@@ -168,7 +168,7 @@ const makeEl=createCustomSelect("makeSelect","Select vehicle make");
 const modelEl=createCustomSelect("modelSelect","Choose make first");
 const yearEl=createCustomSelect("yearSelect","Choose model first");
 const MAKE_DOMAINS={"acura":"acura.com","alfa romeo":"alfaromeo.com","aston martin":"astonmartin.com","audi":"audi.com","bentley":"bentleymotors.com","bmw":"bmw.com","buick":"buick.com","byd":"byd.com","cadillac":"cadillac.com","changan":"globalchangan.com","chery":"cheryinternational.com","chevrolet":"chevrolet.com","chrysler":"chrysler.com","citroen":"citroen.com","cupra":"cupraofficial.com","dacia":"dacia.com","daihatsu":"daihatsu.com","dodge":"dodge.com","ferrari":"ferrari.com","fiat":"fiat.com","ford":"ford.com","genesis":"genesis.com","geely":"global.geely.com","gmc":"gmc.com","great wall":"gwm-global.com","haval":"haval-global.com","honda":"honda.com","hongqi":"hongqi-auto.com","hyundai":"hyundai.com","infiniti":"infiniti.com","isuzu":"isuzu.com","jaguar":"jaguar.com","jeep":"jeep.com","kia":"kia.com","lamborghini":"lamborghini.com","land rover":"landrover.com","lexus":"lexus.com","lincoln":"lincoln.com","lotus":"lotuscars.com","lucid":"lucidmotors.com","maserati":"maserati.com","mazda":"mazda.com","mclaren":"mclaren.com","mercedes-benz":"mercedes-benz.com","mg":"mgmotor.com","mini":"mini.com","mitsubishi":"mitsubishi-motors.com","nio":"nio.com","nissan":"nissan-global.com","opel":"opel.com","peugeot":"peugeot.com","polestar":"polestar.com","porsche":"porsche.com","proton":"proton.com","ram":"ramtrucks.com","renault":"renault.com","rivian":"rivian.com","saab":"saab.com","seat":"seat.com","skoda":"skoda-auto.com","smart":"smart.com","subaru":"subaru.com","suzuki":"suzuki.com","tesla":"tesla.com","toyota":"toyota.com","volkswagen":"volkswagen.com","volvo":"volvocars.com","xpeng":"xpeng.com","zeekr":"zeekr.com","perodua":"perodua.com.my","holden":"holden.com.au","pontiac":"pontiac.com","datsun":"datsun.com","scion":"scion.com","ram trucks":"ramtrucks.com"}; 
-async function loadMakes(){try{const d=await api("/api/makes");makeEl.setOptions((d.makes||[]).map(x=>{const name=x.name||x.make;const key=String(name).toLowerCase().replace(/\\s+/g," ").trim();const domain=MAKE_DOMAINS[key]||MAKE_DOMAINS[key.replace(/\\s+/g,"")]||((key.replace(/[^a-z0-9]/g,"")||"")+".com");return {label:name,value:name,logoDomain:domain,initials:name.split(/\\s+/).map(w=>w[0]).slice(0,2).join("").toUpperCase()}}));}catch(e){makeEl.setOptions([]);message(vehicleMsg,"Vehicle list could not be loaded. Please try again shortly.")}}
+async function loadMakes(){try{const d=await api("/api/makes");makeEl.setOptions((d.makes||[]).map(x=>{const name=x.name||x.make;const key=String(name).toLowerCase().replace(/\s+/g," ").trim();const domain=MAKE_DOMAINS[key]||MAKE_DOMAINS[key.replace(/\s+/g,"")]||((key.replace(/[^a-z0-9]/g,"")||"")+".com");return {label:name,value:name,logoDomain:domain,initials:name.split(/\s+/).map(w=>w[0]).slice(0,2).join("").toUpperCase()}}));}catch(e){makeEl.setOptions([]);message(vehicleMsg,"Vehicle list could not be loaded. Please try again shortly.")}}
 makeEl.onChange(async value=>{
   modelEl.setDisabled(true);yearEl.setDisabled(true);modelEl.setOptions([]);yearEl.setOptions([]);models=[];
   if(!value)return;
@@ -254,11 +254,11 @@ function renderProducts(f){
   if(resultCard.querySelector(".recommendations"))return;
   const parseWheelSpecs=value=>{
     const text=String(value||"");
-    const re=/(\\d{2})\\s*[x×]\\s*(\\d{1,2}(?:\\.\\d+)?)\\s*J?\\s*(?:ET\\s*|\\s*ET)?([+-]?\\d{1,2})?/gi;
+    const re=/(\d{2})\s*[x×]\s*(\d{1,2}(?:\.\d+)?)\s*J?\s*(?:ET\s*|\s*ET)?([+-]?\d{1,2})?/gi;
     const found=[];let m;
     while((m=re.exec(text))!==null){
       const after=text.slice(m.index+m[0].length,m.index+m[0].length+12);
-      const etMatch=m[0].match(/ET\\s*([+-]?\\d{1,2})/i)||after.match(/(?:^|\\s)([+-]\\d{1,2})(?:\\s|$)/);
+      const etMatch=m[0].match(/ET\s*([+-]?\d{1,2})/i)||after.match(/(?:^|\s)([+-]\d{1,2})(?:\s|$)/);
       found.push({diameter:Number(m[1]),width:Number(m[2]),et:etMatch?Number(etMatch[1]):null,source:text});
     }
     return found;
