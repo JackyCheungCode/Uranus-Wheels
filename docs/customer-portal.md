@@ -50,3 +50,11 @@
 - Customer response RLS verifies ownership, issued status and validity date. Trigger function execution is revoked from API roles.
 - Current composer supports one line item per quotation. Multi-line quotations, PDF generation, email notifications, customer PO, and automatic order conversion remain future work.
 - Quote acceptance records commercial intent only; it does not create a sales order, collect payment, or constitute a signed PI / Sales Contract.
+
+## Formal sales orders — Phase 1
+- Staff can convert a customer-accepted quotation into a formal sales order from `/staff/enquiries` after reviewing it.
+- One accepted quotation can create at most one sales order. The database snapshots the accepted quotation's line items, currency, amounts, Incoterm, named place, payment terms, delivery estimate, validity and customer notes; later quotation edits cannot silently change the order snapshot.
+- Sales orders are linked to the registered customer account and the originating enquiry. Orders can only be created by authorized staff/admin users from an accepted quotation.
+- Initial order status is `order_confirmed`. Staff can update the order lifecycle through PI issued, awaiting payment, payment received, production, quality inspection, ready to ship, shipped, delivered, completed or cancelled.
+- Status changes are recorded in `wheel_order_events` and displayed in the customer's My Orders timeline. Customers can only read their own orders and customer-visible events; internal-only events remain staff-only.
+- This phase does not yet generate PI PDFs, collect payments, generate signed contracts, or integrate production/QC/carrier systems. Status changes are operational records, not proof of payment or shipment.
