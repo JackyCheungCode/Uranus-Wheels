@@ -86,7 +86,8 @@ These must retain their different data sources and dependent-option logic while 
 - [x] Token foundation and semantic layer names exist.
 - [x] Global AppShell navigation/footer styles are centralized.
 - [x] Common button, select, input and textarea visual contracts are applied.
-- [ ] No semantic color drift between routes.
+- [x] Shared button, filter and selection states use the same semantic color hierarchy across all 10 page templates.
+- [ ] Review remaining non-control page-specific color accents and contrast.
 - [ ] Keyboard and screen-reader checks pass for all selector families.
 - [ ] Desktop, tablet and mobile screenshots reviewed for every route.
 
@@ -103,7 +104,7 @@ These must retain their different data sources and dependent-option logic while 
 - [ ] Verify all validation, loading, success and error states.
 
 ### Gate C — release
-- [ ] Automated route and interaction checks pass.
+- [x] Worker and inline page-script syntax checks pass; route HTTP/browser interaction checks remain blocked by the current Preview 403 response.
 - [ ] Browser visual acceptance passes at 1440px, 1024px, 768px and 390px.
 - [ ] Preview acceptance approved before any production release.
 
@@ -144,3 +145,12 @@ These must retain their different data sources and dependent-option logic while 
 - Vehicle fitment and brake-clearance verification are not inferred from customer-entered targets; the Custom Builder remains an engineering enquiry.
 - The public Preview endpoint has returned HTTP 403 from the available execution environment. Worker deployment status can be verified, but end-to-end browser delivery, keyboard/screen-reader operation and responsive visual acceptance remain outstanding.
 - Real browser tests are still required at 1440px, 1024px, 768px and 390px before production release.
+
+## 10. Shared shell and catalog rendering verification (2026-11-07)
+
+- Injected the shared Design System stylesheet after page-local styles in all 10 HTML page templates (Fitment, Wheels catalog/detail, Product Configurator, About, Engineering, Gallery, Dealers, Contact, FAQ and Custom Builder); the root shell also includes it.
+- Added a final shared semantic control layer for primary/secondary buttons, filters, builder choices, selected states, dropdown options and swatches. Swatch fill colors remain product-color data; the selected ring is shared.
+- Removed the remaining inline styles from the two conditional region/city input fields. The only remaining inline styles on button/input/select/textarea tags are the five Custom Builder color swatches, where the inline background is the actual color sample.
+- Static parser checks pass for the Worker module wrapper and every inline JavaScript page script. The Configurator's external ES module import is retained and reviewed separately.
+- Fixed a JavaScript syntax error in the Wheels product-detail renderer that prevented the selected product detail markup from being assembled.
+- Static shell inventory confirms all 10 templates include the shared header, footer, global CSS, active-route script and interaction script.
