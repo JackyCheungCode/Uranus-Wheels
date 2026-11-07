@@ -6,7 +6,9 @@
 - Customer account routes: /account, /account/login, /account/register.
 - Customer profile record with self-service profile fields.
 - Authenticated RFQ ownership: signed-in submissions from the product configurator, Custom Builder, Contact Us, and Dealer enquiry form attach the authenticated user ID.
-- Customer dashboard lists only the signed-in user's own enquiry records.
+- Customer dashboard lists only the signed-in user's own enquiry records, including status and a detail view.
+- Customers can send follow-up messages in a private enquiry conversation thread.
+- Enquiry status lifecycle fields are available for the future sales workflow.
 - Guest submissions remain possible and are not made readable to anonymous users.
 
 ## Database and authorization
