@@ -83,6 +83,35 @@ main{max-width:var(--content);margin:auto;padding:0 32px 80px}.finder-wrap{margi
 @media(max-width:900px){.header-inner{padding:0 24px}.nav{gap:16px}.nav a{font-size:10px}.hero-inner{padding:54px 24px 60px;gap:25px}main{padding-left:24px;padding-right:24px}.method{padding:22px}.specs{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:680px){.header-inner{min-height:68px;padding:0 18px}.brand strong{font-size:17px}.nav{display:none}.menu{display:block}.header-right .lang{display:none}.hero-inner{grid-template-columns:1fr;padding:48px 20px 52px}.hero-wheel{width:min(58vw,220px);margin-top:10px}.hero h1{font-size:clamp(42px,12vw,58px)}main{padding:0 16px 58px}.finder-wrap{padding-top:28px}.intro{display:block}.intro p{margin-top:10px}.methods{grid-template-columns:1fr;gap:12px}.method{padding:22px 18px}.form-grid{gap:12px}.submit-row,.ai-footer{align-items:stretch;flex-direction:column}.submit-row .btn,.ai-footer .btn{width:100%}.results-head{align-items:start;flex-direction:column}.result-card{padding:16px}.vehicle-line{flex-direction:column}.specs{grid-template-columns:repeat(2,1fr)}.fitment-details{grid-template-columns:1fr}.footer-inner{padding:24px 18px;flex-direction:column}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation-duration:.01ms!important;transition-duration:.01ms!important}}
+
+/* Fitment finder refinement: neutral automotive layers, compact identity data */
+.vin-lookup{background:var(--uw-layer-0,#f2f3f2);padding:16px;margin:0 0 14px}
+.vin-lookup-head strong{font-size:13px;color:var(--uw-text,#171a1c)}
+.vin-lookup-head span{color:var(--uw-text-muted,#697176)}
+.vin-help{color:var(--uw-text-secondary,#525a5e);font-size:11px;line-height:1.6}
+.vin-divider{color:var(--uw-text-muted,#697176);margin:0 0 15px}
+.vin-divider:before,.vin-divider:after{background:var(--uw-border-subtle,rgba(16,18,20,.12))}
+.vin-result{margin-top:14px;padding:16px;background:var(--uw-layer-1,#fff);border:1px solid var(--uw-border-subtle,rgba(16,18,20,.12))}
+.vin-decoded,.vin-result .vin-decoded{margin:0 0 14px;padding:0;background:transparent}
+.vin-decoded-head{margin:0 0 8px;color:var(--uw-text-secondary,#525a5e);font-size:10px;letter-spacing:.08em}
+.vin-decoded-table-wrap{width:100%;overflow-x:auto}
+.vin-decoded-table{width:100%;border-collapse:collapse;background:transparent;font-size:12px}
+.vin-decoded-table tr{border-bottom:1px solid var(--uw-border-subtle,rgba(16,18,20,.12))}
+.vin-decoded-table tr:last-child{border-bottom:0}
+.vin-decoded-table th,.vin-decoded-table td{padding:7px 10px;text-align:left;vertical-align:top;line-height:1.45}
+.vin-decoded-table th{width:34%;color:var(--uw-text-secondary,#525a5e);font-weight:500}
+.vin-decoded-table td{color:var(--uw-text,#171a1c);font-weight:600}
+.vin-vehicle-image-wrap{background:var(--uw-layer-2,#e9ebea);min-height:160px}
+.vin-vehicle-image-placeholder{color:var(--uw-text-muted,#697176)}
+.vin-result .vehicle-confirm-copy{background:transparent;padding:0}
+.vin-result .vehicle-confirm-copy h3{color:var(--uw-text,#171a1c)}
+.vin-result .vehicle-confirm-copy p,.vin-confirm-status{color:var(--uw-text-secondary,#525a5e)}
+.vin-result .advice,.vin-result .variant-options,.vin-result .variant-option{background:var(--uw-layer-0,#f2f3f2);border-color:var(--uw-border-subtle,rgba(16,18,20,.12));color:var(--uw-text,#171a1c);box-shadow:none}
+.vin-result .variant-option:hover{background:var(--uw-layer-2,#e9ebea)}
+.make-logo{background:var(--uw-layer-1,#fff);border:1px solid var(--uw-border-subtle,rgba(16,18,20,.12));border-radius:2px}
+.make-logo img{width:25px;height:25px;object-fit:contain}
+.make-logo-fallback{display:grid;place-items:center;width:100%;height:100%;color:var(--uw-text-secondary,#525a5e);font-size:10px;font-weight:650}
+@media(max-width:600px){.vin-decoded-table th,.vin-decoded-table td{padding:7px 8px}.vin-decoded-table th{width:38%}.vin-result{padding:12px}.vin-vehicle-image-wrap{min-height:130px}}
 </style>
 <style id="uw-global-shell">.uw-topline{height:3px;background:linear-gradient(90deg,#80643a,#b99a68,#e1d2b5,#80643a)}.uw-header{position:relative;z-index:50;background:#101416;color:#fff;border-bottom:1px solid #ffffff18;font-family:"IBM Plex Sans",Arial,sans-serif}.uw-header-inner{max-width:1320px;min-height:78px;margin:auto;padding:0 32px;display:flex;align-items:center;justify-content:space-between;gap:24px}.uw-brand{display:flex;flex-direction:column;gap:3px;flex-shrink:0;color:#fff;text-decoration:none}.uw-brand strong{font-size:19px;font-weight:650;letter-spacing:.16em}.uw-brand small{font-size:8px;color:#aeb5b9;letter-spacing:.23em}.uw-nav{display:flex;align-items:center;gap:clamp(12px,1.8vw,25px)}.uw-nav a{color:#c6cccf;text-decoration:none;font-size:10px;font-weight:600;letter-spacing:.11em}.uw-nav a:hover,.uw-nav a[aria-current=page]{color:#fff}.uw-actions{display:flex;align-items:center;gap:10px}.uw-lang,.uw-menu{border:1px solid #ffffff45;background:transparent;color:#fff;padding:9px 11px;font:600 10px "IBM Plex Sans",Arial,sans-serif;letter-spacing:.08em;cursor:pointer}.uw-menu{display:none}.uw-footer{background:#0c0f10;color:#e6e8e8;font-family:"IBM Plex Sans",Arial,sans-serif}.uw-footer-inner{max-width:1320px;margin:auto;padding:48px 32px 24px}.uw-footer-top{display:grid;grid-template-columns:1.5fr repeat(3,1fr);gap:34px;padding-bottom:36px}.uw-footer-top p{max-width:270px;color:#929b9f;font-size:11px;line-height:1.7}.uw-footer-top b{display:block;font-size:9px;letter-spacing:.16em;color:#d4bd96;margin-bottom:15px}.uw-footer-top>div>a:not(.uw-brand){display:block;color:#aeb5b9;text-decoration:none;font-size:11px;margin:10px 0}.uw-footer-bottom{border-top:1px solid #ffffff22;padding-top:18px;display:flex;justify-content:space-between;gap:20px;color:#818a8f;font-size:9px;letter-spacing:.08em}@media(max-width:900px){.uw-header-inner{padding:0 20px}.uw-menu{display:block}.uw-nav{display:none;position:absolute;top:78px;left:0;right:0;padding:12px 22px 20px;background:#101416;flex-direction:column;align-items:stretch;gap:0}.uw-nav.open{display:flex}.uw-nav a{padding:13px 0;border-bottom:1px solid #ffffff18}.uw-footer-inner{padding-left:22px;padding-right:22px}.uw-footer-top{grid-template-columns:1fr 1fr}.uw-footer-top>div:first-child{grid-column:1/-1}}@media(max-width:520px){.uw-header-inner{min-height:68px;padding:0 15px}.uw-brand strong{font-size:16px}.uw-nav{top:68px}.uw-footer-inner{padding:38px 18px 22px}.uw-footer-top{gap:22px 16px}.uw-footer-bottom{flex-direction:column}}</style>${globalCss}</head>
 <body id="top">
@@ -99,16 +128,16 @@ ${globalHeader}
 <section class="method" id="vehicle-search">
 <div class="method-head"><div><div class="method-number">METHOD 01 / VEHICLE LOOKUP</div><h3>Find your vehicle</h3><div class="method-sub">Search by VIN for a faster identification, or select your vehicle manually.</div></div><div class="method-icon" aria-hidden="true">⌖</div></div>
 <div class="vin-lookup">
-  <div class="vin-lookup-head"><strong>Search by VIN</strong><span>17-CHARACTER VEHICLE ID</span></div>
+  <div class="vin-lookup-head"><strong>Optional shortcut · Search by VIN</strong><span>NOT REQUIRED</span></div>
   <form id="vinForm">
-    <label class="label" for="vinInput">Vehicle Identification Number (VIN)</label>
-    <div class="vin-entry"><input class="control" id="vinInput" name="vin" type="text" minlength="17" maxlength="17" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="Enter your 17-character VIN" required><button class="btn btn-primary" id="vinSubmit" type="submit">Decode VIN ↗</button></div>
-    <div class="vin-help">We send the VIN to NHTSA vPIC for decoding. Uranus Wheels does not save the full VIN.</div>
+    <label class="label" for="vinInput">Vehicle Identification Number (VIN) · Optional</label>
+    <div class="vin-entry"><input class="control" id="vinInput" name="vin" type="text" maxlength="17" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="Enter VIN only if available"><button class="btn btn-primary" id="vinSubmit" type="submit">Decode VIN ↗</button></div>
+    <div class="vin-help">VIN is optional. You can skip this section and select Vehicle make, Model and Model year below. If entered, the VIN is sent to NHTSA vPIC for decoding; Uranus Wheels does not save the full VIN.</div>
   </form>
   <div class="vin-message message" id="vinMessage" role="status"></div>
 <div id="vinResult" class="vin-result" hidden aria-live="polite"></div>
 </div>
-<div class="vin-divider"><span>OR SELECT VEHICLE MANUALLY</span></div>
+<div class="vin-divider"><span>MANUAL VEHICLE SELECTION · NO VIN REQUIRED</span></div>
 <form id="vehicleForm">
 <div class="form-grid">
 <div class="field-group full"><label class="label" id="makeLabel">Vehicle make</label><div class="custom-select" id="makeSelect"><button class="select-trigger" type="button" role="combobox" aria-labelledby="makeLabel" aria-haspopup="listbox" aria-expanded="false" aria-controls="makeOptions"><span class="select-value">Loading makes…</span><span class="chevron" aria-hidden="true"></span></button><div class="select-menu" hidden><input class="select-search" type="search" placeholder="Search vehicle make…" aria-label="Search vehicle make"><div class="select-options" id="makeOptions" role="listbox"></div></div></div></div>
@@ -156,9 +185,9 @@ function createCustomSelect(rootId,placeholder){
   let options=[],value="",changeHandler=()=>{};
   function close(){menu.hidden=true;trigger.setAttribute("aria-expanded","false")}
   function logoSlug(name){const aliases={"mercedes-benz":"mercedes","land rover":"landrover","alfa romeo":"alfaromeo","great wall":"greatwall","hongqi":"hongqi","mini":"mini","mg":"mg","ram trucks":"ram"};return aliases[String(name||"").toLowerCase()]||String(name||"").toLowerCase().replace(/[^a-z0-9]/g,"")}
-  function logoSources(item){const domain=item.logoDomain||"";const slug=logoSlug(item.label);return ["https://cdn.simpleicons.org/"+encodeURIComponent(slug),"https://icons.duckduckgo.com/ip3/"+encodeURIComponent(domain)+".ico","https://www.google.com/s2/favicons?domain="+encodeURIComponent(domain)+"&sz=128"]}
+  function logoSources(item){const domain=item.logoDomain||"";const slug=logoSlug(item.label);const sources=[];if(domain){sources.push("https://www.google.com/s2/favicons?domain="+encodeURIComponent(domain)+"&sz=128");sources.push("https://icons.duckduckgo.com/ip3/"+encodeURIComponent(domain)+".ico")}sources.push("https://cdn.simpleicons.org/"+encodeURIComponent(slug));return sources}
   function makeLogo(item,className){const wrap=document.createElement("span");wrap.className=className;const img=document.createElement("img");img.alt="";img.loading="lazy";img.referrerPolicy="no-referrer";const sources=logoSources(item);let index=0;img.onerror=()=>{index++;if(index<sources.length)img.src=sources[index];else{wrap.innerHTML='<span class="make-logo-fallback">'+escapeHtml(item.initials||item.label.slice(0,2).toUpperCase())+'</span>'}};img.src=sources[0];wrap.append(img);return wrap}
-  function setSelected(item){valueNode.replaceChildren();if(item&&item.logoDomain)valueNode.append(makeLogo(item,"make-logo selected-make-logo"));const text=document.createElement("span");text.className="selected-make-text";text.textContent=item?item.label:placeholder;valueNode.append(text)}
+  function setSelected(item){valueNode.replaceChildren();if(item)valueNode.append(makeLogo(item,"make-logo selected-make-logo"));const text=document.createElement("span");text.className="selected-make-text";text.textContent=item?item.label:placeholder;valueNode.append(text)}
   function render(){
     const term=search.value.trim().toLowerCase();
     const matches=options.filter(item=>item.label.toLowerCase().includes(term));
@@ -202,7 +231,7 @@ const makeEl=createCustomSelect("makeSelect","Select vehicle make");
 const modelEl=createCustomSelect("modelSelect","Choose make first");
 const yearEl=createCustomSelect("yearSelect","Choose model first");
 const MAKE_DOMAINS={"acura":"acura.com","alfa romeo":"alfaromeo.com","aston martin":"astonmartin.com","audi":"audi.com","bentley":"bentleymotors.com","bmw":"bmw.com","buick":"buick.com","byd":"byd.com","cadillac":"cadillac.com","changan":"globalchangan.com","chery":"cheryinternational.com","chevrolet":"chevrolet.com","chrysler":"chrysler.com","citroen":"citroen.com","cupra":"cupraofficial.com","dacia":"dacia.com","daihatsu":"daihatsu.com","dodge":"dodge.com","ferrari":"ferrari.com","fiat":"fiat.com","ford":"ford.com","genesis":"genesis.com","geely":"global.geely.com","gmc":"gmc.com","great wall":"gwm-global.com","haval":"haval-global.com","honda":"honda.com","hongqi":"hongqi-auto.com","hyundai":"hyundai.com","infiniti":"infiniti.com","isuzu":"isuzu.com","jaguar":"jaguar.com","jeep":"jeep.com","kia":"kia.com","lamborghini":"lamborghini.com","land rover":"landrover.com","lexus":"lexus.com","lincoln":"lincoln.com","lotus":"lotuscars.com","lucid":"lucidmotors.com","maserati":"maserati.com","mazda":"mazda.com","mclaren":"mclaren.com","mercedes-benz":"mercedes-benz.com","mg":"mgmotor.com","mini":"mini.com","mitsubishi":"mitsubishi-motors.com","nio":"nio.com","nissan":"nissan-global.com","opel":"opel.com","peugeot":"peugeot.com","polestar":"polestar.com","porsche":"porsche.com","proton":"proton.com","ram":"ramtrucks.com","renault":"renault.com","rivian":"rivian.com","saab":"saab.com","seat":"seat.com","skoda":"skoda-auto.com","smart":"smart.com","subaru":"subaru.com","suzuki":"suzuki.com","tesla":"tesla.com","toyota":"toyota.com","volkswagen":"volkswagen.com","volvo":"volvocars.com","xpeng":"xpeng.com","zeekr":"zeekr.com","perodua":"perodua.com.my","holden":"holden.com.au","pontiac":"pontiac.com","datsun":"datsun.com","scion":"scion.com","ram trucks":"ramtrucks.com"}; 
-async function loadMakes(){try{const d=await api("/api/makes");makeEl.setOptions((d.makes||[]).map(x=>{const name=x.name||x.make;const key=String(name).toLowerCase().replace(/\s+/g," ").trim();const domain=MAKE_DOMAINS[key]||MAKE_DOMAINS[key.replace(/\s+/g,"")]||((key.replace(/[^a-z0-9]/g,"")||"")+".com");return {label:name,value:name,logoDomain:domain,initials:name.split(/\s+/).map(w=>w[0]).slice(0,2).join("").toUpperCase()}}));}catch(e){makeEl.setOptions([]);message(vehicleMsg,"Vehicle list could not be loaded. Please try again shortly.")}}
+async function loadMakes(){try{const d=await api("/api/makes");makeEl.setOptions((d.makes||[]).map(x=>{const name=x.name||x.make;const key=String(name).toLowerCase().replace(/\s+/g," ").trim();const domain=MAKE_DOMAINS[key]||MAKE_DOMAINS[key.replace(/\s+/g,"")]||"";return {label:name,value:name,logoDomain:domain,initials:name.split(/\s+/).map(w=>w[0]).slice(0,2).join("").toUpperCase()}}));}catch(e){makeEl.setOptions([]);message(vehicleMsg,"Vehicle list could not be loaded. Please try again shortly.")}}
 makeEl.onChange(async value=>{
   modelEl.setDisabled(true);yearEl.setDisabled(true);modelEl.setOptions([]);yearEl.setOptions([]);models=[];
   if(!value)return;
@@ -220,7 +249,7 @@ function renderVinVehicle(vehicle){
     ["Engine",vehicle.engine],["Plant country",vehicle.plant_country]
   ].filter(item=>item[1]);
   if(!items.length)return "";
-  return '<div class="vin-decoded"><div class="vin-decoded-head">Vehicle identity · NHTSA vPIC</div><div class="vin-decoded-grid">'+items.map(item=>'<div class="vin-decoded-item"><small>'+escapeHtml(item[0])+'</small><strong>'+escapeHtml(item[1])+'</strong></div>').join("")+'</div></div>';
+  return '<div class="vin-decoded"><div class="vin-decoded-head">Vehicle identity · NHTSA vPIC</div><div class="vin-decoded-table-wrap"><table class="vin-decoded-table"><tbody>'+items.map(item=>'<tr><th scope="row">'+escapeHtml(item[0])+'</th><td>'+escapeHtml(item[1])+'</td></tr>').join("")+'</tbody></table></div></div>';
 }
 function showVinDecodedOnly(data){showVinConfirmation(data)}
 function renderVinCandidates(data){
