@@ -12,7 +12,7 @@ The storefront has a shared header/footer and several global tokens, but the sou
 |---|---|---|
 | Design tokens | Tokens exist, but page CSS still contains many literal colors and local semantic aliases | Route semantic UI colors through shared tokens; keep physical wheel/finish swatch colors literal where they represent real materials |
 | Buttons | 116 button elements; multiple class families and page-local button styles | One primary / secondary / tertiary / danger contract; preserve choice controls as a distinct selectable-control family |
-| Selects | Three custom selector families plus native selects; Custom Builder was being enhanced twice by its local and global scripts | Added an enhancement guard, fixed label lookup via `select.labels`, added visible required-select errors and reset cleanup |
+| Selects | Three custom selector families plus native selects; Custom Builder was being enhanced twice by its local and global scripts; RFQ dropdowns lacked consistent keyboard semantics | Added an enhancement guard, fixed label lookup via `select.labels`, added visible required-select errors/reset cleanup, and added combobox/listbox roles, label association, Arrow/Home/End/Enter/Space/Escape keyboard handling to RFQ dropdowns |
 | Forms | Contact, dealer, RFQ and builder forms have different markup and field classes | Shared labels, field heights, focus, errors, disabled/loading and status semantics |
 | AppShell | Shared header/footer exists; several pages also had legacy menu handlers that conflicted with the global handler | Removed duplicate page-level header/language listeners and stale fitment menu hook; one global AppShell handler now owns the shared menu |
 | Responsive | CSS includes several local breakpoints and one-off layout overrides | Consolidate common breakpoints after page-by-page viewport tests |
@@ -73,6 +73,7 @@ These must retain their different data sources and dependent-option logic while 
 - The source still contains many local literal colors. Some are legitimate wheel artwork/material swatches; remaining semantic UI colors need token migration.
 - Existing page-local CSS can still override global rules depending on template order and selector specificity.
 - Global select enhancement is progressive enhancement; disabled options, required validation, form reset, dynamic option mutation and dependent selects still need real-browser verification.
+- Product configuration dropdowns now expose combobox/listbox semantics and keyboard navigation, but real screen-reader and touch verification is still pending.
 - Custom Builder retains its own Carbon selector renderer and is now excluded from the global enhancer; keyboard and screen-reader parity still needs browser testing.
 - Global AppShell menu and language controls are now the only shared-header handlers; page-local duplicates were removed to prevent double-toggle behavior.
 - The fitment selector and dropdown selector have separate legacy scripts; keyboard parity must be verified and then consolidated.
@@ -94,6 +95,7 @@ These must retain their different data sources and dependent-option logic while 
 - [ ] Map the Custom Builder steps and submission journey.
 - [x] Block product quotation requests unless a published product, approved finish and complete matching SKU dimension/offset exist.
 - [x] Remove default demo fitment values from the product configuration summary and RFQ preview when no published product exists.
+- [x] Add keyboard-operable semantics and explicit label association to the product configuration dropdown family.
 - [x] Label Custom Builder inputs as customer-requested engineering targets, not fitment or production approval.
 - [ ] Reconcile engineering-approved dimensions, offsets, PCD, center bore, lug count, finishes and construction rules.
 - [ ] Verify RFQ payloads and dependent location / shipping fields.
