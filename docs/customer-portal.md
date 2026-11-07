@@ -48,7 +48,7 @@
 - Customers can review issued quotations in the matching enquiry detail and accept or decline with an optional message.
 - Customer decisions are stored separately and a database trigger updates quote status; acceptance also advances the enquiry status to `accepted`.
 - Customer response RLS verifies ownership, issued status and validity date. Trigger function execution is revoked from API roles.
-- Current composer supports one line item per quotation. Multi-line quotations, PDF generation, email notifications, customer PO, and automatic order conversion remain future work.
+- Current composer supports one line item per quotation. Multi-line quotations, quotation PDF generation and email notifications remain future work; accepted quotes can be converted to formal sales orders in the staff workspace.
 - Quote acceptance records commercial intent only; it does not create a sales order, collect payment, or constitute a signed PI / Sales Contract.
 
 ## Formal sales orders — Phase 1
@@ -58,3 +58,13 @@
 - Initial order status is `order_confirmed`. Staff can update the order lifecycle through PI issued, awaiting payment, payment received, production, quality inspection, ready to ship, shipped, delivered, completed or cancelled.
 - Status changes are recorded in `wheel_order_events` and displayed in the customer's My Orders timeline. Customers can only read their own orders and customer-visible events; internal-only events remain staff-only.
 - This phase does not yet generate PI PDFs, collect payments, generate signed contracts, or integrate production/QC/carrier systems. Status changes are operational records, not proof of payment or shipment.
+
+## Proforma invoices & payment verification — Phase 1
+- Staff/admin can configure seller legal identity, registered address and bank beneficiary details in the Sales Order panel. Only accounts with trusted `app_metadata.role=admin` can save these settings; no company or bank details are prefilled or invented.
+- Staff can create a PI draft from an existing sales order. Database triggers snapshot the order's currency, items, amounts, Incoterm, named place, payment terms, delivery estimate, buyer enquiry contact/configuration, seller identity and bank details.
+- PI is issued only after seller legal name, registered address, bank beneficiary, bank name and account number are present. HS code remains a broker-confirmation field; port, packing and due-date details are editable order-specific inputs.
+- Issued PIs are visible to the matching customer in My Orders. The customer can open a print-ready PI and use the browser's Print / Save as PDF function. This is browser-generated output, not a server-generated PDF.
+- Customers can upload a payment proof (PDF/JPG/PNG/WebP, max 10 MB) to a private Storage bucket and submit payment stage, amount, currency, reference and note. The database verifies order ownership, PI issuance, currency and uploaded proof path.
+- Only staff/admin can verify or reject a submitted payment proof. An uploaded proof is never treated as money received. Verified payment totals drive `partially_paid` / `payment_received` order status; database guards prevent marking an order fully paid before verified funds cover the total.
+- Customer and staff access is protected by RLS. Storage objects are private and signed URLs are short-lived.
+- Not yet included: automated email delivery, bank reconciliation, payment gateway integration, signed sales contract, server-side PDF generation, PO workflow, or automatic shipment tracking. Legal/tax details and HS codes must be confirmed by the business and its broker before external use.
