@@ -281,7 +281,7 @@ function showResult(payload,advice,mode){
       '<div class="fitment-detail">'+specIcon(icons.max)+'<label>Maximum reference</label><strong>'+escapeHtml(max)+'</strong></div>'+
     '</div>'+adviceHtml+
     '<div class="warning">Important: flush and maximum sizes are aftermarket reference points, not guaranteed fitment. Exact brake clearance, tire dimensions, suspension, trim and regional variant must be checked before ordering or manufacturing.</div>'+
-    '<div class="source-line"><span>Dataset '+escapeHtml(payload.dataset_version||f.dataset_version||"ANKUSI current release")+' · CC BY 4.0</span><a href="'+escapeHtml(f.source_url||"https://ankusiwheels.com/wheel-fitment-api/")+'" target="_blank" rel="noopener">View ANKUSI source ↗</a></div>'+
+    '<div class="source-line"><span>Dataset '+escapeHtml(payload.dataset_version||f.dataset_version||"ANKUSI current release")+' · CC BY 4.0'+(mode==="vin"?" · Vehicle identity: NHTSA vPIC":"")+'</span><a href="'+escapeHtml(f.source_url||"https://ankusiwheels.com/wheel-fitment-api/")+'" target="_blank" rel="noopener">View ANKUSI source ↗</a></div>'+
     "";
   results.classList.add("visible");renderVehicleImage(f);results.scrollIntoView({behavior:"smooth",block:"start"});
 }
@@ -1393,20 +1393,22 @@ async function handleVinDecode(request) {
   const rows = Array.isArray(ankusi.results) ? ankusi.results : [];
   const normalize = value => String(value || "").toLowerCase().replace(/[^a-z0-9]/g, "");
   const makeKey = normalize(vehicle.make), modelKey = normalize(vehicle.model), yearKey = String(vehicle.year);
-  const candidates = rows.filter(row => {
+  const exactCandidates = rows.filter(row => {
     const candidateMake = normalize(row.make), candidateModel = normalize(row.model);
     const sameMake = candidateMake === makeKey;
     const sameYear = String(row.year || "") === yearKey;
-    const sameModel = candidateModel.includes(modelKey) || modelKey.includes(candidateModel);
-    return sameMake && sameYear && !!candidateModel && sameModel;
+    const sameModel = !!candidateModel && (candidateModel.includes(modelKey) || modelKey.includes(candidateModel));
+    return sameMake && sameYear && sameModel;
   });
+  const fallbackCandidates = rows.filter(row => normalize(row.make) === makeKey && String(row.year || "") === yearKey && !!normalize(row.model));
+  const candidates = exactCandidates.length ? exactCandidates : fallbackCandidates;
 
   const datasetVersion = ankusi.dataset_version || ankusi.version || "ANKUSI current release";
-  if (candidates.length === 1) {
+  if (candidates.length === 1 && exactCandidates.length === 1) {
     return cacheResult({ status: "matched", vehicle, fitment: candidates[0], dataset_version: datasetVersion, sources: ["NHTSA vPIC", "ANKUSI Wheel Fitment API"], license: ankusi.license || "CC BY 4.0" });
   }
-  if (candidates.length > 1) {
-    return cacheResult({ status: "ambiguous", vehicle, candidates: candidates.slice(0, 8), dataset_version: datasetVersion, message: "Several ANKUSI records match the decoded make, model and year. Confirm the vehicle version before using the specifications.", sources: ["NHTSA vPIC", "ANKUSI Wheel Fitment API"] });
+  if (candidates.length > 0) {
+    return cacheResult({ status: "ambiguous", vehicle, candidates: candidates.slice(0, 8), dataset_version: datasetVersion, message: "ANKUSI returned one or more possible vehicle records. Confirm the exact model or chassis version before using the specifications.", sources: ["NHTSA vPIC", "ANKUSI Wheel Fitment API"] });
   }
   return cacheResult({ status: "decoded_only", vehicle, message: decodedError || "The VIN was decoded, but no sufficiently specific ANKUSI wheel-fitment record matched this vehicle. You can continue with manual vehicle lookup or request an engineering review.", dataset_version: datasetVersion, sources: ["NHTSA vPIC", "ANKUSI Wheel Fitment API"] });
 }
