@@ -374,6 +374,28 @@ main{max-width:1320px;margin:auto;padding:0 36px 84px}.catalog-intro{display:fle
  {slug:'form-05',code:'UW / CONCEPT 05',name:'FORM 05',construction:'3-Piece',design:'Mesh',diameter:'19–22 in',finish:'Polished Hardware',description:'A modular three-piece concept with visible assembly character.',art:'w2'},
  {slug:'form-06',code:'UW / CONCEPT 06',name:'FORM 06',construction:'3-Piece',design:'Split-Spoke',diameter:'21–24 in',finish:'Custom Finish',description:'A bold split-spoke direction for bespoke multi-piece applications.',art:'w3'}
  ];
+ const conceptProducts=products;
+ let catalogMode='concept';
+ const SUPABASE_URL='https://enobstpmthgraiozgncg.supabase.co';
+ const SUPABASE_KEY='sb_publishable_5XYSwJKcZB5g61IbgOsvPA_ja2iAsFG';
+ try {
+  const response=await fetch(SUPABASE_URL+'/rest/v1/wheel_products?select=*,wheel_media(*),wheel_variants(*),wheel_finishes(*)&status=eq.published&order=sort_order.asc',{
+   headers:{apikey:SUPABASE_KEY,Authorization:'Bearer '+SUPABASE_KEY}
+  });
+  if(!response.ok) throw new Error('Catalog API returned '+response.status);
+  const rows=await response.json();
+  if(Array.isArray(rows)&&rows.length){
+   products=rows.map((p,index)=>{
+    const variants=p.wheel_variants||[],finishes=p.wheel_finishes||[],media=p.wheel_media||[];
+    const diameters=Array.from(new Set(variants.map(v=>v.diameter).filter(v=>v!==null&&v!==undefined))).sort((a,b)=>Number(a)-Number(b));
+    const diameter=diameters.length?diameters[0]+'–'+diameters[diameters.length-1]+' in':'Specifications on request';
+    const primary=media.find(m=>m.is_primary)||media.find(m=>m.role==='hero')||media.find(m=>m.media_type==='image');
+    const imageUrl=primary&&/^https?:\\/\\//i.test(primary.storage_path||'')?primary.storage_path:null;
+    return {slug:p.slug,code:p.model_code,name:p.name,construction:({'monoblock':'Monoblock','2_piece':'2-Piece','3_piece':'3-Piece'})[p.construction]||p.construction,design:p.design_language||'Forged Design',diameter,finish:finishes.map(x=>x.name).join(' / ')||'Custom Finish',description:p.short_description||p.description||'',art:'w'+(index%4+1),imageUrl,live:true,variants,finishes,media};
+   });
+   catalogMode='live';
+  }
+ } catch(error) { console.warn('Uranus product catalog fallback:',error); }
  const state={construction:new Set(),design:new Set(),diameter:new Set()};
  const grid=document.getElementById('productGrid'),search=document.getElementById('productSearch'),count=document.getElementById('resultCount'),panel=document.getElementById('filterPanel'),toggle=document.getElementById('filterToggle'),chips=document.getElementById('activeChips'),empty=document.getElementById('emptyState');
  const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
