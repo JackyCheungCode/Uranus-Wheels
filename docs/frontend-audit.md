@@ -154,3 +154,15 @@ These must retain their different data sources and dependent-option logic while 
 - Static parser checks pass for the Worker module wrapper and every inline JavaScript page script. The Configurator's external ES module import is retained and reviewed separately.
 - Fixed a JavaScript syntax error in the Wheels product-detail renderer that prevented the selected product detail markup from being assembled.
 - Static shell inventory confirms all 10 templates include the shared header, footer, global CSS, active-route script and interaction script.
+
+## 11. Product configurator RFQ persistence and logistics consistency (2026-11-07)
+
+- The Product Configurator's "Create Quotation Request" action now writes a `configured` enquiry row to Supabase `wheel_enquiries` before revealing the printable Quotation Request document.
+- The RFQ payload records the product, requested finish, exact published SKU dimensions and fitment parameters, buyer legal/contact details, requested quantity, Incoterm and named place, transport mode, origin/destination, estimated delivery window and explicit pending-commercial-quotation values.
+- Buyer company, contact, valid email, destination country, city, street address and whole-number set quantity (1–5,000) are required. Country/city are no longer prefilled with a fictional US / Los Angeles destination.
+- Successful RFQs are locked against accidental repeat submission. Failed API writes retain the form and explicitly state that the request was not recorded.
+- Supabase anon-role INSERT was verified in a transaction and rolled back; no test enquiry was retained. The browser uses only the publishable key and existing INSERT-only RLS policy, never a service-role key.
+- Custom Builder configured enquiries now explicitly persist `engineering_review_required=true`, `fitment_verified=false`, `production_specification_approved=false` and `review_status=pending_engineering_review`. A successful submission button is locked to prevent accidental duplicate submissions.
+- Incoterm selection is transport-aware: air freight hides sea-only FAS/FOB/CFR/CIF terms and falls back to FCA when necessary. Named-place text now follows the selected term, transport mode and customer delivery address. Manual region entry reloads matching city choices.
+- Current Preview deployment: Worker version `b2abd235-d723-4b3b-8ce0-e5bbe1ffaf83`, deployment `eee85623-0c27-4be3-992c-f00ed7660196`, 100% traffic. Source commit deployed: `13e8d01fd71367fde56bbca721b4e96ad0d38404`.
+- The Cloudflare control plane confirms the deployed version is serving 100% of Preview traffic. Public HTTP and full browser interaction remain unverified because the available execution environment returns HTTP 403 for Preview requests.
