@@ -254,11 +254,11 @@ function renderProducts(f){
   if(resultCard.querySelector(".recommendations"))return;
   const parseWheelSpecs=value=>{
     const text=String(value||"");
-    const re=/(\d{2})\s*[x×]\s*(\d{1,2}(?:\.\d+)?)\s*J?\s*(?:ET\s*|\s*ET)?([+-]?\d{1,2})?/gi;
+    const re=/(\d{2})\s*[x×]\s*(\d{1,2}(?:\.\d+)?)\s*J?/gi;
     const found=[];let m;
     while((m=re.exec(text))!==null){
       const after=text.slice(m.index+m[0].length,m.index+m[0].length+12);
-      const etMatch=m[0].match(/ET\s*([+-]?\d{1,2})/i)||after.match(/(?:^|\s)([+-]\d{1,2})(?:\s|$)/);
+      const etMatch=after.match(/^\s*ET\s*([+-]?\d{1,2})/i)||after.match(/(?:^|\s)([+-]\d{1,2})(?:\s|$)/);
       found.push({diameter:Number(m[1]),width:Number(m[2]),et:etMatch?Number(etMatch[1]):null,source:text});
     }
     return found;
