@@ -105,3 +105,13 @@ These must retain their different data sources and dependent-option logic while 
 - [ ] Automated route and interaction checks pass.
 - [ ] Browser visual acceptance passes at 1440px, 1024px, 768px and 390px.
 - [ ] Preview acceptance approved before any production release.
+
+## 8. Latest implementation pass (2026-11-07)
+
+- Shared shell coverage: 10 page templates plus the top-level response shell use the shared global header, footer, token CSS, navigation interaction and active-route script.
+- Static inventory at this pass: 115 button elements, 4 forms, 43 inputs, 3 textareas and 8 native selects. The button inventory includes semantic option controls and material swatches; swatch colors are data, not button-theme exceptions.
+- Removed the last inline spacing declaration from the Custom Builder submit button and moved it to the shared spacing token.
+- Added an accessible name to the Custom Builder optional project-notes input.
+- Product configuration RFQ remains locked unless published product, approved finish and complete matching size/offset SKU data are present.
+- Cloudflare Preview deployment verified at 100% traffic: Worker version `f1ca5ad9-2d78-44db-bb33-71ca8f99c0bd`, deployment `9b817452-0f8b-4950-9d3d-2643dcb1ed07`.
+- Public Preview route smoke requests returned HTTP 403 from the execution environment across all tested routes. Deployment control-plane success is verified; public HTTP delivery and visual interaction are not yet independently verified.
