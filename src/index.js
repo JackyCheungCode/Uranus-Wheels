@@ -185,6 +185,8 @@ ${globalHeader}
 <script>
 (function(){
 const vehicleForm=document.getElementById("vehicleForm"),aiForm=document.getElementById("aiForm"),vinForm=document.getElementById("vinForm");
+const vinLookup=vinForm?.closest(".vin-lookup"),vinDivider=vinLookup?.nextElementSibling;
+if(vinLookup&&vinDivider?.classList.contains("vin-divider")){const dividerLabel=vinDivider.querySelector("span");if(dividerLabel)dividerLabel.textContent="OR SEARCH BY VIN · OPTIONAL";vehicleForm.insertAdjacentElement("afterend",vinDivider);vinDivider.insertAdjacentElement("afterend",vinLookup);}
 const vehicleMsg=document.getElementById("vehicleMessage"),aiMsg=document.getElementById("aiMessage"),vinMsg=document.getElementById("vinMessage");
 const vinInput=document.getElementById("vinInput"),vinSubmit=document.getElementById("vinSubmit"),vinResult=document.getElementById("vinResult");
 let vinConfirmedVehicle=null;
