@@ -288,7 +288,7 @@ async function loadVinVehicleImage(vehicle,box){
     if(data.image_url){
       const img=document.createElement("img");img.className="vin-vehicle-image";img.alt=[make,model,year].join(" ")+" reference vehicle";img.loading="eager";
       img.onerror=()=>{img.replaceWith(Object.assign(document.createElement("div"),{className:"vin-vehicle-image-placeholder",textContent:"Reference image unavailable. You can still confirm using the decoded vehicle details."}))};
-      img.src=data.image_url;placeholder.replaceWith(img);
+      img.src=data.image_url.startsWith("/")?data.image_url:"/api/vehicle-image-file?src="+encodeURIComponent(data.image_url);placeholder.replaceWith(img);
       const credit=box.querySelector(".vin-confirm-status");credit.textContent=(data.title||"Vehicle reference image")+" · Wikimedia Commons. Colour and appearance may vary.";
     }else placeholder.textContent="No matching reference image was found. You can still confirm using the decoded vehicle details.";
   }catch(error){placeholder.textContent="Vehicle image could not be loaded. You can still confirm using the decoded vehicle details."}
@@ -323,7 +323,7 @@ function showResult(payload,advice,mode){
   const makerDomain=MAKE_DOMAINS[makerKey]||MAKE_DOMAINS[makerKey.replace(/\s+/g,"")]||((makerKey.replace(/[^a-z0-9]/g,"")||"")+".com");
   const makerInitials=makeLabel.split(/\s+/).map(w=>w[0]).slice(0,2).join("").toUpperCase();
   const makerSlug=({"mercedes-benz":"mercedes","land rover":"landrover","alfa romeo":"alfaromeo","great wall":"greatwall","ram trucks":"ram"}[makerKey]||makerKey.replace(/[^a-z0-9]/g,""));
-  const makerLogo='<span class="report-maker-mark"><img src="https://cdn.simpleicons.org/'+encodeURIComponent(makerSlug)+'" data-fallback-1="https://icons.duckduckgo.com/ip3/'+encodeURIComponent(makerDomain)+'.ico" data-fallback-2="https://www.google.com/s2/favicons?domain='+encodeURIComponent(makerDomain)+'&sz=256" alt="'+escapeHtml(makeLabel)+'" loading="lazy" referrerpolicy="no-referrer" onerror="if(this.dataset.fallback1){this.src=this.dataset.fallback1;this.dataset.fallback1=\'\'}else if(this.dataset.fallback2){this.src=this.dataset.fallback2;this.dataset.fallback2=\'\'}else{this.style.display=\'none\'}"></span>';
+  const makerLogo='<span class="report-maker-mark"><img src="/api/make-logo?make='+encodeURIComponent(makeLabel)+'" alt="'+escapeHtml(makeLabel)+'" loading="lazy" onerror="this.style.display=\'none\'"></span>';
   document.getElementById("resultMakerLogo").innerHTML=makerLogo;
   const specIcon=paths=>'<span class="spec-icon" aria-hidden="true"><svg viewBox="0 0 24 24">'+paths+'</svg></span>';
   const icons={
@@ -376,7 +376,7 @@ async function renderVehicleImage(f){
     const q=new URLSearchParams({make,model,year});
     const d=await api("/api/vehicle-image?"+q.toString());
     const holder=box.querySelector(".vehicle-photo-placeholder");
-    if(d.image_url){const img=document.createElement("img");img.className="vehicle-photo";img.src=d.image_url;img.alt=title+" reference vehicle";img.loading="lazy";img.onerror=()=>{img.replaceWith(Object.assign(document.createElement("div"),{className:"vehicle-photo-placeholder",textContent:"Reference image unavailable. Please confirm using the vehicle details."}));};holder.replaceWith(img);const credit=box.querySelector(".image-credit");credit.textContent=(d.title||"Vehicle reference image")+" · Wikimedia Commons";}
+    if(d.image_url){const img=document.createElement("img");img.className="vehicle-photo";img.src=d.image_url.startsWith("/")?d.image_url:"/api/vehicle-image-file?src="+encodeURIComponent(d.image_url);img.alt=title+" reference vehicle";img.loading="lazy";img.onerror=()=>{img.replaceWith(Object.assign(document.createElement("div"),{className:"vehicle-photo-placeholder",textContent:"Reference image unavailable. Please confirm using the vehicle details."}));};holder.replaceWith(img);const credit=box.querySelector(".image-credit");credit.textContent=(d.title||"Vehicle reference image")+" · Wikimedia Commons";}
     else holder.textContent="No sufficiently matched reference image was found. Please verify the vehicle details before continuing.";
   }catch(e){box.querySelector(".vehicle-photo-placeholder").textContent="Vehicle image unavailable. Please verify the exact vehicle details."}
 }
@@ -1537,7 +1537,7 @@ async function handleVehicleImage(url) {
     const pick=pages.find(page=>page.imageinfo&&page.imageinfo[0]&&(page.imageinfo[0].thumburl||page.imageinfo[0].url));
     if(pick){
       const info=pick.imageinfo[0],meta=info.extmetadata||{};
-      return json({image_url:info.thumburl||info.url,title:pick.title,matched:true,license:meta.LicenseShortName&&meta.LicenseShortName.value||"Wikimedia Commons",artist:meta.Artist&&meta.Artist.value||"",source_url:info.descriptionurl||"https://commons.wikimedia.org"});
+      return json({image_url:url.origin+"/api/vehicle-image-file?src="+encodeURIComponent(info.thumburl||info.url),title:pick.title,matched:true,license:meta.LicenseShortName&&meta.LicenseShortName.value||"Wikimedia Commons",artist:meta.Artist&&meta.Artist.value||"",source_url:info.descriptionurl||"https://commons.wikimedia.org"});
     }
   }
   return json({image_url:null,title:null,matched:false,year,source:"Wikimedia Commons"});
