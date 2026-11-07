@@ -289,19 +289,19 @@ function showResult(payload,advice,mode){
   resultCard.innerHTML=
     '<div class="vehicle-line"><div><strong>'+escapeHtml(title||"Vehicle match")+'</strong><br><span>Fitment reference returned by ANKUSI Wheels</span></div><span>REFERENCE DATA · CONFIRM VEHICLE CONFIGURATION</span></div>'+
     vinDetails+
-    '<div class="specs">'+
+    '<div class="specs confirmation-gated" hidden>'+
       '<div class="spec">'+specIcon(icons.pcd)+'<label>Bolt pattern / PCD</label><strong>'+escapeHtml(pcd)+'</strong><small>Number of lugs × pitch circle diameter</small></div>'+
       '<div class="spec">'+specIcon(icons.bore)+'<label>Center bore</label><strong>'+escapeHtml(bore)+'</strong><small>Hub bore'+escapeHtml(rear)+'</small></div>'+
       '<div class="spec">'+specIcon(icons.lug)+'<label>Lug count</label><strong>'+escapeHtml(f.lug_count||"—")+'</strong><small>Factory hub specification</small></div>'+
       '<div class="spec">'+specIcon(icons.year)+'<label>Vehicle year</label><strong>'+escapeHtml(f.year||"—")+'</strong><small>Model year in source record</small></div>'+
     '</div>'+
-    '<div class="fitment-details">'+
+    '<div class="fitment-details confirmation-gated" hidden>'+
       '<div class="fitment-detail">'+specIcon(icons.oe)+'<label>Original equipment wheel</label><strong>'+escapeHtml(oe)+'</strong></div>'+
       '<div class="fitment-detail">'+specIcon(icons.flush)+'<label>Flush reference</label><strong>'+escapeHtml(flush)+'</strong></div>'+
       '<div class="fitment-detail">'+specIcon(icons.max)+'<label>Maximum reference</label><strong>'+escapeHtml(max)+'</strong></div>'+
     '</div>'+adviceHtml+
-    '<div class="warning">Important: flush and maximum sizes are aftermarket reference points, not guaranteed fitment. Exact brake clearance, tire dimensions, suspension, trim and regional variant must be checked before ordering or manufacturing.</div>'+
-    '<div class="source-line"><span>Dataset '+escapeHtml(payload.dataset_version||f.dataset_version||"ANKUSI current release")+' · CC BY 4.0'+(mode==="vin"?" · Vehicle identity: NHTSA vPIC":"")+'</span><a href="'+escapeHtml(f.source_url||"https://ankusiwheels.com/wheel-fitment-api/")+'" target="_blank" rel="noopener">View ANKUSI source ↗</a></div>'+
+    '<div class="warning confirmation-gated" hidden>Important: flush and maximum sizes are aftermarket reference points, not guaranteed fitment. Exact brake clearance, tire dimensions, suspension, trim and regional variant must be checked before ordering or manufacturing.</div>'+
+    '<div class="source-line confirmation-gated" hidden><span>Dataset '+escapeHtml(payload.dataset_version||f.dataset_version||"ANKUSI current release")+' · CC BY 4.0'+(mode==="vin"?" · Vehicle identity: NHTSA vPIC":"")+'</span><a href="'+escapeHtml(f.source_url||"https://ankusiwheels.com/wheel-fitment-api/")+'" target="_blank" rel="noopener">View ANKUSI source ↗</a></div>'+
     "";
   results.classList.add("visible");renderVehicleImage(f);results.scrollIntoView({behavior:"smooth",block:"start"});
 }
@@ -318,16 +318,16 @@ async function renderVehicleImage(f){
   const make=String(f.make||"").trim(),model=String(f.model||"").trim(),year=String(f.year||"").trim();
   const title=[make,model,year].filter(Boolean).join(" ");
   const box=document.createElement("section");box.className="vehicle-confirm";
-  box.innerHTML='<div class="vehicle-photo-placeholder">Finding a reference image for this vehicle…</div><div class="vehicle-confirm-copy"><div class="eyebrow">STEP 1 / VEHICLE CONFIRMATION</div><h3>Is this your vehicle?</h3><p>Before we recommend a wheel design, please confirm the exact body style and generation shown here.</p><div class="vehicle-confirm-actions"><button type="button" class="btn btn-gold" id="confirmVehicle">Yes, this is my vehicle</button><button type="button" class="btn btn-outline" id="rejectVehicle">Not my vehicle</button></div><div class="image-credit">Reference vehicle image · Wikimedia Commons</div></div>';
+  box.innerHTML='<div class="vehicle-photo-placeholder">Finding a reference image for this vehicle…</div><div class="vehicle-confirm-copy"><div class="eyebrow">STEP 2 / VEHICLE MODEL CHECK</div><h3>Is this the correct vehicle model?</h3><p>This is a reference image to help identify the model and body style. Your vehicle may have a different paint colour, wheels or modifications.</p><div class="vehicle-confirm-actions"><button type="button" class="btn btn-gold" id="confirmVehicle">Yes, this is the correct model</button><button type="button" class="btn btn-outline" id="rejectVehicle">No, choose another vehicle</button></div><div class="image-credit">Reference image only · Appearance and colour may vary.</div></div>';
   resultCard.prepend(box);
   const yes=box.querySelector("#confirmVehicle"),no=box.querySelector("#rejectVehicle");
-  yes.addEventListener("click",()=>{yes.disabled=true;yes.textContent="Vehicle confirmed";no.disabled=true;renderProducts(f)});
-  no.addEventListener("click",()=>{box.querySelector(".vehicle-confirm-copy p").textContent="Please refine the body style or chassis code in your vehicle description, then run the AI search again.";yes.disabled=true;no.disabled=true;document.getElementById("prompt").focus()});
+  yes.addEventListener("click",()=>{yes.disabled=true;yes.textContent="Vehicle model confirmed";no.disabled=true;resultCard.querySelectorAll(".confirmation-gated").forEach(el=>el.hidden=false);renderProducts(f)});
+  no.addEventListener("click",()=>{box.querySelector(".vehicle-confirm-copy p").textContent="Please return to vehicle selection and choose a different make, model or year.";yes.disabled=true;no.disabled=true;document.getElementById("vehicleForm").scrollIntoView({behavior:"smooth",block:"center"})});
   try{
     const q=new URLSearchParams({make,model,year});
     const d=await api("/api/vehicle-image?"+q.toString());
     const holder=box.querySelector(".vehicle-photo-placeholder");
-    if(d.image_url){const img=document.createElement("img");img.className="vehicle-photo";img.src=d.image_url;img.alt=title+" reference vehicle";img.loading="lazy";img.onerror=()=>{holder.textContent="A verified reference image could not be loaded. Please confirm using the vehicle details.";};holder.replaceWith(img);const credit=box.querySelector(".image-credit");credit.textContent=(d.title||"Vehicle reference image")+" · Wikimedia Commons";}
+    if(d.image_url){const img=document.createElement("img");img.className="vehicle-photo";img.src=d.image_url;img.alt=title+" reference vehicle";img.loading="lazy";img.onerror=()=>{img.replaceWith(Object.assign(document.createElement("div"),{className:"vehicle-photo-placeholder",textContent:"Reference image unavailable. Please confirm using the vehicle details."}));};holder.replaceWith(img);const credit=box.querySelector(".image-credit");credit.textContent=(d.title||"Vehicle reference image")+" · Wikimedia Commons";}
     else holder.textContent="No sufficiently matched reference image was found. Please verify the vehicle details before continuing.";
   }catch(e){box.querySelector(".vehicle-photo-placeholder").textContent="Vehicle image unavailable. Please verify the exact vehicle details."}
 }
