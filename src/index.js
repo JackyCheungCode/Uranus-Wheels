@@ -175,7 +175,50 @@ makeEl.onChange(async value=>{
 modelEl.onChange(value=>{
   const m=models.find(x=>x.name===value);yearEl.setOptions((m&&m.years||[]).map(y=>({label:y,value:y})));yearEl.setDisabled(!value);
 });
-function showResult(payload,advice,mode){const f=payload.results&&payload.results[0]?payload.results[0]:payload.fitment||payload;const modelLabel=String(f.model||"").trim();const makeLabel=String(f.make||"").trim();const vehicleLabel=makeLabel&&modelLabel.toLowerCase().startsWith(makeLabel.toLowerCase())?modelLabel:[makeLabel,modelLabel].filter(Boolean).join(" ");const title=[vehicleLabel,f.year||""].filter(Boolean).join(" ");document.getElementById("resultTitle").textContent=title||"Fitment result";document.getElementById("resultMeta").textContent=mode==="ai"?"AI-assisted lookup · ANKUSI MCP":"Vehicle lookup · ANKUSI API";const pcd=f.bolt_pattern||"Not listed";const bore=f.center_bore_mm?f.center_bore_mm+" mm":"Not listed";const rear=f.center_bore_rear_mm?(" · Rear "+f.center_bore_rear_mm+" mm"):"";const oe=f.oe_wheel||"Not listed";const flush=f.flush_wheel||"Not published";const max=f.max_wheel||"Not published";let safeAdvice=advice?escapeHtml(advice).replace(/\*\*(.*?)\*\*/g,"<strong>$1</strong>").replace(/^\s*\*\s+/gm,"• ").replace(/\n/g,"<br>"):"";let adviceHtml=advice?'<div class="advice"><h4>Uranus AI guidance</h4><p>'+safeAdvice+'</p></div>':"";const makerDomain=MAKE_DOMAINS[String(makeLabel).toLowerCase().replace(/\\s+/g," ").trim()]||((String(makeLabel).toLowerCase().replace(/[^a-z0-9]/g,"")||"")+".com");const makerInitials=makeLabel.split(/\\s+/).map(w=>w[0]).slice(0,2).join("").toUpperCase();const makerLogo='<span class="vehicle-maker-mark"><img src="https://www.google.com/s2/favicons?domain='+encodeURIComponent(makerDomain)+'&sz=128" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.parentNode.innerHTML=\'<span class=&quot;make-logo-fallback&quot;>'+escapeHtml(makerInitials)+'</span>\'"></span>';const specIcon=(paths)=>'<span class="spec-icon" aria-hidden="true"><svg viewBox="0 0 24 24">'+paths+'</svg></span>';const icons={pcd:'<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="2.2"/><path d="M12 3.5v3M20.5 12h-3M12 20.5v-3M3.5 12h3"/>',bore:'<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.2"/>',lug:'<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="5.5" r="1.1"/><circle cx="18.2" cy="10" r="1.1"/><circle cx="15.8" cy="17.2" r="1.1"/><circle cx="8.2" cy="17.2" r="1.1"/><circle cx="5.8" cy="10" r="1.1"/>',year:'<rect x="3.5" y="5" width="17" height="15" rx="1.5"/><path d="M7.5 3v4M16.5 3v4M3.5 9h17M8 13h2M14 13h2M8 16.5h2"/>',oe:'<path d="M3 15.5h18l-2-6H6l-3 6Z"/><path d="M6 15.5v2M18 15.5v2M7 9.5l1.5-3h7l2.5 3"/>',flush:'<circle cx="12" cy="12" r="8.5"/><path d="M4 12h16M12 4v16M7 7l10 10M17 7 7 17"/>',max:'<path d="M4 19 12 4l8 15H4Z"/><path d="M12 9v5M12 17h.01"/>'};resultCard.innerHTML='<div class="vehicle-line"><div class="vehicle-line-main"><strong>'+escapeHtml(title||"Vehicle match")+'</strong><br><span>Fitment record returned by ANKUSI Wheels</span></div></div><span>DATA VERIFIED AT SOURCE</span></div><div class="specs"><div class="spec">'+specIcon(icons.pcd)+'<label>Bolt pattern / PCD</label><strong>'+escapeHtml(pcd)+'</strong><small>Number of lugs × pitch circle diameter</small></div><div class="spec">'+specIcon(icons.bore)+'<label>Center bore</label><strong>'+escapeHtml(bore)+'</strong><small>Hub bore'+escapeHtml(rear)+'</small></div><div class="spec">'+specIcon(icons.lug)+'<label>Lug count</label><strong>'+escapeHtml(f.lug_count||"—")+'</strong><small>Factory hub specification</small></div><div class="spec">'+specIcon(icons.year)+'<label>Vehicle year</label><strong>'+escapeHtml(f.year||"—")+'</strong><small>Model year in source record</small></div></div><div class="fitment-details"><div class="fitment-detail">'+specIcon(icons.oe)+'<label>Original equipment wheel</label><strong>'+escapeHtml(oe)+'</strong></div><div class="fitment-detail">'+specIcon(icons.flush)+'<label>Flush reference</label><strong>'+escapeHtml(flush)+'</strong></div><div class="fitment-detail">'+specIcon(icons.max)+'<label>Maximum reference</label><strong>'+escapeHtml(max)+'</strong></div></div>'+adviceHtml+'<div class="warning">Important: flush and maximum sizes are aftermarket reference points, not guaranteed fitment. Exact brake clearance, tire dimensions, suspension, trim and regional variant must be checked before ordering or manufacturing.</div><div class="source-line"><span>Dataset '+escapeHtml(payload.dataset_version||f.dataset_version||"ANKUSI current release")+' · CC BY 4.0</span><a href="'+escapeHtml(f.source_url||"https://ankusiwheels.com/wheel-fitment-api/")+'" target="_blank" rel="noopener">View ANKUSI source ↗</a></div>';results.classList.add("visible");renderVehicleImage(f);results.scrollIntoView({behavior:"smooth",block:"start"})}
+function showResult(payload,advice,mode){
+  const f=payload.results&&payload.results[0]?payload.results[0]:payload.fitment||payload;
+  const modelLabel=String(f.model||"").trim(),makeLabel=String(f.make||"").trim();
+  const vehicleLabel=makeLabel&&modelLabel.toLowerCase().startsWith(makeLabel.toLowerCase())?modelLabel:[makeLabel,modelLabel].filter(Boolean).join(" ");
+  const title=[vehicleLabel,f.year||""].filter(Boolean).join(" ");
+  document.getElementById("resultTitle").textContent=title||"Fitment result";
+  document.getElementById("resultMeta").textContent=mode==="ai"?"AI-assisted lookup · ANKUSI MCP":"Vehicle lookup · ANKUSI API";
+  const pcd=f.bolt_pattern||"Not listed",bore=f.center_bore_mm?f.center_bore_mm+" mm":"Not listed";
+  const rear=f.center_bore_rear_mm?(" · Rear "+f.center_bore_rear_mm+" mm"):"";
+  const oe=f.oe_wheel||"Not listed",flush=f.flush_wheel||"Not published",max=f.max_wheel||"Not published";
+  const safeAdvice=advice?escapeHtml(advice).replace(/\*\*(.*?)\*\*/g,"<strong>$1</strong>").replace(/^\s*\*\s+/gm,"• ").replace(/\n/g,"<br>"):"";
+  const adviceHtml=advice?'<div class="advice"><h4>Uranus AI guidance</h4><p>'+safeAdvice+'</p></div>':"";
+  const makerKey=makeLabel.toLowerCase().replace(/\s+/g," ").trim();
+  const makerDomain=MAKE_DOMAINS[makerKey]||MAKE_DOMAINS[makerKey.replace(/\s+/g,"")]||((makerKey.replace(/[^a-z0-9]/g,"")||"")+".com");
+  const makerInitials=makeLabel.split(/\s+/).map(w=>w[0]).slice(0,2).join("").toUpperCase();
+  const makerLogo='<span class="vehicle-maker-mark"><img src="https://www.google.com/s2/favicons?domain='+encodeURIComponent(makerDomain)+'&sz=128" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.parentNode.innerHTML=\'<span class=&quot;make-logo-fallback&quot;>'+escapeHtml(makerInitials)+'</span>\'"></span>';
+  const specIcon=paths=>'<span class="spec-icon" aria-hidden="true"><svg viewBox="0 0 24 24">'+paths+'</svg></span>';
+  const icons={
+    pcd:'<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="2.2"/><path d="M12 3.5v3M20.5 12h-3M12 20.5v-3M3.5 12h3"/>',
+    bore:'<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.2"/>',
+    lug:'<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="5.5" r="1.1"/><circle cx="18.2" cy="10" r="1.1"/><circle cx="15.8" cy="17.2" r="1.1"/><circle cx="8.2" cy="17.2" r="1.1"/><circle cx="5.8" cy="10" r="1.1"/>',
+    year:'<rect x="3.5" y="5" width="17" height="15" rx="1.5"/><path d="M7.5 3v4M16.5 3v4M3.5 9h17M8 13h2M14 13h2M8 16.5h2"/>',
+    oe:'<path d="M3 15.5h18l-2-6H6l-3 6Z"/><path d="M6 15.5v2M18 15.5v2M7 9.5l1.5-3h7l2.5 3"/>',
+    flush:'<circle cx="12" cy="12" r="8.5"/><path d="M4 12h16M12 4v16M7 7l10 10M17 7 7 17"/>',
+    max:'<path d="M4 19 12 4l8 15H4Z"/><path d="M12 9v5M12 17h.01"/>'
+  };
+  resultCard.innerHTML=
+    '<div class="vehicle-line"><div><strong>'+escapeHtml(title||"Vehicle match")+'</strong><br><span>Fitment record returned by ANKUSI Wheels</span></div><span>DATA VERIFIED AT SOURCE</span></div>'+
+    '<div class="specs">'+
+      '<div class="spec">'+specIcon(icons.pcd)+'<label>Bolt pattern / PCD</label><strong>'+escapeHtml(pcd)+'</strong><small>Number of lugs × pitch circle diameter</small></div>'+
+      '<div class="spec">'+specIcon(icons.bore)+'<label>Center bore</label><strong>'+escapeHtml(bore)+'</strong><small>Hub bore'+escapeHtml(rear)+'</small></div>'+
+      '<div class="spec">'+specIcon(icons.lug)+'<label>Lug count</label><strong>'+escapeHtml(f.lug_count||"—")+'</strong><small>Factory hub specification</small></div>'+
+      '<div class="spec">'+specIcon(icons.year)+'<label>Vehicle year</label><strong>'+escapeHtml(f.year||"—")+'</strong><small>Model year in source record</small></div>'+
+    '</div>'+
+    '<div class="fitment-details">'+
+      '<div class="fitment-detail">'+specIcon(icons.oe)+'<label>Original equipment wheel</label><strong>'+escapeHtml(oe)+'</strong></div>'+
+      '<div class="fitment-detail">'+specIcon(icons.flush)+'<label>Flush reference</label><strong>'+escapeHtml(flush)+'</strong></div>'+
+      '<div class="fitment-detail">'+specIcon(icons.max)+'<label>Maximum reference</label><strong>'+escapeHtml(max)+'</strong></div>'+
+    '</div>'+adviceHtml+
+    '<div class="warning">Important: flush and maximum sizes are aftermarket reference points, not guaranteed fitment. Exact brake clearance, tire dimensions, suspension, trim and regional variant must be checked before ordering or manufacturing.</div>'+
+    '<div class="source-line"><span>Dataset '+escapeHtml(payload.dataset_version||f.dataset_version||"ANKUSI current release")+' · CC BY 4.0</span><a href="'+escapeHtml(f.source_url||"https://ankusiwheels.com/wheel-fitment-api/")+'" target="_blank" rel="noopener">View ANKUSI source ↗</a></div>'+
+    '<div class="maker-logo-corner">'+makerLogo+'</div>';
+  results.classList.add("visible");renderVehicleImage(f);results.scrollIntoView({behavior:"smooth",block:"start"});
+}
 
 function renderVariantOptions(data){
   document.getElementById("resultTitle").textContent="Confirm your vehicle";
