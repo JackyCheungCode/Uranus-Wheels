@@ -24,10 +24,10 @@ const html = String.raw`<!doctype html>
 .select-option{display:flex;align-items:center;gap:12px}
 .select-option{display:flex;align-items:center;gap:12px;min-height:48px}.select-value{display:block;min-width:0;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.select-trigger{min-width:0}.spec{padding:16px 14px 14px 48px!important}.fitment-detail{position:relative;padding:16px 14px 16px 48px!important}.fitment-detail .spec-icon{left:14px;top:16px}.spec label,.fitment-detail label,.spec strong,.fitment-detail strong,.spec small{position:relative;z-index:1}
 .make-logo{width:32px;height:32px;flex:0 0 32px;display:grid;place-items:center;border-radius:50%;background:#fff;border:1px solid #d9dfe2;overflow:hidden;color:#39434a;font-size:9px;font-weight:700;letter-spacing:-.04em}
-.make-logo img{width:27px;height:27px;object-fit:contain}
+.make-logo img{width:27px;height:27px;object-fit:contain}.make-logo.selected-make-logo{width:25px;height:25px;flex:0 0 25px;border:0;border-radius:0;background:transparent}.make-logo.selected-make-logo img{width:25px;height:25px}.select-value{display:flex;align-items:center;gap:9px}.selected-make-text{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .make-logo-fallback{font-size:9px;font-weight:700}
 .make-label{display:block;line-height:1.35}
-.report-kicker{display:flex;align-items:center;gap:12px}.report-maker-mark{display:inline-flex;align-items:center;justify-content:center;width:42px;height:30px;flex:0 0 auto;overflow:visible}.report-maker-mark img{display:block;width:42px;height:30px;object-fit:contain;background:transparent}.report-maker-mark .make-logo-fallback{font-size:13px;color:#30383d}
+.report-kicker{display:flex;align-items:center;gap:12px}.report-maker-mark{display:flex;align-items:center;justify-content:flex-end;width:88px;height:54px;flex:0 0 88px;margin-left:auto;overflow:visible;background:transparent}.report-maker-mark img{display:block;width:88px;height:54px;object-fit:contain;object-position:right center;background:transparent;filter:grayscale(1) contrast(1.08)}.report-maker-mark .make-logo-fallback{font-size:13px;color:#30383d}
 .vehicle-maker-mark .make-logo-fallback{font-size:19px;color:#30383d}
 .vehicle-line{display:flex;justify-content:space-between;align-items:center;gap:18px}
 .vehicle-line-main{min-width:0}
@@ -122,6 +122,10 @@ function createCustomSelect(rootId,placeholder){
   const root=document.getElementById(rootId),trigger=root.querySelector(".select-trigger"),valueNode=root.querySelector(".select-value"),menu=root.querySelector(".select-menu"),search=root.querySelector(".select-search"),list=root.querySelector(".select-options");
   let options=[],value="",changeHandler=()=>{};
   function close(){menu.hidden=true;trigger.setAttribute("aria-expanded","false")}
+  function logoSlug(name){const aliases={"mercedes-benz":"mercedes","land rover":"landrover","alfa romeo":"alfaromeo","great wall":"greatwall","hongqi":"hongqi","mini":"mini","mg":"mg","ram trucks":"ram"};return aliases[String(name||"").toLowerCase()]||String(name||"").toLowerCase().replace(/[^a-z0-9]/g,"")}
+  function logoSources(item){const domain=item.logoDomain||"";const slug=logoSlug(item.label);return ["https://cdn.simpleicons.org/"+encodeURIComponent(slug),"https://icons.duckduckgo.com/ip3/"+encodeURIComponent(domain)+".ico","https://www.google.com/s2/favicons?domain="+encodeURIComponent(domain)+"&sz=128"]}
+  function makeLogo(item,className){const wrap=document.createElement("span");wrap.className=className;const img=document.createElement("img");img.alt="";img.loading="lazy";img.referrerPolicy="no-referrer";const sources=logoSources(item);let index=0;img.onerror=()=>{index++;if(index<sources.length)img.src=sources[index];else{wrap.innerHTML='<span class="make-logo-fallback">'+escapeHtml(item.initials||item.label.slice(0,2).toUpperCase())+'</span>'}};img.src=sources[0];wrap.append(img);return wrap}
+  function setSelected(item){valueNode.replaceChildren();if(item&&item.logoDomain)valueNode.append(makeLogo(item,"make-logo selected-make-logo"));const text=document.createElement("span");text.className="selected-make-text";text.textContent=item?item.label:placeholder;valueNode.append(text)}
   function render(){
     const term=search.value.trim().toLowerCase();
     const matches=options.filter(item=>item.label.toLowerCase().includes(term));
@@ -129,9 +133,9 @@ function createCustomSelect(rootId,placeholder){
     if(!matches.length){const empty=document.createElement("div");empty.className="select-empty";empty.textContent="No matching options";list.append(empty);return}
     matches.forEach(item=>{
       const button=document.createElement("button");button.type="button";button.className="select-option";button.setAttribute("role","option");button.setAttribute("aria-selected",String(item.value===value));
-      if(item.logoDomain){const logo=document.createElement("span");logo.className="make-logo";const img=document.createElement("img");img.src="https://www.google.com/s2/favicons?domain="+encodeURIComponent(item.logoDomain)+"&sz=128";img.alt="";img.loading="lazy";img.referrerPolicy="no-referrer";img.onerror=()=>{logo.innerHTML='<span class="make-logo-fallback">'+escapeHtml(item.initials||item.label.slice(0,2).toUpperCase())+'</span>'};logo.append(img);button.append(logo)}
+      if(item.logoDomain)button.append(makeLogo(item,"make-logo"));
       const label=document.createElement("span");label.className="make-label";label.textContent=item.label;button.append(label);
-      button.addEventListener("click",()=>{value=item.value;valueNode.textContent=item.label;close();search.value="";render();trigger.focus();changeHandler(value)});
+      button.addEventListener("click",()=>{value=item.value;setSelected(item);close();search.value="";render();trigger.focus();changeHandler(value)});
       button.addEventListener("keydown",event=>{
         const buttons=Array.from(list.querySelectorAll(".select-option"));const index=buttons.indexOf(button);
         if(event.key==="ArrowDown"){event.preventDefault();buttons[Math.min(index+1,buttons.length-1)]?.focus()}
@@ -155,7 +159,7 @@ function createCustomSelect(rootId,placeholder){
   document.addEventListener("click",event=>{if(!root.contains(event.target))close()});
   return {
     get value(){return value},
-    setOptions(items){options=items||[];value="";valueNode.textContent=placeholder;search.value="";render()},
+    setOptions(items){options=items||[];value="";setSelected(null);search.value="";render()},
     setDisabled(disabled){trigger.disabled=!!disabled;if(disabled)close()},
     onChange(handler){changeHandler=handler}
   };
@@ -189,7 +193,8 @@ function showResult(payload,advice,mode){
   const makerKey=makeLabel.toLowerCase().replace(/\s+/g," ").trim();
   const makerDomain=MAKE_DOMAINS[makerKey]||MAKE_DOMAINS[makerKey.replace(/\s+/g,"")]||((makerKey.replace(/[^a-z0-9]/g,"")||"")+".com");
   const makerInitials=makeLabel.split(/\s+/).map(w=>w[0]).slice(0,2).join("").toUpperCase();
-  const makerLogo='<span class="report-maker-mark"><img src="https://www.google.com/s2/favicons?domain='+encodeURIComponent(makerDomain)+'&sz=128" alt="'+escapeHtml(makeLabel)+' logo" loading="lazy" referrerpolicy="no-referrer" onerror="this.parentNode.innerHTML=\'<span class=&quot;make-logo-fallback&quot;>'+escapeHtml(makerInitials)+'</span>\'"></span>';
+  const makerSlug=({"mercedes-benz":"mercedes","land rover":"landrover","alfa romeo":"alfaromeo","great wall":"greatwall","ram trucks":"ram"}[makerKey]||makerKey.replace(/[^a-z0-9]/g,""));
+  const makerLogo='<span class="report-maker-mark"><img src="https://cdn.simpleicons.org/'+encodeURIComponent(makerSlug)+'" data-fallback-1="https://icons.duckduckgo.com/ip3/'+encodeURIComponent(makerDomain)+'.ico" data-fallback-2="https://www.google.com/s2/favicons?domain='+encodeURIComponent(makerDomain)+'&sz=256" alt="'+escapeHtml(makeLabel)+'" loading="lazy" referrerpolicy="no-referrer" onerror="if(this.dataset.fallback1){this.src=this.dataset.fallback1;this.dataset.fallback1=\'\'}else if(this.dataset.fallback2){this.src=this.dataset.fallback2;this.dataset.fallback2=\'\'}else{this.style.display=\'none\'}"></span>';
   document.getElementById("resultMakerLogo").innerHTML=makerLogo;
   const specIcon=paths=>'<span class="spec-icon" aria-hidden="true"><svg viewBox="0 0 24 24">'+paths+'</svg></span>';
   const icons={
