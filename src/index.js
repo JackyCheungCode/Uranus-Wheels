@@ -43,7 +43,7 @@ const fitmentHtml = String.raw`<!doctype html>
 .vin-help{margin-top:9px;line-height:1.55;letter-spacing:0}
 .vin-divider{display:flex;align-items:center;gap:12px;margin:0 0 15px;font-weight:600;letter-spacing:.12em}
 .vin-divider:before,.vin-divider:after{content:"";height:1px;background:#d5d9d5;flex:1}
-.vin-decoded{margin:0 0 16px;padding:16px;background:#edf0ed}
+.vin-result{margin-top:16px;padding:16px;background:#edf0ed}.vin-result[hidden]{display:none!important}.vin-result .vin-decoded{margin:0 0 14px;padding:0;background:transparent}.vin-result .vin-decoded-head{font-size:10px}.vin-vehicle-image-wrap{margin:0 0 14px;background:#dfe3e0;min-height:190px;display:grid;place-items:center;overflow:hidden}.vin-vehicle-image{display:block;width:100%;max-height:360px;object-fit:cover}.vin-vehicle-image-placeholder{padding:28px 16px;text-align:center;color:#626b6f;font-size:12px}.vin-confirm-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}.vin-confirm-actions .btn{min-height:44px}.vin-confirm-status{margin-top:10px;color:#697176;font-size:11px;line-height:1.5}.vin-result .vehicle-confirm-copy{padding:0;background:transparent}.vin-result .vehicle-confirm-copy h3{margin:0 0 7px}.vin-result .vehicle-confirm-copy p{margin:0;color:#525b60;font-size:13px;line-height:1.6}.vin-decoded{margin:0 0 16px;padding:16px;background:#edf0ed}
 .vin-decoded-head{font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#80643a;margin-bottom:12px}
 .vin-decoded-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
 .vin-decoded-item{min-width:0;padding:10px;background:#fff}
@@ -106,6 +106,7 @@ ${globalHeader}
     <div class="vin-help">We send the VIN to NHTSA vPIC for decoding. Uranus Wheels does not save the full VIN.</div>
   </form>
   <div class="vin-message message" id="vinMessage" role="status"></div>
+<div id="vinResult" class="vin-result" hidden aria-live="polite"></div>
 </div>
 <div class="vin-divider"><span>OR SELECT VEHICLE MANUALLY</span></div>
 <form id="vehicleForm">
@@ -140,7 +141,8 @@ ${globalHeader}
 (function(){
 const vehicleForm=document.getElementById("vehicleForm"),aiForm=document.getElementById("aiForm"),vinForm=document.getElementById("vinForm");
 const vehicleMsg=document.getElementById("vehicleMessage"),aiMsg=document.getElementById("aiMessage"),vinMsg=document.getElementById("vinMessage");
-const vinInput=document.getElementById("vinInput"),vinSubmit=document.getElementById("vinSubmit");
+const vinInput=document.getElementById("vinInput"),vinSubmit=document.getElementById("vinSubmit"),vinResult=document.getElementById("vinResult");
+let vinConfirmedVehicle=null;
 const results=document.getElementById("results"),resultCard=document.getElementById("resultCard");
 const vehicleSubmit=document.getElementById("vehicleSubmit"),aiSubmit=document.getElementById("aiSubmit");
 let models=[];
@@ -223,26 +225,46 @@ function renderVinVehicle(vehicle){
 function showVinDecodedOnly(data){showVinConfirmation(data)}
 function renderVinCandidates(data){
   const options=(data.candidates||[]).slice(0,8),vehicle=data.vehicle||{};
-  document.getElementById("resultTitle").textContent=[vehicle.make,vehicle.model,vehicle.year].filter(Boolean).join(" ")||"Confirm vehicle";
-  document.getElementById("resultMeta").textContent="VIN decoded · select the closest vehicle version";
-  document.getElementById("resultMakerLogo").replaceChildren();
-  resultCard.innerHTML=renderVinVehicle(vehicle)+'<div class="advice"><h4>Choose the closest vehicle version</h4><p>Several reference records match this VIN. Select the closest version; we will then fill the vehicle form for you.</p></div><div class="variant-options">'+options.map((v,i)=>'<button class="variant-option" type="button" data-vin-candidate="'+i+'"><strong>'+escapeHtml(v.model||"Vehicle variant")+'</strong><span>'+escapeHtml([v.year,v.chassis_code,v.body_style].filter(Boolean).join(" · ")||"ANKUSI reference record")+'</span><span>Choose this version →</span></button>').join("")+'</div>';
-  options.forEach((v,i)=>resultCard.querySelector('[data-vin-candidate="'+i+'"]').addEventListener("click",()=>showVinConfirmation({...data,selected_candidate:v})));
-  results.classList.add("visible");results.scrollIntoView({behavior:"smooth",block:"start"});
+  vinResult.hidden=false;
+  vinResult.innerHTML=renderVinVehicle(vehicle)+'<div class="advice"><h4>Choose the closest vehicle version</h4><p>Several ANKUSI reference records match this VIN. Select the closest version before confirming the vehicle.</p></div><div class="variant-options">'+options.map((v,i)=>'<button class="variant-option" type="button" data-vin-candidate="'+i+'"><strong>'+escapeHtml(v.model||"Vehicle variant")+'</strong><span>'+escapeHtml([v.year,v.chassis_code,v.body_style].filter(Boolean).join(" · ")||"ANKUSI reference record")+'</span><span>Choose this version →</span></button>').join("")+'</div>';
+  options.forEach((v,i)=>vinResult.querySelector('[data-vin-candidate="'+i+'"]').addEventListener("click",()=>showVinConfirmation({...data,selected_candidate:v})));
+  vinResult.scrollIntoView({behavior:"smooth",block:"nearest"});
+}
+async function loadVinVehicleImage(vehicle,box){
+  const make=String(vehicle.make||"").trim(),model=String(vehicle.model||"").trim(),year=String(vehicle.year||"").trim();
+  const placeholder=box.querySelector(".vin-vehicle-image-placeholder");
+  if(!make||!model||!year){placeholder.textContent="Vehicle image cannot be matched because the decoded make, model or year is incomplete.";return}
+  try{
+    const q=new URLSearchParams({make,model,year}),data=await api("/api/vehicle-image?"+q.toString());
+    if(data.image_url){
+      const img=document.createElement("img");img.className="vin-vehicle-image";img.alt=[make,model,year].join(" ")+" reference vehicle";img.loading="eager";
+      img.onerror=()=>{img.replaceWith(Object.assign(document.createElement("div"),{className:"vin-vehicle-image-placeholder",textContent:"Reference image unavailable. You can still confirm using the decoded vehicle details."}))};
+      img.src=data.image_url;placeholder.replaceWith(img);
+      const credit=box.querySelector(".vin-confirm-status");credit.textContent=(data.title||"Vehicle reference image")+" · Wikimedia Commons. Colour and appearance may vary.";
+    }else placeholder.textContent="No matching reference image was found. You can still confirm using the decoded vehicle details.";
+  }catch(error){placeholder.textContent="Vehicle image could not be loaded. You can still confirm using the decoded vehicle details."}
+  finally{const button=box.querySelector("#confirmVinVehicle");if(button)button.disabled=false}
 }
 function showVinConfirmation(data){
-  const vehicle=data.vehicle||{},title=[vehicle.make,vehicle.model,vehicle.year].filter(Boolean).join(" ");
-  document.getElementById("resultTitle").textContent=title||"VIN decoded";
-  document.getElementById("resultMeta").textContent="NHTSA vPIC · confirm vehicle identity";
-  document.getElementById("resultMakerLogo").replaceChildren();
-  resultCard.innerHTML=renderVinVehicle(vehicle)+'<div class="vehicle-confirm-copy vin-confirm"><h3>Is this the correct vehicle model?</h3><p>Confirm the vehicle identity to fill Vehicle make, Model and Model year automatically. Manufacturer information is included above.</p><div class="vehicle-confirm-actions"><button type="button" class="btn btn-gold" id="confirmVinVehicle">Yes, this is the correct model</button><button type="button" class="btn btn-outline" id="cancelVinVehicle">No, choose another vehicle</button></div><div class="image-credit">VIN decoded by NHTSA vPIC. Please check the details before continuing.</div></div>';
-  resultCard.querySelector("#confirmVinVehicle").addEventListener("click",async()=>{
-    const button=resultCard.querySelector("#confirmVinVehicle");button.disabled=true;button.textContent="Filling vehicle details…";
-    try{await fillVehicleFormFromVin(vehicle);document.getElementById("vehicleForm").requestSubmit()}
-    catch(error){button.disabled=false;button.textContent="Yes, this is the correct model";message(vinMsg,error.message||"Could not fill the vehicle form. Please select the vehicle manually.")}
+  const vehicle=data.vehicle||{},candidate=data.selected_candidate;
+  vinConfirmedVehicle=null;vinResult.hidden=false;
+  vinResult.innerHTML='<div class="vin-vehicle-image-wrap"><div class="vin-vehicle-image-placeholder">Loading the matching vehicle image…</div></div>'+renderVinVehicle(vehicle)+(candidate?'<div class="vin-confirm-status">Selected ANKUSI reference: '+escapeHtml([candidate.model,candidate.chassis_code,candidate.body_style,candidate.year].filter(Boolean).join(" · "))+'</div>':"")+'<div class="vehicle-confirm-copy"><h3>Is this the correct vehicle model?</h3><p>This reference image is used to identify the model and body style. Your vehicle may have a different paint colour, wheels or modifications.</p><div class="vin-confirm-actions"><button type="button" class="btn btn-gold" id="confirmVinVehicle" disabled>Yes, this is the correct model</button><button type="button" class="btn btn-outline" id="cancelVinVehicle">No, choose another vehicle</button></div><div class="vin-confirm-status">Loading the vehicle reference image. If no image is available, you can still confirm from the vehicle details.</div></div>';
+  const box=vinResult;
+  box.querySelector("#confirmVinVehicle").addEventListener("click",async()=>{
+    const button=box.querySelector("#confirmVinVehicle");button.disabled=true;button.textContent="Updating vehicle details…";
+    try{
+      await fillVehicleFormFromVin(vehicle);
+      vinConfirmedVehicle=vehicle;
+      button.textContent="Vehicle confirmed";
+      box.querySelector("#cancelVinVehicle").disabled=true;
+      vehicleForm.requestSubmit();
+    }catch(error){button.disabled=false;button.textContent="Yes, this is the correct model";message(vinMsg,error.message||"Could not fill the vehicle form. Please select the vehicle manually.")}
   });
-  resultCard.querySelector("#cancelVinVehicle").addEventListener("click",()=>document.getElementById("vehicleForm").scrollIntoView({behavior:"smooth",block:"center"}));
-  results.classList.add("visible");results.scrollIntoView({behavior:"smooth",block:"start"});
+  box.querySelector("#cancelVinVehicle").addEventListener("click",()=>{
+    vinConfirmedVehicle=null;vinResult.hidden=true;vinInput.focus();vehicleForm.scrollIntoView({behavior:"smooth",block:"center"});
+  });
+  vinResult.scrollIntoView({behavior:"smooth",block:"nearest"});
+  loadVinVehicleImage(vehicle,box);
 }
 async function fillVehicleFormFromVin(vehicle){
   const make=String(vehicle.make||"").trim(),model=String(vehicle.model||"").trim(),year=String(vehicle.year||"").trim();
@@ -270,7 +292,7 @@ function showResult(payload,advice,mode){
   const oe=f.oe_wheel||"Not listed",flush=f.flush_wheel||"Not published",max=f.max_wheel||"Not published";
   const safeAdvice=advice?escapeHtml(advice).replace(/\*\*(.*?)\*\*/g,"<strong>$1</strong>").replace(/^\s*\*\s+/gm,"• ").replace(/\n/g,"<br>"):"";
   const adviceHtml=advice?'<div class="advice"><h4>Uranus AI guidance</h4><p>'+safeAdvice+'</p></div>':"";
-  const vinDetails=mode==="vin"?renderVinVehicle(payload.vehicle):"";
+  const vinDetails=mode==="vin"?"":"";
   const makerKey=makeLabel.toLowerCase().replace(/\s+/g," ").trim();
   const makerDomain=MAKE_DOMAINS[makerKey]||MAKE_DOMAINS[makerKey.replace(/\s+/g,"")]||((makerKey.replace(/[^a-z0-9]/g,"")||"")+".com");
   const makerInitials=makeLabel.split(/\s+/).map(w=>w[0]).slice(0,2).join("").toUpperCase();
@@ -304,7 +326,7 @@ function showResult(payload,advice,mode){
     '<div class="warning confirmation-gated" hidden>Important: flush and maximum sizes are aftermarket reference points, not guaranteed fitment. Exact brake clearance, tire dimensions, suspension, trim and regional variant must be checked before ordering or manufacturing.</div>'+
     '<div class="source-line confirmation-gated" hidden><span>Dataset '+escapeHtml(payload.dataset_version||f.dataset_version||"ANKUSI current release")+' · CC BY 4.0'+(mode==="vin"?" · Vehicle identity: NHTSA vPIC":"")+'</span><a href="'+escapeHtml(f.source_url||"https://ankusiwheels.com/wheel-fitment-api/")+'" target="_blank" rel="noopener">View ANKUSI source ↗</a></div>'+
     "";
-  results.classList.add("visible");renderVehicleImage(f);results.scrollIntoView({behavior:"smooth",block:"start"});
+  results.classList.add("visible");if(mode==="vin"){resultCard.querySelectorAll(".confirmation-gated").forEach(el=>el.hidden=false);renderProducts(f)}else{renderVehicleImage(f)}results.scrollIntoView({behavior:"smooth",block:"start"});
 }
 
 function renderVariantOptions(data){
@@ -403,7 +425,7 @@ vinForm.addEventListener("submit",async e=>{
   e.preventDefault();clearMessage(vinMsg);clearMessage(vehicleMsg);clearMessage(aiMsg);
   const vin=String(vinInput.value||"").trim().toUpperCase();
   if(!/^[ABCDEFGHJKLMNPRSTUVWXYZ0-9]{17}$/.test(vin)){message(vinMsg,"Enter a valid 17-character VIN. The letters I, O and Q are not used.");return}
-  vinInput.value=vin;setLoading(vinSubmit,true,"Decode VIN ↗");
+  vinInput.value=vin;vinConfirmedVehicle=null;vinResult.hidden=true;vinResult.replaceChildren();setLoading(vinSubmit,true,"Decode VIN ↗");
   try{
     const response=await fetch("/api/vin-decode",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({vin})});
     const data=await response.json();
@@ -413,7 +435,7 @@ vinForm.addEventListener("submit",async e=>{
   }catch(error){message(vinMsg,error.message||"Could not decode this VIN. Please try manual vehicle lookup.")}
   finally{setLoading(vinSubmit,false,"Decode VIN ↗")}
 });
-vehicleForm.addEventListener("submit",async e=>{e.preventDefault();clearMessage(vehicleMsg);clearMessage(aiMsg);if(!makeEl.value||!modelEl.value||!yearEl.value){message(vehicleMsg,"Please select your vehicle make, model and year.");return}setLoading(vehicleSubmit,true,"Find wheel specs ↗");try{const q=new URLSearchParams({make:makeEl.value,model:modelEl.value,year:yearEl.value});const d=await api("/api/fitment?"+q.toString());if(!d.results||!d.results.length){message(vehicleMsg,"No exact record was found for this combination. Try another model year or use the AI assistant to clarify the vehicle variant.");return}showResult(d,null,"vehicle")}catch(err){message(vehicleMsg,err.message||"Could not retrieve fitment data.")}finally{setLoading(vehicleSubmit,false,"Find wheel specs ↗")}});
+vehicleForm.addEventListener("submit",async e=>{e.preventDefault();clearMessage(vehicleMsg);clearMessage(aiMsg);if(!makeEl.value||!modelEl.value||!yearEl.value){message(vehicleMsg,"Please select your vehicle make, model and year.");return}setLoading(vehicleSubmit,true,"Find wheel specs ↗");try{const q=new URLSearchParams({make:makeEl.value,model:modelEl.value,year:yearEl.value});const d=await api("/api/fitment?"+q.toString());if(!d.results||!d.results.length){message(vehicleMsg,"No exact record was found for this combination. Try another model year or use the AI assistant to clarify the vehicle variant.");return}const isVin=!!(vinConfirmedVehicle&&vinConfirmedVehicle.make.toLowerCase()===makeEl.value.toLowerCase()&&vinConfirmedVehicle.model.toLowerCase()===modelEl.value.toLowerCase()&&String(vinConfirmedVehicle.year)===String(yearEl.value));showResult({...d,vehicle:isVin?vinConfirmedVehicle:undefined},null,isVin?"vin":"vehicle");vinConfirmedVehicle=null}catch(err){message(vehicleMsg,err.message||"Could not retrieve fitment data.")}finally{setLoading(vehicleSubmit,false,"Find wheel specs ↗")}});
 aiForm.addEventListener("submit",async e=>{e.preventDefault();clearMessage(aiMsg);clearMessage(vehicleMsg);setLoading(aiSubmit,true,"Get AI recommendation ↗");try{const r=await fetch("/api/ai-advice",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({prompt:document.getElementById("prompt").value})});const d=await r.json();if(!r.ok)throw new Error(d.error||"AI service is temporarily unavailable.");if(d.type==="variant_options"){renderVariantOptions(d);return}if(d.type==="clarification"){message(aiMsg,d.message||"Please add your vehicle make, model and year.");return}if(!d.fitment)throw new Error("No verified fitment record was returned. Please provide a more specific vehicle description.");showResult({results:[d.fitment],dataset_version:d.dataset_version},d.advice,"ai")}catch(err){message(aiMsg,err.message||"AI could not complete the lookup.")}finally{setLoading(aiSubmit,false,"Get AI recommendation ↗")}});
 document.querySelectorAll("[data-prompt]").forEach(b=>b.addEventListener("click",()=>{document.getElementById("prompt").value=b.dataset.prompt;document.getElementById("prompt").focus()}));
 loadMakes();
