@@ -1386,6 +1386,7 @@ async function handleVinDecode(request) {
 
   const engineParts = [decoded.DisplacementL ? decoded.DisplacementL + " L" : "", decoded.EngineCylinders ? decoded.EngineCylinders + " cylinders" : "", decoded.FuelTypePrimary || ""].filter(Boolean);
   const vehicle = {
+    manufacturer: String(decoded.Manufacturer || "").trim(),
     make: String(decoded.Make || "").trim(),
     model: String(decoded.Model || "").trim(),
     year: String(decoded.ModelYear || "").trim(),
