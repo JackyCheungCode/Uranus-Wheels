@@ -17,7 +17,7 @@ The storefront has a shared header/footer and several global tokens, but the sou
 | AppShell | Shared header/footer exists; several pages also had legacy menu handlers that conflicted with the global handler | Removed duplicate page-level header/language listeners and stale fitment menu hook; one global AppShell handler now owns the shared menu |
 | Responsive | CSS includes several local breakpoints and one-off layout overrides | Consolidate common breakpoints after page-by-page viewport tests |
 | Accessibility | Some controls use ARIA roles; implementation differs by generation | Keyboard, focus, labels, error association and screen-reader audit |
-| Business logic | Fitment flow, product configurator and custom builder are distinct flows | Do not merge logic during visual convergence; audit data/engineering constraints after foundation |
+| Business logic | Fitment flow, product configurator and custom builder are distinct flows; configurator had fallback demo specs that could still populate an RFQ | Product RFQ is now gated on a published product, approved finish and complete matching SKU dimension/offset; fallback values display as TBC / not published. Custom Builder explicitly labels entered values as engineering-review targets only |
 
 ## 2. Control inventory
 
@@ -76,7 +76,7 @@ These must retain their different data sources and dependent-option logic while 
 - Custom Builder retains its own Carbon selector renderer and is now excluded from the global enhancer; keyboard and screen-reader parity still needs browser testing.
 - Global AppShell menu and language controls are now the only shared-header handlers; page-local duplicates were removed to prevent double-toggle behavior.
 - The fitment selector and dropdown selector have separate legacy scripts; keyboard parity must be verified and then consolidated.
-- The custom builder's engineering and dimensional option rules belong to the next business-logic phase, not this visual pass.
+- Custom Builder remains a free-form engineering enquiry, not a vehicle-verified product configurator. Its dimensions, PCD, center bore, lug count and load inputs are explicitly described as customer-requested targets pending engineering review.
 - No browser-based visual acceptance has been completed in this pass. Preview requests from the execution environment returned HTTP 403, so this must not be described as visually verified.
 
 ## 7. Acceptance gates
@@ -92,6 +92,9 @@ These must retain their different data sources and dependent-option logic while 
 ### Gate B — business logic
 - [ ] Map the full Fitment-to-Product-to-Configuration-to-RFQ journey.
 - [ ] Map the Custom Builder steps and submission journey.
+- [x] Block product quotation requests unless a published product, approved finish and complete matching SKU dimension/offset exist.
+- [x] Remove default demo fitment values from the product configuration summary and RFQ preview when no published product exists.
+- [x] Label Custom Builder inputs as customer-requested engineering targets, not fitment or production approval.
 - [ ] Reconcile engineering-approved dimensions, offsets, PCD, center bore, lug count, finishes and construction rules.
 - [ ] Verify RFQ payloads and dependent location / shipping fields.
 - [ ] Verify all validation, loading, success and error states.
