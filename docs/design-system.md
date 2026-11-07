@@ -96,8 +96,9 @@ All buttons share 44px minimum height, 2px radius, IBM Plex Sans typography and 
 - [x] Legacy `.field` and `.form-field` labels are programmatically associated with their input/select/textarea controls when missing.
 - [x] Product configuration dropdowns expose labelled combobox/listbox semantics and support Arrow keys, Home, End, Enter/Space and Escape.
 - [x] Shared button and form-control baseline styles are applied after page styles.
-- [ ] Remove remaining page-specific color overrides and legacy component exceptions.
-- [ ] Confirm every page uses the same primary / secondary / tertiary button mapping.
+- [ ] Remove remaining page-specific color overrides and legacy component exceptions outside the shared button/selector contract.
+- [x] Apply one final primary (graphite), secondary (transparent neutral) and tertiary/selection (layered neutral with a consistent selected state) button contract across all 10 page templates.
+- [x] Normalize unclassed filter and builder choice buttons; preserve swatch fills as product-color data with a shared selected ring.
 - [ ] Browser-test select keyboard behavior, required validation, dynamic options and form reset.
 - [ ] Test header, footer and controls at desktop, tablet and mobile widths.
 - [ ] Verify contrast, focus visibility and reduced-motion behavior on all templates.
@@ -105,4 +106,4 @@ All buttons share 44px minimum height, 2px radius, IBM Plex Sans typography and 
 
 ## Implementation note
 
-This phase centralizes the foundation without yet rewriting the legacy custom-wheel business flow. Existing old Builder dimension and fitment options remain scheduled for the later business-logic consolidation phase; do not treat those options as engineering-approved production specifications.
+This phase centralizes the foundation without yet rewriting the legacy custom-wheel business flow. Custom Builder dimensions remain customer-requested engineering targets, not engineering-approved production specifications. Product configuration uses only published approved SKU combinations.
