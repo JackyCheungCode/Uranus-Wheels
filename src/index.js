@@ -19,6 +19,7 @@ const fitmentHtml = String.raw`<!doctype html>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;450;500;600;650;700&display=swap" rel="stylesheet">
 <style>
+.confirmation-gated[hidden]{display:none!important}
 
 /* Automotive aftermarket visual direction: asphalt, titanium and performance orange */
 :root{--ink:#171a1d;--graphite:#2b3035;--metal:#8b969d;--silver:#d7dde0;--paper:#eef0f1;--surface:#fbfcfc;--surface2:#e2e6e8;--text:#1b2024;--muted:#667178;--line:rgba(23,26,29,.12);--gold:var(--uw-champagne);--gold-dark:#80643a}
