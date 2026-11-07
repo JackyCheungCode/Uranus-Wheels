@@ -634,7 +634,7 @@ function bindDropdown(id,key){
   const option=e.target.closest('[data-dropdown-option]');if(!option||option.disabled)return;
   state[key]=option.dataset.value;
   if(key==='country'){renderDestinationPorts();loadRegionsAndCities(true);refreshTransportOptions();}
-  if(key==='region'&&state.region==='__custom_region__'){$('region').style.display='block';$('regionSelect').querySelector('[data-dropdown-value]').textContent='Other region / enter manually…';state.region='';state.cities=[];renderCityOptions();}
+  if(key==='region'&&state.region==='__custom_region__'){$('region').style.display='block';$('regionSelect').querySelector('[data-dropdown-value]').textContent='Other region / enter manually…';state.region='';state.cities=[];renderCityOptions();$('citySelect').querySelector('[data-dropdown-value]').textContent='Choose city or enter manually';$('citySelect').querySelector('[data-dropdown-trigger]').disabled=false;}
   else if(key==='region'){$('region').style.display='none';loadCities();}
   if(key==='city'&&state.city==='__custom_city__'){state.city='__custom_city__';$('citySelect').querySelector('[data-dropdown-value]').textContent='Other city / enter manually…';$('customCity').style.display='block';}
   else if(key==='city')$('customCity').style.display='none';
