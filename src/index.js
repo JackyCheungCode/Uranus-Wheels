@@ -215,9 +215,9 @@ loadMakes();
 function json(data, status) {
   return new Response(JSON.stringify(data), { status: status || 200, headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store", "access-control-allow-origin": "*" } });
 }
-async function fetchJson(url) {
-  const response = await fetch(url, { headers: { "accept": "application/json" }, signal: AbortSignal.timeout(12000) });
-  if (!response.ok) throw new Error("ANKUSI returned HTTP " + response.status);
+async function fetchJson(url, init = {}) {
+  const response = await fetch(url, { ...init, headers: { "accept": "application/json", ...(init.headers || {}) }, signal: AbortSignal.timeout(12000) });
+  if (!response.ok) throw new Error("Remote data source returned HTTP " + response.status);
   return response.json();
 }
 function datasetRows(data) {
