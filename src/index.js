@@ -1576,7 +1576,7 @@ async function handleVehicleImage(url) {
     const pick=pages.find(page=>page.imageinfo&&page.imageinfo[0]&&(page.imageinfo[0].thumburl||page.imageinfo[0].url));
     if(pick){
       const info=pick.imageinfo[0],meta=info.extmetadata||{};
-      return json({image_url:url.origin+"/api/vehicle-image-file?src="+encodeURIComponent(info.thumburl||info.url),title:pick.title,matched:true,license:meta.LicenseShortName&&meta.LicenseShortName.value||"Wikimedia Commons",artist:meta.Artist&&meta.Artist.value||"",source_url:info.descriptionurl||"https://commons.wikimedia.org"});
+      return json({image_url:"/api/vehicle-image-file?src="+encodeURIComponent(info.thumburl||info.url),title:pick.title,matched:true,license:meta.LicenseShortName&&meta.LicenseShortName.value||"Wikimedia Commons",artist:meta.Artist&&meta.Artist.value||"",source_url:info.descriptionurl||"https://commons.wikimedia.org"});
     }
   }
   return json({image_url:null,title:null,matched:false,year,source:"Wikimedia Commons"});
