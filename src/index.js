@@ -352,6 +352,36 @@ main{max-width:1320px;margin:auto;padding:0 36px 84px}.catalog-intro{display:fle
 .detail-hero{display:grid;grid-template-columns:1.1fr .9fr;gap:38px;padding:54px 0 38px;align-items:center}.detail-art{min-height:480px;display:grid;place-items:center;background:linear-gradient(145deg,#e1e4e1,#f8f9f7)}.detail-art .wheel-art{width:min(70%,330px)}.breadcrumb{font-size:10px;color:#737d80;letter-spacing:.08em;margin-bottom:28px}.breadcrumb a{text-decoration:underline;text-underline-offset:3px}.detail-copy h1{font-size:clamp(38px,5vw,62px);font-weight:500;line-height:.98;letter-spacing:-.055em;margin:12px 0}.detail-copy>p{font-size:13px;line-height:1.8;color:#657074;max-width:500px}.detail-tag{display:inline-block;background:#e3e6e2;padding:8px 10px;font-size:9px;letter-spacing:.12em;margin:10px 0 20px}.detail-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:22px}.detail-button{min-height:46px;display:inline-flex;align-items:center;justify-content:center;padding:0 18px;background:#171c1f;color:#fff;font-size:9px;font-weight:650;letter-spacing:.12em}.detail-button.secondary{background:transparent;color:#171c1f;border:1px solid #8d9394}.detail-section{padding:38px 0;border-top:1px solid var(--line)}.detail-section h2{font-size:30px;font-weight:500;letter-spacing:-.04em;margin:8px 0 22px}.detail-spec-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:#dce0dc}.detail-spec-cell{background:#fff;padding:18px}.detail-spec-cell small{display:block;color:#747d80;font-size:8px;letter-spacing:.12em}.detail-spec-cell strong{display:block;font-size:15px;font-weight:500;margin-top:8px}.notice{background:#e7e9e6;padding:16px 18px;color:#626c70;font-size:10px;line-height:1.7;margin-top:16px}
 @media(max-width:900px){.uw-header-inner{padding:0 20px}.uw-menu{display:block}.uw-nav{display:none;position:absolute;top:78px;left:0;right:0;padding:12px 22px 20px;background:#101416;flex-direction:column;align-items:stretch;gap:0}.uw-nav.open{display:flex}.uw-nav a{padding:13px 0;border-bottom:1px solid #ffffff18}.uw-footer-inner{padding-left:22px;padding-right:22px}.uw-footer-top{grid-template-columns:1fr 1fr}.uw-footer-top>div:first-child{grid-column:1/-1}.wheels-hero:after{right:-18%;opacity:.42}.product-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.detail-hero{grid-template-columns:1fr 1fr;gap:22px}.detail-art{min-height:390px}.detail-spec-grid{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:600px){.uw-header-inner{min-height:68px;padding:0 15px}.uw-brand strong{font-size:16px}.uw-nav{top:68px}.uw-footer-inner{padding:38px 18px 22px}.uw-footer-top{gap:22px 16px}.uw-footer-bottom{flex-direction:column}.wheels-hero{min-height:410px}.wheels-hero:after{width:360px;height:360px;right:-40%;opacity:.25}.wheels-hero:before{background:linear-gradient(90deg,#101416f2,#10141699)}.wheels-hero-inner{padding:58px 20px}.wheels-hero h1{font-size:54px}.hero-meta{gap:15px;flex-wrap:wrap}.hero-meta strong{font-size:11px}main{padding:0 18px 60px}.catalog-intro{padding:44px 0 20px;align-items:flex-start;flex-direction:column}.collection-strip{grid-template-columns:1fr;gap:8px}.collection-tile{min-height:115px}.catalog-toolbar{flex-wrap:wrap}.search-box{flex-basis:100%}.result-count{flex:1}.filter-panel.open{grid-template-columns:1fr}.product-grid{grid-template-columns:1fr 1fr;gap:8px}.product-visual{height:175px}.wheel-art{width:74%;}.product-info{padding:13px}.product-info h3{font-size:16px}.product-info p{font-size:10px;min-height:50px}.product-spec{padding:8px}.product-spec strong{font-size:10px}.card-bottom{align-items:flex-start;flex-direction:column}.card-link{margin-top:5px}.detail-hero{grid-template-columns:1fr;padding:28px 0}.detail-art{min-height:330px;order:0}.detail-copy{order:1}.detail-copy h1{font-size:44px}.detail-spec-grid{grid-template-columns:1fr 1fr}.detail-spec-cell{padding:13px}}
+/* Mobile product catalog: one product per row, image left and specifications/actions right */
+@media(max-width:680px){
+.product-grid{grid-template-columns:minmax(0,1fr);gap:10px}
+.product-card{overflow:hidden}
+.product-card>a{display:grid;grid-template-columns:minmax(112px,36%) minmax(0,1fr);align-items:stretch;min-height:180px}
+.product-visual{height:auto;min-height:180px;align-self:stretch}
+.product-image{padding:8px;object-fit:contain}
+.wheel-art{width:82%;max-width:140px}
+.product-info{min-width:0;padding:12px;display:flex;flex-direction:column;align-items:stretch}
+.product-code{font-size:8px}
+.product-info h3{font-size:17px;line-height:1.15;margin:5px 0}
+.product-info p{font-size:10px;line-height:1.45;min-height:0;margin:0 0 9px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.product-specs{grid-template-columns:repeat(2,minmax(0,1fr));gap:1px}
+.product-spec{padding:7px 8px;min-width:0}
+.product-spec small{font-size:7px;letter-spacing:.07em}
+.product-spec strong{font-size:9px;line-height:1.3;overflow-wrap:anywhere}
+.card-bottom{margin-top:auto;padding-top:10px;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.card-bottom span{font-size:7px;line-height:1.3}
+.card-link{display:inline-flex;align-items:center;justify-content:center;min-height:32px;margin-top:0;padding:0 10px;background:#171c1f;color:#fff;border:0;font-size:8px;letter-spacing:.08em;white-space:nowrap}
+.product-card:hover{transform:none;box-shadow:0 4px 16px #18202410}
+}
+@media(max-width:380px){
+.product-card>a{grid-template-columns:minmax(100px,34%) minmax(0,1fr)}
+.product-info{padding:10px}
+.product-info h3{font-size:16px}
+.product-spec{padding:6px}
+.product-spec strong{font-size:8px}
+.card-bottom span{font-size:6.5px}
+.card-link{min-height:30px;padding:0 8px}
+}
 </style>
 ${globalCss}</head>
 <body>${globalHeader}
@@ -1367,7 +1397,7 @@ async function handleAi(request, env) {
     source: "ANKUSI Wheels MCP + REST API cross-check"
   });
 }
-const adminHtml = String.raw\`<!doctype html>
+const adminHtml = String.raw`<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -1441,7 +1471,7 @@ $("mobileMenu").addEventListener("click",()=>$("sidebar").classList.toggle("open
 sb.auth.onAuthStateChange((event,session)=>{if(event==="SIGNED_OUT"){showOnly(loginView)}else if(session&&allowed(session.user)&&appView.classList.contains("hidden")){enter(session.user)}});
 const initial=await sb.auth.getSession();if(initial.data.session)await enter(initial.data.session.user);else showOnly(loginView);
 </script>
-</body></html>\`;
+</body></html>`;
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
