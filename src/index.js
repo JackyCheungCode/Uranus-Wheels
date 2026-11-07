@@ -93,7 +93,7 @@ ${globalHeader}
 </div></section>
 <main>
 <section class="finder-wrap">
-<div class="intro"><div><div class="kicker">Wheel Finder / 01</div><h2>How would you like to find your wheels?</h2></div><p>Two ways to get started. Use vehicle details for a direct specification lookup, or describe your goals and let our AI guide the search.</p></div>
+<div class="intro"><div><div class="kicker">Wheel Finder / 01</div><h2>How would you like to find your wheels?</h2></div><p>Three ways to get started. Decode your VIN, select your vehicle manually, or describe your goals and let our AI guide the search.</p></div>
 <div class="methods">
 <section class="method" id="vehicle-search">
 <div class="method-head"><div><div class="method-number">METHOD 01 / VEHICLE LOOKUP</div><h3>Find your vehicle</h3><div class="method-sub">Search by VIN for a faster identification, or select your vehicle manually.</div></div><div class="method-icon" aria-hidden="true">⌖</div></div>
@@ -381,7 +381,7 @@ function renderProducts(f){
 vinForm.addEventListener("submit",async e=>{
   e.preventDefault();clearMessage(vinMsg);clearMessage(vehicleMsg);clearMessage(aiMsg);
   const vin=String(vinInput.value||"").trim().toUpperCase();
-  if(!/^[A-HJ-NPR-Z0-9]{17}$/.test(vin)){message(vinMsg,"Enter a valid 17-character VIN. The letters I, O and Q are not used.");return}
+  if(!/^[ABCDEFGHJKLMNPRSTUVWXYZ0-9]{17}$/.test(vin)){message(vinMsg,"Enter a valid 17-character VIN. The letters I, O and Q are not used.");return}
   vinInput.value=vin;setLoading(vinSubmit,true,"Decode VIN ↗");
   try{
     const response=await fetch("/api/vin-decode",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({vin})});
