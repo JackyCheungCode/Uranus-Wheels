@@ -189,7 +189,8 @@ function showResult(payload,advice,mode){
   const makerKey=makeLabel.toLowerCase().replace(/\s+/g," ").trim();
   const makerDomain=MAKE_DOMAINS[makerKey]||MAKE_DOMAINS[makerKey.replace(/\s+/g,"")]||((makerKey.replace(/[^a-z0-9]/g,"")||"")+".com");
   const makerInitials=makeLabel.split(/\s+/).map(w=>w[0]).slice(0,2).join("").toUpperCase();
-  const makerLogo='<span class="report-maker-mark"><img src="https://www.google.com/s2/favicons?domain='+encodeURIComponent(makerDomain)+'&sz=128" alt="'+escapeHtml(makeLabel)+' logo" loading="lazy" referrerpolicy="no-referrer" onerror="this.parentNode.innerHTML=\'<span class=&quot;make-logo-fallback&quot;>'+escapeHtml(makerInitials)+'</span>\'"></span>';\n  document.getElementById("resultMakerLogo").innerHTML=makerLogo;
+  const makerLogo='<span class="report-maker-mark"><img src="https://www.google.com/s2/favicons?domain='+encodeURIComponent(makerDomain)+'&sz=128" alt="'+escapeHtml(makeLabel)+' logo" loading="lazy" referrerpolicy="no-referrer" onerror="this.parentNode.innerHTML=\'<span class=&quot;make-logo-fallback&quot;>'+escapeHtml(makerInitials)+'</span>\'"></span>';
+  document.getElementById("resultMakerLogo").innerHTML=makerLogo;
   const specIcon=paths=>'<span class="spec-icon" aria-hidden="true"><svg viewBox="0 0 24 24">'+paths+'</svg></span>';
   const icons={
     pcd:'<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="2.2"/><path d="M12 3.5v3M20.5 12h-3M12 20.5v-3M3.5 12h3"/>',
