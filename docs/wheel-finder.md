@@ -15,9 +15,11 @@
 
 ### 2. Natural-language AI
 - Customer describes vehicle and intent in their own language.
-- Cloudflare Workers AI model `@cf/zai-org/glm-4.7-flash` identifies make/model/year or asks a clarification.
+- Cloudflare Workers AI model `@cf/google/gemma-4-26b-a4b-it` (thinking disabled for concise customer-facing responses) identifies make/model/year or asks a clarification.
 - Model tool call invokes ANKUSI MCP `lookup_wheel_fitment`.
-- Workers AI produces a cautious recommendation grounded in the returned MCP record.
+- The MCP result is cross-checked against ANKUSI REST `/fitment` to catch similar trims/body styles.
+- If body style/chassis remains ambiguous, ask the customer to clarify instead of selecting a nearby variant.
+- Workers AI produces a cautious recommendation grounded in the cross-checked record.
 
 ## Data and safety rules
 
