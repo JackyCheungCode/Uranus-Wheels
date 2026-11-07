@@ -212,7 +212,7 @@ modelEl.onChange(value=>{
 function renderVinVehicle(vehicle){
   if(!vehicle)return "";
   const items=[
-    ["Make",vehicle.make],["Model",vehicle.model],["Model year",vehicle.year],["Trim",vehicle.trim],
+    ["Manufacturer",vehicle.manufacturer],["Make",vehicle.make],["Model",vehicle.model],["Model year",vehicle.year],["Trim",vehicle.trim],
     ["Series",vehicle.series],["Body class",vehicle.body_class],["Drive type",vehicle.drive_type],
     ["Engine",vehicle.engine],["Plant country",vehicle.plant_country]
   ].filter(item=>item[1]);
