@@ -34,7 +34,7 @@ main{max-width:var(--content);margin:auto;padding:0 32px 80px}.finder-wrap{margi
 <header class="header"><div class="header-inner">
 <a class="brand" href="/" aria-label="Uranus Wheels home"><strong>URANUS</strong><small>Forged Wheels</small></a>
 <nav class="nav" aria-label="Main navigation"><a class="active" href="/">Wheel Finder</a><a href="#vehicle-search">Find by Vehicle</a><a href="#ai-search">Ask AI</a></nav>
-<div class="header-right"><button class="lang" type="button" aria-label="Language">EN / 全球</button><button class="menu" id="menuBtn" type="button">Menu</button></div>
+<div class="header-right"><span class="lang" aria-label="Current language">EN / GLOBAL</span><button class="menu" id="menuBtn" type="button">Menu</button></div>
 </div></header>
 <section class="hero"><div class="hero-inner">
 <div><div class="eyebrow">Uranus Wheels / Fitment Intelligence</div><h1>Find the right fit.<br>Make it yours.</h1><p class="hero-copy">Start with your vehicle, or simply tell us what you drive and what you want. Discover wheel specifications and a considered direction for your next forged set.</p></div>
@@ -110,10 +110,10 @@ async function fetchJson(url) {
   return response.json();
 }
 function datasetRows(data) {
-  if (Array.isArray(data)) return data;
-  if (Array.isArray(data.data)) return data.data;
-  if (Array.isArray(data.records)) return data.records;
-  return [];
+  const rows = Array.isArray(data) ? data : Array.isArray(data.data) ? data.data : Array.isArray(data.records) ? data.records : [];
+  if (!rows.length || !Array.isArray(rows[0])) return rows;
+  const columns = Array.isArray(data.columns) ? data.columns : [];
+  return rows.map(row => Object.fromEntries(columns.map((column, index) => [String(column), row[index]])));
 }
 async function getDataset() {
   const cache = caches.default;
@@ -231,9 +231,9 @@ export default {
     try {
       if (url.pathname === "/health") return json({ ok: true, app: "uranus-wheels-wheel-finder", phase: "wheel-finder", ai_model: MODEL, ankusi_api: ANKUSI + "/fitment", ankusi_mcp: MCP_URL });
       if (url.pathname === "/api/makes" && request.method === "GET") {
-        const data = await fetchJson(ANKUSI + "/makes");
-        const makes = Array.isArray(data.makes) ? data.makes : Array.isArray(data) ? data : [];
-        return json({ makes, source: "ANKUSI Wheels API" });
+        const data = await getDataset();
+        const names = Array.from(new Set(datasetRows(data).map(row => String(row.make || "").trim()).filter(Boolean))).sort((a, b) => a.localeCompare(b));
+        return json({ makes: names.map(name => ({ name })), count: names.length, dataset_version: data.version || data.name || "ANKUSI current release", source: "ANKUSI Wheels Dataset API" });
       }
       if (url.pathname === "/api/models" && request.method === "GET") {
         const make = String(url.searchParams.get("make") || "").trim();
