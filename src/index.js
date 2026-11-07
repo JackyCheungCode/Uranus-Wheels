@@ -282,7 +282,8 @@ async function handleVehicleImage(url) {
   const params = new URLSearchParams({ action:"query", generator:"search", gsrsearch:search, gsrnamespace:"6", gsrlimit:"8", prop:"imageinfo", iiprop:"url|extmetadata", iiurlwidth:"1400", format:"json", origin:"*" });
   const data = await fetchJson("https://commons.wikimedia.org/w/api.php?" + params.toString());
   const pages = data.query && data.query.pages ? Object.values(data.query.pages) : [];
-  const tokens = [make, ...model.split(/\s+/).filter(x=>x.length>1)].map(x=>x.toLowerCase());
+  const coreModel = model.match(/[a-z0-9-]{2,}/i);
+  const tokens = [make, coreModel && coreModel[0]].filter(Boolean).map(x=>x.toLowerCase());
   const matched = pages.map(page => ({ page, info:page.imageinfo && page.imageinfo[0] })).filter(x => x.info && x.info.thumburl && tokens.every(token => String(x.page.title||"").toLowerCase().includes(token)));
   const pick = matched[0] || null;
   if (!pick) return json({ image_url:null, title:null, matched:false, year });
