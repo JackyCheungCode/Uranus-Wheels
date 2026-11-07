@@ -22,20 +22,19 @@ const html = String.raw`<!doctype html>
 .btn-gold:hover,.btn-primary:hover{background:#f1844f;border-color:#f1844f}
 .kicker,.method-number,.product-card .product-code{color:#bb5127}
 .select-option{display:flex;align-items:center;gap:12px}
-.select-option{display:flex;align-items:center;gap:12px;min-height:48px}
+.select-option{display:flex;align-items:center;gap:12px;min-height:48px}.select-value{display:block;min-width:0;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.select-trigger{min-width:0}.spec{padding:16px 14px 14px 48px!important}.fitment-detail{position:relative;padding:16px 14px 16px 48px!important}.fitment-detail .spec-icon{left:14px;top:16px}.spec label,.fitment-detail label,.spec strong,.fitment-detail strong,.spec small{position:relative;z-index:1}
 .make-logo{width:32px;height:32px;flex:0 0 32px;display:grid;place-items:center;border-radius:50%;background:#fff;border:1px solid #d9dfe2;overflow:hidden;color:#39434a;font-size:9px;font-weight:700;letter-spacing:-.04em}
 .make-logo img{width:27px;height:27px;object-fit:contain}
 .make-logo-fallback{font-size:9px;font-weight:700}
 .make-label{display:block;line-height:1.35}
-.maker-logo-corner{display:flex;justify-content:flex-end;margin-top:14px}.vehicle-maker-mark{width:76px;height:76px;flex:0 0 76px;display:grid;place-items:center;border-radius:50%;background:#fff;border:1px solid #d9dfe2;box-shadow:0 4px 16px #00000012;overflow:hidden}
-.vehicle-maker-mark img{width:62px;height:62px;object-fit:contain}
+.report-kicker{display:flex;align-items:center;gap:12px}.report-maker-mark{display:inline-flex;align-items:center;justify-content:center;width:42px;height:30px;flex:0 0 auto;overflow:visible}.report-maker-mark img{display:block;width:42px;height:30px;object-fit:contain;background:transparent}.report-maker-mark .make-logo-fallback{font-size:13px;color:#30383d}
 .vehicle-maker-mark .make-logo-fallback{font-size:19px;color:#30383d}
 .vehicle-line{display:flex;justify-content:space-between;align-items:center;gap:18px}
 .vehicle-line-main{min-width:0}
 .vehicle-line-brand{display:flex;align-items:center;gap:18px}
 .spec{position:relative;padding:16px 14px 14px 48px}
-.spec-icon{position:absolute;left:14px;top:17px;width:24px;height:24px;color:#b95730;display:grid;place-items:center}
-.spec-icon svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.spec-icon{position:absolute;left:14px;top:17px;width:24px;height:24px;color:#525a5e;display:grid;place-items:center;pointer-events:none;z-index:0}
+.spec-icon svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
 .spec label{letter-spacing:.09em}.fitment-detail{position:relative;padding-left:48px}.fitment-detail .spec-icon{top:16px}
 .vehicle-photo{background:#30363b}
 .vehicle-confirm{border-left:3px solid #e56b35}
@@ -100,7 +99,7 @@ main{max-width:var(--content);margin:auto;padding:0 32px 80px}.finder-wrap{margi
 </section>
 </div>
 <section class="results" id="results" aria-live="polite">
-<div class="results-head"><div><div class="kicker">Fitment report / 02</div><h2 id="resultTitle">Your vehicle specifications</h2></div><div class="results-meta" id="resultMeta"></div></div>
+<div class="results-head"><div><div class="kicker report-kicker">Fitment report / 02 <span id="resultMakerLogo" aria-label="Vehicle manufacturer"></span></div><h2 id="resultTitle">Your vehicle specifications</h2></div><div class="results-meta" id="resultMeta"></div></div>
 <div class="result-card" id="resultCard"></div>
 </section>
 <div class="footnote">Fitment data is provided by ANKUSI Wheels under the Creative Commons Attribution 4.0 International license. Factory specifications are reference data. Flush and maximum aftermarket sizes are guidance only, not guaranteed fitment. Brake clearance, suspension, tire size, vehicle trim and market specification must be verified before ordering or production.</div>
@@ -130,7 +129,7 @@ function createCustomSelect(rootId,placeholder){
     if(!matches.length){const empty=document.createElement("div");empty.className="select-empty";empty.textContent="No matching options";list.append(empty);return}
     matches.forEach(item=>{
       const button=document.createElement("button");button.type="button";button.className="select-option";button.setAttribute("role","option");button.setAttribute("aria-selected",String(item.value===value));
-      const logo=document.createElement("span");logo.className="make-logo";const img=document.createElement("img");img.src="https://www.google.com/s2/favicons?domain="+encodeURIComponent(item.logoDomain||"")+"&sz=128";img.alt="";img.loading="lazy";img.referrerPolicy="no-referrer";img.onerror=()=>{logo.innerHTML='<span class="make-logo-fallback">'+escapeHtml(item.initials||item.label.slice(0,2).toUpperCase())+'</span>'};logo.append(img);button.append(logo);
+      if(item.logoDomain){const logo=document.createElement("span");logo.className="make-logo";const img=document.createElement("img");img.src="https://www.google.com/s2/favicons?domain="+encodeURIComponent(item.logoDomain)+"&sz=128";img.alt="";img.loading="lazy";img.referrerPolicy="no-referrer";img.onerror=()=>{logo.innerHTML='<span class="make-logo-fallback">'+escapeHtml(item.initials||item.label.slice(0,2).toUpperCase())+'</span>'};logo.append(img);button.append(logo)}
       const label=document.createElement("span");label.className="make-label";label.textContent=item.label;button.append(label);
       button.addEventListener("click",()=>{value=item.value;valueNode.textContent=item.label;close();search.value="";render();trigger.focus();changeHandler(value)});
       button.addEventListener("keydown",event=>{
@@ -190,7 +189,7 @@ function showResult(payload,advice,mode){
   const makerKey=makeLabel.toLowerCase().replace(/\s+/g," ").trim();
   const makerDomain=MAKE_DOMAINS[makerKey]||MAKE_DOMAINS[makerKey.replace(/\s+/g,"")]||((makerKey.replace(/[^a-z0-9]/g,"")||"")+".com");
   const makerInitials=makeLabel.split(/\s+/).map(w=>w[0]).slice(0,2).join("").toUpperCase();
-  const makerLogo='<span class="vehicle-maker-mark"><img src="https://www.google.com/s2/favicons?domain='+encodeURIComponent(makerDomain)+'&sz=128" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.parentNode.innerHTML=\'<span class=&quot;make-logo-fallback&quot;>'+escapeHtml(makerInitials)+'</span>\'"></span>';
+  const makerLogo='<span class="report-maker-mark"><img src="https://www.google.com/s2/favicons?domain='+encodeURIComponent(makerDomain)+'&sz=128" alt="'+escapeHtml(makeLabel)+' logo" loading="lazy" referrerpolicy="no-referrer" onerror="this.parentNode.innerHTML=\'<span class=&quot;make-logo-fallback&quot;>'+escapeHtml(makerInitials)+'</span>\'"></span>';\n  document.getElementById("resultMakerLogo").innerHTML=makerLogo;
   const specIcon=paths=>'<span class="spec-icon" aria-hidden="true"><svg viewBox="0 0 24 24">'+paths+'</svg></span>';
   const icons={
     pcd:'<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="2.2"/><path d="M12 3.5v3M20.5 12h-3M12 20.5v-3M3.5 12h3"/>',
@@ -216,7 +215,7 @@ function showResult(payload,advice,mode){
     '</div>'+adviceHtml+
     '<div class="warning">Important: flush and maximum sizes are aftermarket reference points, not guaranteed fitment. Exact brake clearance, tire dimensions, suspension, trim and regional variant must be checked before ordering or manufacturing.</div>'+
     '<div class="source-line"><span>Dataset '+escapeHtml(payload.dataset_version||f.dataset_version||"ANKUSI current release")+' · CC BY 4.0</span><a href="'+escapeHtml(f.source_url||"https://ankusiwheels.com/wheel-fitment-api/")+'" target="_blank" rel="noopener">View ANKUSI source ↗</a></div>'+
-    '<div class="maker-logo-corner">'+makerLogo+'</div>';
+    "";
   results.classList.add("visible");renderVehicleImage(f);results.scrollIntoView({behavior:"smooth",block:"start"});
 }
 
