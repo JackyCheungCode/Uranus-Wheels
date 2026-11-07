@@ -35,3 +35,9 @@
 - Worker upload validation succeeded and Preview deployment was assigned 100% traffic.
 - Browser-level registration, confirmation-email delivery, password recovery and signed-in end-to-end RFQ submission still require live browser testing.
 - Configure Supabase Auth Site URL and redirect allow-list to include the Preview and production domains before enabling public account registration. Confirm custom SMTP is configured for reliable customer verification and password-reset email delivery.
+
+## Staff access setup
+- Open the intended staff user's record in Supabase Auth and assign `app_metadata.role` to `staff` or `admin` using a trusted administrative method.
+- Do not put this role in `user_metadata`; users can edit their own user metadata.
+- After changing app metadata, have the staff user refresh/sign in again so the JWT contains the updated claim.
+- Staff workspace: `/staff/enquiries`. It is protected in the UI and independently protected by RLS policies.
