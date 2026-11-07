@@ -243,7 +243,7 @@ function showResult(payload,advice,mode){
   const vehicleLabel=makeLabel&&modelLabel.toLowerCase().startsWith(makeLabel.toLowerCase())?modelLabel:[makeLabel,modelLabel].filter(Boolean).join(" ");
   const title=[vehicleLabel,f.year||""].filter(Boolean).join(" ");
   document.getElementById("resultTitle").textContent=title||"Fitment result";
-  document.getElementById("resultMeta").textContent=mode==="ai"?"AI-assisted lookup · ANKUSI MCP":"Vehicle lookup · ANKUSI API";
+  document.getElementById("resultMeta").textContent=mode==="vin"?"VIN decoded · NHTSA vPIC + ANKUSI":mode==="ai"?"AI-assisted lookup · ANKUSI MCP":"Vehicle lookup · ANKUSI API";
   const pcd=f.bolt_pattern||"Not listed",bore=f.center_bore_mm?f.center_bore_mm+" mm":"Not listed";
   const rear=f.center_bore_rear_mm?(" · Rear "+f.center_bore_rear_mm+" mm"):"";
   const oe=f.oe_wheel||"Not listed",flush=f.flush_wheel||"Not published",max=f.max_wheel||"Not published";
@@ -267,7 +267,7 @@ function showResult(payload,advice,mode){
     max:'<path d="M4 19 12 4l8 15H4Z"/><path d="M12 9v5M12 17h.01"/>'
   };
   resultCard.innerHTML=
-    '<div class="vehicle-line"><div><strong>'+escapeHtml(title||"Vehicle match")+'</strong><br><span>Fitment record returned by ANKUSI Wheels</span></div><span>DATA VERIFIED AT SOURCE</span></div>'+
+    '<div class="vehicle-line"><div><strong>'+escapeHtml(title||"Vehicle match")+'</strong><br><span>Fitment reference returned by ANKUSI Wheels</span></div><span>REFERENCE DATA · CONFIRM VEHICLE CONFIGURATION</span></div>'+
     vinDetails+
     '<div class="specs">'+
       '<div class="spec">'+specIcon(icons.pcd)+'<label>Bolt pattern / PCD</label><strong>'+escapeHtml(pcd)+'</strong><small>Number of lugs × pitch circle diameter</small></div>'+
@@ -1398,7 +1398,7 @@ async function handleVinDecode(request) {
     const sameMake = candidateMake === makeKey;
     const sameYear = String(row.year || "") === yearKey;
     const sameModel = candidateModel.includes(modelKey) || modelKey.includes(candidateModel);
-    return sameMake && sameYear && sameModel;
+    return sameMake && sameYear && !!candidateModel && sameModel;
   });
 
   const datasetVersion = ankusi.dataset_version || ankusi.version || "ANKUSI current release";
