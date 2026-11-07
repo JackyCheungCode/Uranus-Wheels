@@ -90,7 +90,9 @@ All buttons share 44px minimum height, 2px radius, IBM Plex Sans typography and 
 - [x] Shared header/footer use the 1280px content width.
 - [x] Nested route active-state mapping is implemented.
 - [x] Mobile menu has accessible expanded state, Escape and outside-click close behavior.
-- [x] Native select elements are progressively enhanced into a shared keyboard-operable custom selector.
+- [x] Removed duplicate page-level mobile menu and language handlers; shared AppShell owns the global header interaction.
+- [x] Native select elements are progressively enhanced into a shared keyboard-operable custom selector, with already-enhanced Custom Builder controls excluded from double enhancement.
+- [x] Required enhanced selects expose a visible validation message and return focus to the visible trigger.
 - [x] Shared button and form-control baseline styles are applied after page styles.
 - [ ] Remove remaining page-specific color overrides and legacy component exceptions.
 - [ ] Confirm every page uses the same primary / secondary / tertiary button mapping.
