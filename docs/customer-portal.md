@@ -41,3 +41,12 @@
 - Do not put this role in `user_metadata`; users can edit their own user metadata.
 - After changing app metadata, have the staff user refresh/sign in again so the JWT contains the updated claim.
 - Staff workspace: `/staff/enquiries`. It is protected in the UI and independently protected by RLS policies.
+
+## Quotations — Phase 1
+- Staff can create and issue a quotation against an enquiry from `/staff/enquiries`.
+- Quotation records are versioned per enquiry and retain currency, item description/quantity/unit price, subtotal, shipping, total, Incoterm® 2020 code, named place, payment terms, delivery estimate, validity date, customer notes and internal-only notes.
+- Customers can review issued quotations in the matching enquiry detail and accept or decline with an optional message.
+- Customer decisions are stored separately and a database trigger updates quote status; acceptance also advances the enquiry status to `accepted`.
+- Customer response RLS verifies ownership, issued status and validity date. Trigger function execution is revoked from API roles.
+- Current composer supports one line item per quotation. Multi-line quotations, PDF generation, email notifications, customer PO, and automatic order conversion remain future work.
+- Quote acceptance records commercial intent only; it does not create a sales order, collect payment, or constitute a signed PI / Sales Contract.
