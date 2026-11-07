@@ -68,3 +68,14 @@
 - Only staff/admin can verify or reject a submitted payment proof. An uploaded proof is never treated as money received. Verified payment totals drive `partially_paid` / `payment_received` order status; database guards prevent marking an order fully paid before verified funds cover the total.
 - Customer and staff access is protected by RLS. Storage objects are private and signed URLs are short-lived.
 - Not yet included: automated email delivery, bank reconciliation, payment gateway integration, signed sales contract, server-side PDF generation, PO workflow, or automatic shipment tracking. Legal/tax details and HS codes must be confirmed by the business and its broker before external use.
+
+
+## Sales contracts & customer acknowledgement — Phase 1
+- Staff can create a contract draft only after a PI has been issued. The database snapshots seller/buyer legal identity from the issued PI and commercial/order specifications from the formal sales order and PI.
+- Contract drafts include editable fields for governing law, dispute resolution, arbitration institution/seat, language, warranty, inspection, claims window, force majeure, cancellation, fitment responsibility, specification change control, packing and quality standards, plus additional terms.
+- These legal and commercial fields are deliberately not prefilled with invented defaults. The business must enter the parties' agreed terms; use an explicit N/A only where genuinely not applicable.
+- Only a trusted app_metadata.role=admin account can record legal review. Editing any clause clears the review marker. Database guards prevent issuing an incomplete or unreviewed contract.
+- Staff/admin can issue a reviewed contract to the customer. The customer can view/print it, then accept or decline with an optional message. Responses are recorded once per contract and shown in the staff workspace.
+- In-app acceptance is an auditable customer acknowledgement, not a qualified electronic signature or proof of legally executed contract. Parties should complete their agreed signing process and obtain jurisdiction-appropriate legal review.
+- Print / Save as PDF uses the customer's browser; there is no server-generated PDF or automated email delivery.
+- Contract records and responses are protected by RLS; customers can only see contracts belonging to their own sales orders. The Security Advisor returned no lints after the migration.
