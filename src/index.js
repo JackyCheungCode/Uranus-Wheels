@@ -1508,6 +1508,45 @@ async function handleGeocode(url) {
   const out=new Response(JSON.stringify({location:p,source:"OpenStreetMap Nominatim"}),{headers:{"content-type":"application/json","cache-control":"public, max-age=86400","access-control-allow-origin":"*"}});
   await cache.put(key,out.clone());return out;
 }
+async function handleMakeLogo(url) {
+  const make=String(url.searchParams.get("make")||"").trim();
+  if(!make||make.length>80)return new Response("Invalid make",{status:400});
+  const normalized=make.toLowerCase().replace(/[^a-z0-9]+/g," ").trim();
+  const key=new Request("https://uranus-logo-cache.invalid/"+encodeURIComponent(normalized));
+  const cache=caches.default,cached=await cache.match(key);if(cached)return cached;
+  const slug=normalized.replace(/[^a-z0-9]/g,"");
+  const domain=MAKE_LOGO_DOMAINS[normalized]||MAKE_LOGO_DOMAINS[normalized.replace(/\s+/g,"")]||(slug+".com");
+  const candidates=[
+    "https://www.google.com/s2/favicons?domain="+encodeURIComponent(domain)+"&sz=128",
+    "https://icons.duckduckgo.com/ip3/"+encodeURIComponent(domain)+".ico",
+    "https://cdn.simpleicons.org/"+encodeURIComponent(slug)
+  ];
+  for(const source of candidates){
+    try{
+      const response=await fetch(source,{headers:{"accept":"image/avif,image/webp,image/png,image/svg+xml,image/*;q=0.8"},signal:AbortSignal.timeout(5000)});
+      const type=response.headers.get("content-type")||"";
+      if(!response.ok||!type.startsWith("image/"))continue;
+      const bytes=await response.arrayBuffer();if(bytes.byteLength<100)continue;
+      const out=new Response(bytes,{headers:{"content-type":type,"cache-control":"public, max-age=604800, stale-while-revalidate=86400","x-content-type-options":"nosniff"}});
+      await cache.put(key,out.clone());return out;
+    }catch(_){}
+  }
+  const initials=make.split(/\s+/).map(x=>x[0]).slice(0,2).join("").toUpperCase().replace(/[&<>"]/g,"");
+  const svg='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="8" fill="#e0e0e0"/><text x="32" y="40" text-anchor="middle" font-family="Arial,sans-serif" font-size="22" font-weight="600" fill="#393939">'+initials+'</text></svg>';
+  const out=new Response(svg,{headers:{"content-type":"image/svg+xml; charset=utf-8","cache-control":"public, max-age=86400"}});
+  await cache.put(key,out.clone());return out;
+}
+async function handleVehicleImageAsset(url,request) {
+  const source=url.searchParams.get("src");let target;
+  try{target=new URL(source)}catch(_){return new Response("Invalid image source",{status:400})}
+  if(target.protocol!=="https:"||target.hostname!=="upload.wikimedia.org")return new Response("Image host not allowed",{status:403});
+  const cache=caches.default,cached=await cache.match(request);if(cached)return cached;
+  const response=await fetch(target.toString(),{headers:{"accept":"image/avif,image/webp,image/jpeg,image/png"},signal:AbortSignal.timeout(12000)});
+  const type=response.headers.get("content-type")||"";
+  if(!response.ok||!type.startsWith("image/"))return new Response("Vehicle image unavailable",{status:502});
+  const out=new Response(response.body,{headers:{"content-type":type,"cache-control":"public, max-age=2592000, immutable","x-content-type-options":"nosniff"}});
+  await cache.put(request,out.clone());return out;
+}
 async function handleVehicleImage(url) {
   const make=String(url.searchParams.get("make")||"").trim();
   const model=String(url.searchParams.get("model")||"").trim();
@@ -1861,6 +1900,8 @@ export default {
       if (url.pathname === "/api/locations/cities" && request.method === "GET") return handleLocationLookup(url);
       if (url.pathname === "/api/geocode" && request.method === "GET") return handleGeocode(url);
       if (url.pathname === "/api/vehicle-image" && request.method === "GET") return handleVehicleImage(url);
+      if (url.pathname === "/api/vehicle-image-file" && request.method === "GET") return handleVehicleImageAsset(url,request);
+      if (url.pathname === "/api/make-logo" && request.method === "GET") return handleMakeLogo(url);
       if (url.pathname === "/api/ai-advice" && request.method === "POST") return handleAi(request, env);
       if (url.pathname === "/admin" || url.pathname.startsWith("/admin/")) return new Response(adminHtml, { headers: { "content-type": "text/html; charset=utf-8", "cache-control": "no-store", "x-content-type-options": "nosniff" } });
       if (url.pathname === "/wheels" || url.pathname.startsWith("/wheels/")) return new Response(wheelsHtml, { headers: { "content-type": "text/html; charset=utf-8", "cache-control": "no-store", "x-content-type-options": "nosniff" } });
