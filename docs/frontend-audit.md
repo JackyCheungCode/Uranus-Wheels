@@ -91,14 +91,15 @@ These must retain their different data sources and dependent-option logic while 
 - [ ] Desktop, tablet and mobile screenshots reviewed for every route.
 
 ### Gate B — business logic
-- [ ] Map the full Fitment-to-Product-to-Configuration-to-RFQ journey.
-- [ ] Map the Custom Builder steps and submission journey.
+- [x] Map the full Fitment-to-Product-to-Configuration-to-RFQ journey and persist approved-SKU RFQs to the enquiry table (Fitment remains a separate lookup and is not treated as a fitment approval).
+- [x] Map the Custom Builder four-step request and submission journey, including engineering-review flags.
 - [x] Block product quotation requests unless a published product, approved finish and complete matching SKU dimension/offset exist.
 - [x] Remove default demo fitment values from the product configuration summary and RFQ preview when no published product exists.
 - [x] Add keyboard-operable semantics and explicit label association to the product configuration dropdown family.
 - [x] Label Custom Builder inputs as customer-requested engineering targets, not fitment or production approval.
 - [ ] Reconcile engineering-approved dimensions, offsets, PCD, center bore, lug count, finishes and construction rules.
-- [ ] Verify RFQ payloads and dependent location / shipping fields.
+- [x] Verify RFQ payload structure, buyer validation, country/city/address dependencies, sea/air mode and Incoterm named-place logic.
+- [ ] Verify end-to-end RFQ submission from a real browser against the live Preview deployment.
 - [ ] Verify all validation, loading, success and error states.
 
 ### Gate C — release
@@ -115,3 +116,31 @@ These must retain their different data sources and dependent-option logic while 
 - Product configuration RFQ remains locked unless published product, approved finish and complete matching size/offset SKU data are present.
 - Cloudflare Preview deployment verified at 100% traffic: Worker version `f1ca5ad9-2d78-44db-bb33-71ca8f99c0bd`, deployment `9b817452-0f8b-4950-9d3d-2643dcb1ed07`.
 - Public Preview route smoke requests returned HTTP 403 from the execution environment across all tested routes. Deployment control-plane success is verified; public HTTP delivery and visual interaction are not yet independently verified.
+
+## 9. Business-flow implementation pass (2026-11-07)
+
+### Product catalog → configuration → RFQ
+- Product selection reads only published catalog records. RFQ controls remain disabled unless the product has a published finish and a complete matching SKU with finish ID, PCD, center bore, lug count, diameter, width and offset.
+- Removed default customer destination assumptions. Country, city and street address must be explicitly supplied; buyer legal/company name, contact, valid email and whole-number quantity (1–5,000 sets) are required before submission.
+- RFQ creation now POSTs a `configured` record to `wheel_enquiries` using the public publishable key and existing anonymous INSERT-only policy. The stored configuration includes product/SKU, finish, buyer, shipping mode, Incoterm named place, estimated route window and explicit quotation-only status.
+- The printable Quotation Request and email draft are revealed only after the database insert succeeds. The email draft opens without a pre-filled recipient, avoiding the previous behavior of addressing the draft to the buyer's own email.
+- Duplicate product RFQ creation is locked after successful save. Database validation limits are mirrored in the form (company name 120 chars; email 254 chars).
+- Supabase schema and RLS were inspected. A temporary `configured` insert under the `anon` role succeeded and was rolled back; no test row was retained.
+
+### Transport / Incoterms
+- Customer transport modes remain limited to Sea freight and Air freight.
+- Sea-only Incoterms FAS, FOB, CFR and CIF are hidden for Air freight. Switching to Air freight while one of those is selected changes the selection to FCA.
+- Named place now follows the selected rule: EXW supplier premises (exact premises pending); FCA cargo handover terminal (exact terminal pending); FAS/FOB/CFR/CIF Yantian Port; CPT/CIP destination port or airport to be confirmed; DAP/DPU/DDP customer delivery address.
+- The exact cargo terminal, airport and destination routing remain forwarder-confirmation items; the UI does not invent a carrier booking or exact terminal.
+
+### Custom Builder / enquiries
+- Custom Builder configured requests now persist explicit `engineering_review_required`, `fitment_verified:false`, `production_specification_approved:false` and `pending_engineering_review` status.
+- Successful Custom Builder submission buttons stay locked to prevent accidental duplicate requests.
+- Manual region entry now enables the city selector's manual-city path.
+- Contact and dealer forms retain their existing INSERT-only submission path; no automatic email notification or staff inbox is configured.
+
+### Remaining release blockers
+- Product catalog still has no real published product/SKU records, so live product RFQ creation remains intentionally unavailable until approved data is entered.
+- Vehicle fitment and brake-clearance verification are not inferred from customer-entered targets; the Custom Builder remains an engineering enquiry.
+- The public Preview endpoint has returned HTTP 403 from the available execution environment. Worker deployment status can be verified, but end-to-end browser delivery, keyboard/screen-reader operation and responsive visual acceptance remain outstanding.
+- Real browser tests are still required at 1440px, 1024px, 768px and 390px before production release.
