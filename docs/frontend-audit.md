@@ -12,9 +12,9 @@ The storefront has a shared header/footer and several global tokens, but the sou
 |---|---|---|
 | Design tokens | Tokens exist, but page CSS still contains many literal colors and local semantic aliases | Route semantic UI colors through shared tokens; keep physical wheel/finish swatch colors literal where they represent real materials |
 | Buttons | 116 button elements; multiple class families and page-local button styles | One primary / secondary / tertiary / danger contract; preserve choice controls as a distinct selectable-control family |
-| Selects | Three custom selector families plus native selects | Converge visual contract and keyboard behavior; do not break each page's data binding |
+| Selects | Three custom selector families plus native selects; Custom Builder was being enhanced twice by its local and global scripts | Added an enhancement guard, fixed label lookup via `select.labels`, added visible required-select errors and reset cleanup |
 | Forms | Contact, dealer, RFQ and builder forms have different markup and field classes | Shared labels, field heights, focus, errors, disabled/loading and status semantics |
-| AppShell | Shared header/footer exists; navigation has responsive state and nested route handling | Continue verifying every route and responsive state |
+| AppShell | Shared header/footer exists; several pages also had legacy menu handlers that conflicted with the global handler | Removed duplicate page-level header/language listeners and stale fitment menu hook; one global AppShell handler now owns the shared menu |
 | Responsive | CSS includes several local breakpoints and one-off layout overrides | Consolidate common breakpoints after page-by-page viewport tests |
 | Accessibility | Some controls use ARIA roles; implementation differs by generation | Keyboard, focus, labels, error association and screen-reader audit |
 | Business logic | Fitment flow, product configurator and custom builder are distinct flows | Do not merge logic during visual convergence; audit data/engineering constraints after foundation |
@@ -72,7 +72,9 @@ These must retain their different data sources and dependent-option logic while 
 
 - The source still contains many local literal colors. Some are legitimate wheel artwork/material swatches; remaining semantic UI colors need token migration.
 - Existing page-local CSS can still override global rules depending on template order and selector specificity.
-- Global select enhancement is progressive enhancement; verify disabled options, required validation, form reset, dynamic option mutation and dependent selects in a real browser.
+- Global select enhancement is progressive enhancement; disabled options, required validation, form reset, dynamic option mutation and dependent selects still need real-browser verification.
+- Custom Builder retains its own Carbon selector renderer and is now excluded from the global enhancer; keyboard and screen-reader parity still needs browser testing.
+- Global AppShell menu and language controls are now the only shared-header handlers; page-local duplicates were removed to prevent double-toggle behavior.
 - The fitment selector and dropdown selector have separate legacy scripts; keyboard parity must be verified and then consolidated.
 - The custom builder's engineering and dimensional option rules belong to the next business-logic phase, not this visual pass.
 - No browser-based visual acceptance has been completed in this pass. Preview requests from the execution environment returned HTTP 403, so this must not be described as visually verified.
