@@ -396,6 +396,7 @@ main{max-width:1320px;margin:auto;padding:0 36px 84px}.catalog-intro{display:fle
    catalogMode='live';
   }
  } catch(error) { console.warn('Uranus product catalog fallback:',error); }
+ if(catalogMode==='live'){const intro=document.querySelector('.catalog-intro p');if(intro)intro.textContent='Browse published Uranus Wheels products by construction, design language and finish. Open a product to review its published SKU configurations and available media.';}
  const state={construction:new Set(),design:new Set(),diameter:new Set()};
  const grid=document.getElementById('productGrid'),search=document.getElementById('productSearch'),count=document.getElementById('resultCount'),panel=document.getElementById('filterPanel'),toggle=document.getElementById('filterToggle'),chips=document.getElementById('activeChips'),empty=document.getElementById('emptyState');
  const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
