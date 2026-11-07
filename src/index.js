@@ -1,307 +1,269 @@
+const MODEL = "@cf/zai-org/glm-4.7-flash";
+const ANKUSI = "https://ankusiwheels.com/wp-json/ankusi/v1";
+const DATASET_URL = ANKUSI + "/dataset/json";
+const MCP_URL = ANKUSI + "/mcp";
+
 const html = String.raw`<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#101214">
-  <meta name="description" content="Uranus Wheels design system foundation preview.">
-  <title>Uranus Wheels — Design System Foundation</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;450;500;600;650;700&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      color-scheme: light;
-      --uw-ink: #101214;
-      --uw-graphite: #252a2e;
-      --uw-metal: #8f989e;
-      --uw-silver: #d9dddf;
-      --uw-paper: #f2f3f2;
-      --uw-surface: #ffffff;
-      --uw-surface-2: #e9ebea;
-      --uw-text: #171a1c;
-      --uw-muted: #697176;
-      --uw-line: rgba(16,18,20,.10);
-      --uw-accent: #b99a68;
-      --uw-accent-dark: #80643a;
-      --uw-radius-sm: 2px;
-      --uw-radius-md: 5px;
-      --uw-radius-lg: 10px;
-      --uw-content: 1280px;
-      --uw-space-1: 4px;
-      --uw-space-2: 8px;
-      --uw-space-3: 12px;
-      --uw-space-4: 16px;
-      --uw-space-5: 24px;
-      --uw-space-6: 32px;
-      --uw-space-7: 48px;
-      --uw-space-8: 64px;
-      --uw-space-9: 88px;
-      --uw-font: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
-      font-family: var(--uw-font);
-      font-synthesis: none;
-      text-rendering: optimizeLegibility;
-    }
-    * { box-sizing: border-box; }
-    html { scroll-behavior: smooth; }
-    body { margin: 0; background: var(--uw-paper); color: var(--uw-text); }
-    a { color: inherit; text-decoration: none; }
-    button, input, select { font: inherit; }
-    .topline { height: 3px; background: linear-gradient(90deg, var(--uw-accent), #e1d2b5 48%, var(--uw-accent-dark)); }
-    .site-header { position: relative; z-index: 5; background: var(--uw-ink); color: #f7f8f8; }
-    .header-inner { max-width: var(--uw-content); min-height: 82px; margin: auto; padding: 0 32px; display: flex; align-items: center; justify-content: space-between; gap: 28px; }
-    .brand { display: flex; flex-direction: column; gap: 1px; min-width: 178px; }
-    .brand-name { font-size: 20px; font-weight: 650; letter-spacing: .16em; line-height: 1.05; }
-    .brand-sub { color: #9ba2a6; font-size: 9px; letter-spacing: .29em; text-transform: uppercase; }
-    .nav { display: flex; align-items: center; gap: 28px; }
-    .nav a { color: #b9c0c4; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; transition: color .18s ease; }
-    .nav a:hover, .nav a[aria-current="page"] { color: #fff; }
-    .header-meta { display: flex; align-items: center; gap: 12px; }
-    .status { border: 1px solid rgba(255,255,255,.22); padding: 7px 10px; color: #c8cdd0; font-size: 9px; letter-spacing: .13em; text-transform: uppercase; }
-    .menu-toggle { display: none; border: 1px solid rgba(255,255,255,.24); background: transparent; color: white; padding: 9px 12px; cursor: pointer; }
-    .hero { background: var(--uw-ink); color: white; overflow: hidden; }
-    .hero-inner { max-width: var(--uw-content); margin: auto; padding: 72px 32px 78px; display: grid; grid-template-columns: minmax(0,1.25fr) minmax(260px,.75fr); align-items: center; gap: 56px; }
-    .eyebrow { color: var(--uw-accent); font-size: 10px; font-weight: 600; letter-spacing: .22em; text-transform: uppercase; }
-    h1 { max-width: 720px; margin: 18px 0 18px; font-size: clamp(42px,6vw,76px); font-weight: 500; line-height: .99; letter-spacing: -.055em; }
-    .hero-copy { max-width: 590px; color: #aeb5b9; font-size: 15px; line-height: 1.75; }
-    .hero-actions { display: flex; gap: 12px; margin-top: 30px; flex-wrap: wrap; }
-    .button { min-height: 44px; display: inline-flex; align-items: center; justify-content: center; padding: 0 18px; border: 1px solid transparent; border-radius: var(--uw-radius-sm); cursor: pointer; font-size: 11px; font-weight: 600; letter-spacing: .11em; text-transform: uppercase; transition: transform .18s ease, background .18s ease, border-color .18s ease; }
-    .button:hover { transform: translateY(-1px); }
-    .button-primary { background: var(--uw-accent); color: #171717; }
-    .button-primary:hover { background: #cbb184; }
-    .button-quiet { border-color: rgba(255,255,255,.28); color: white; background: transparent; }
-    .button-dark { background: var(--uw-ink); color: white; }
-    .button-outline { background: transparent; border-color: rgba(16,18,20,.24); color: var(--uw-text); }
-    .wheel-mark { position: relative; width: min(100%,340px); aspect-ratio: 1; margin: 0 auto; border-radius: 50%; background: radial-gradient(circle at 50% 50%, #141719 0 16%, #3d454a 17% 18%, #111416 19% 26%, #9ca4a8 27% 28%, #252a2e 29% 34%, #778188 35% 36%, #1a1e21 37% 47%, #555e63 48% 49%, #171a1c 50% 58%, #899197 59% 60%, #262b2f 61% 70%, #a4aaad 71% 72%, #1b1e20 73% 100%); box-shadow: 0 28px 70px rgba(0,0,0,.45), inset 0 0 0 1px rgba(255,255,255,.2); }
-    .wheel-mark:before { content: ""; position: absolute; inset: 20%; border-radius: 50%; background: repeating-conic-gradient(from 8deg, transparent 0deg 8deg, rgba(211,218,221,.72) 8.5deg 10deg, transparent 10.5deg 18deg); mask: radial-gradient(circle, transparent 0 21%, #000 22% 100%); }
-    .wheel-mark:after { content: ""; position: absolute; inset: 43%; border-radius: 50%; border: 2px solid #aab1b5; background: radial-gradient(circle, #4c555a, #101214 72%); box-shadow: 0 0 0 7px #242a2e, 0 0 0 9px #8c959a; }
-    .wheel-caption { position: absolute; right: -8px; bottom: 6px; color: #9ea7ab; font-size: 9px; letter-spacing: .2em; text-transform: uppercase; }
-    main { max-width: var(--uw-content); margin: auto; padding: 0 32px 88px; }
-    .section { padding-top: 68px; }
-    .section-head { display: flex; justify-content: space-between; align-items: end; gap: 24px; margin-bottom: 24px; }
-    .section-kicker { color: var(--uw-accent-dark); font-size: 10px; font-weight: 600; letter-spacing: .18em; text-transform: uppercase; }
-    h2 { margin: 7px 0 0; font-size: clamp(25px,3vw,36px); line-height: 1.1; font-weight: 500; letter-spacing: -.035em; }
-    .section-note { max-width: 430px; color: var(--uw-muted); font-size: 12px; line-height: 1.65; }
-    .token-grid { display: grid; grid-template-columns: repeat(6,1fr); gap: 12px; }
-    .token { min-width: 0; background: var(--uw-surface); }
-    .swatch { height: 92px; }
-    .token-info { padding: 13px 13px 15px; }
-    .token-name { display: block; font-size: 11px; font-weight: 600; }
-    .token-value { display: block; margin-top: 4px; color: var(--uw-muted); font-size: 10px; font-variant-numeric: tabular-nums; }
-    .demo-grid { display: grid; grid-template-columns: 1.1fr .9fr; gap: 16px; }
-    .panel { background: var(--uw-surface); padding: 28px; }
-    .panel-dark { background: var(--uw-graphite); color: white; }
-    .panel-label { color: var(--uw-accent-dark); font-size: 9px; font-weight: 600; letter-spacing: .18em; text-transform: uppercase; }
-    .panel-dark .panel-label { color: var(--uw-accent); }
-    .type-display { margin: 22px 0 12px; font-size: clamp(34px,4vw,52px); font-weight: 500; line-height: 1.02; letter-spacing: -.05em; }
-    .type-body { max-width: 560px; color: var(--uw-muted); font-size: 13px; line-height: 1.75; }
-    .panel-dark .type-body { color: #b5bdc1; }
-    .type-meta { display: flex; gap: 18px; margin-top: 26px; color: #8c959a; font-size: 9px; letter-spacing: .12em; text-transform: uppercase; }
-    .scale-list { display: grid; gap: 13px; margin-top: 22px; }
-    .scale-row { display: grid; grid-template-columns: 44px 1fr 44px; align-items: center; gap: 12px; color: var(--uw-muted); font-size: 10px; }
-    .scale-bar { height: 5px; background: var(--uw-surface-2); }
-    .scale-bar span { display: block; height: 100%; background: var(--uw-metal); }
-    .controls-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
-    .control-stack { display: grid; gap: 10px; }
-    .control-title { margin-bottom: 4px; font-size: 11px; font-weight: 600; }
-    .field-label { color: #555e63; font-size: 10px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; }
-    .field, .select { width: 100%; height: 46px; padding: 0 13px; border: 1px solid rgba(16,18,20,.18); border-radius: var(--uw-radius-sm); background: #f8f9f8; color: var(--uw-text); outline: none; }
-    .field:focus, .select:focus { border-color: var(--uw-accent-dark); box-shadow: 0 0 0 2px rgba(185,154,104,.18); }
-    .select-wrap { position: relative; }
-    .select { appearance: none; padding-right: 38px; }
-    .select-wrap:after { content: ""; position: absolute; right: 16px; top: 18px; width: 7px; height: 7px; border-right: 1px solid #555e63; border-bottom: 1px solid #555e63; transform: rotate(45deg); pointer-events: none; }
-    .button-row { display: flex; flex-wrap: wrap; gap: 9px; }
-    .component-card { background: var(--uw-surface); padding: 24px; }
-    .component-card p { color: var(--uw-muted); font-size: 12px; line-height: 1.6; }
-    .component-meta { display: flex; align-items: center; justify-content: space-between; margin-top: 24px; padding-top: 15px; border-top: 1px solid var(--uw-line); color: var(--uw-muted); font-size: 9px; letter-spacing: .1em; text-transform: uppercase; }
-    .layout-demo { display: grid; grid-template-columns: repeat(12,1fr); gap: 8px; margin-top: 20px; }
-    .layout-demo span { height: 38px; background: #dce0df; }
-    .layout-demo span:nth-child(4n+1) { background: #b7c0c2; }
-    .footer { background: var(--uw-ink); color: #aeb5b9; }
-    .footer-inner { max-width: var(--uw-content); margin: auto; padding: 28px 32px; display: flex; justify-content: space-between; gap: 20px; font-size: 10px; letter-spacing: .08em; }
-    .footer strong { color: white; font-weight: 600; letter-spacing: .14em; }
-    @media (max-width: 900px) {
-      .nav { gap: 16px; }
-      .nav a { font-size: 10px; }
-      .header-inner { padding: 0 24px; }
-      .hero-inner { gap: 28px; padding: 58px 24px 64px; }
-      main { padding-left: 24px; padding-right: 24px; }
-      .token-grid { grid-template-columns: repeat(3,1fr); }
-    }
-    @media (max-width: 680px) {
-      .header-inner { min-height: 70px; padding: 0 18px; }
-      .brand { min-width: auto; }
-      .brand-name { font-size: 17px; }
-      .status { display: none; }
-      .menu-toggle { display: inline-flex; }
-      .nav { display: none; position: absolute; top: 70px; left: 0; right: 0; padding: 18px; background: #191d20; flex-direction: column; align-items: stretch; gap: 0; }
-      .nav.is-open { display: flex; }
-      .nav a { padding: 13px 4px; border-bottom: 1px solid rgba(255,255,255,.08); font-size: 11px; }
-      .hero-inner { grid-template-columns: 1fr; padding: 52px 20px 58px; }
-      .wheel-mark { width: min(70vw,260px); margin-top: 10px; }
-      main { padding: 0 18px 64px; }
-      .section { padding-top: 52px; }
-      .section-head { align-items: start; flex-direction: column; gap: 10px; }
-      .demo-grid, .controls-grid { grid-template-columns: 1fr; }
-      .panel { padding: 22px; }
-      .token-grid { grid-template-columns: repeat(2,1fr); }
-      .swatch { height: 72px; }
-      .footer-inner { padding: 24px 18px; flex-direction: column; }
-    }
-    @media (prefers-reduced-motion: reduce) {
-      *, *:before, *:after { scroll-behavior: auto !important; transition-duration: .01ms !important; }
-    }
-  </style>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#101214">
+<meta name="description" content="Find forged wheels for your vehicle with precise fitment data and AI-powered guidance.">
+<title>Wheel Finder — Uranus Wheels</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;450;500;600;650;700&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#101214;--graphite:#252a2e;--metal:#8f989e;--silver:#d9dddf;--paper:#f2f3f2;--surface:#fff;--surface2:#e9ebea;--text:#171a1c;--muted:#697176;--line:rgba(16,18,20,.1);--gold:#b99a68;--gold-dark:#80643a;--content:1280px;--font:"IBM Plex Sans","Helvetica Neue",Arial,sans-serif;font-family:var(--font);font-synthesis:none;text-rendering:optimizeLegibility}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--paper);color:var(--text)}button,input,select,textarea{font:inherit}a{color:inherit;text-decoration:none}.topline{height:3px;background:linear-gradient(90deg,var(--gold),#e1d2b5 48%,var(--gold-dark))}
+.header{background:var(--ink);color:#f7f8f8}.header-inner{max-width:var(--content);min-height:78px;margin:auto;padding:0 32px;display:flex;align-items:center;justify-content:space-between;gap:24px}.brand{display:flex;flex-direction:column;gap:2px}.brand strong{font-size:20px;font-weight:650;letter-spacing:.16em}.brand small{font-size:9px;color:#9ba2a6;letter-spacing:.29em;text-transform:uppercase}.nav{display:flex;align-items:center;gap:28px}.nav a{font-size:11px;color:#b9c0c4;letter-spacing:.1em;text-transform:uppercase}.nav a.active,.nav a:hover{color:#fff}.header-right{display:flex;align-items:center;gap:12px}.lang{border:1px solid #495055;background:transparent;color:#e1e4e5;padding:8px 10px;font-size:10px;letter-spacing:.1em}.menu{display:none;background:transparent;color:#fff;border:1px solid #495055;padding:8px 12px}
+.hero{background:var(--ink);color:white;overflow:hidden}.hero-inner{max-width:var(--content);margin:auto;padding:60px 32px 66px;display:grid;grid-template-columns:1.2fr .8fr;gap:40px;align-items:center}.eyebrow{color:var(--gold);font-size:10px;font-weight:600;letter-spacing:.22em;text-transform:uppercase}.hero h1{font-size:clamp(42px,5.8vw,72px);font-weight:500;line-height:.98;letter-spacing:-.055em;margin:17px 0 18px;max-width:680px}.hero-copy{font-size:14px;line-height:1.75;color:#aeb5b9;max-width:590px}.hero-wheel{position:relative;width:min(100%,300px);aspect-ratio:1;margin:auto;border-radius:50%;background:radial-gradient(circle at 50% 50%,#141719 0 15%,#454e53 16% 18%,#111416 19% 26%,#aab1b5 27% 28%,#252a2e 29% 34%,#778188 35% 36%,#1a1e21 37% 47%,#555e63 48% 49%,#171a1c 50% 58%,#899197 59% 60%,#262b2f 61% 70%,#a4aaad 71% 72%,#1b1e20 73% 100%);box-shadow:0 25px 65px #0008,inset 0 0 0 1px #ffffff30}.hero-wheel:before{content:"";position:absolute;inset:19%;border-radius:50%;background:repeating-conic-gradient(from 8deg,transparent 0 8deg,#d3daddbb 8.5deg 10deg,transparent 10.5deg 18deg);mask:radial-gradient(circle,transparent 0 21%,#000 22% 100%)}.hero-wheel:after{content:"";position:absolute;inset:43%;border-radius:50%;border:2px solid #aab1b5;background:radial-gradient(circle,#4c555a,#101214 72%);box-shadow:0 0 0 7px #242a2e,0 0 0 9px #8c959a}
+main{max-width:var(--content);margin:auto;padding:0 32px 80px}.finder-wrap{margin-top:-1px;padding-top:34px}.intro{display:flex;justify-content:space-between;align-items:end;gap:20px;margin-bottom:20px}.kicker{font-size:10px;color:var(--gold-dark);font-weight:600;letter-spacing:.18em;text-transform:uppercase}.intro h2{font-size:clamp(26px,3vw,36px);font-weight:500;letter-spacing:-.04em;margin:7px 0 0}.intro p{max-width:420px;font-size:12px;color:var(--muted);line-height:1.65;margin:0}
+.methods{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:stretch}.method{background:var(--surface);padding:26px 28px 28px;min-width:0}.method.ai{background:#e9e9e6}.method-head{display:flex;justify-content:space-between;align-items:start;gap:14px;margin-bottom:22px}.method-number{font-size:10px;color:var(--gold-dark);letter-spacing:.15em}.method h3{font-size:22px;font-weight:500;letter-spacing:-.035em;margin:5px 0 5px}.method-sub{font-size:11px;color:var(--muted);line-height:1.6}.method-icon{width:42px;height:42px;display:grid;place-items:center;background:#f0f1ef;color:#333a3e;font-size:18px}.ai .method-icon{background:#dcded9}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.field-group{display:grid;gap:7px;min-width:0}.field-group.full{grid-column:1/-1}.label{font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#4f585d}.control{height:46px;width:100%;border:1px solid rgba(16,18,20,.16);border-radius:2px;background:#f8f9f8;color:var(--text);padding:0 13px;outline:none}.control:focus,.prompt:focus{border-color:var(--gold-dark);box-shadow:0 0 0 2px #b99a682e}.control:disabled{opacity:.5;cursor:not-allowed}.select-wrap{position:relative}.select-wrap:after{content:"";position:absolute;right:15px;top:18px;width:7px;height:7px;border-right:1px solid #596166;border-bottom:1px solid #596166;transform:rotate(45deg);pointer-events:none}.control.select{appearance:none;padding-right:34px}
+.btn{min-height:46px;display:inline-flex;align-items:center;justify-content:center;padding:0 18px;border:1px solid transparent;border-radius:2px;cursor:pointer;font-size:10px;font-weight:600;letter-spacing:.11em;text-transform:uppercase;transition:background .16s ease,transform .16s ease}.btn:hover{transform:translateY(-1px)}.btn-primary{background:var(--ink);color:white}.btn-primary:hover{background:#333a3e}.btn-gold{background:var(--gold);color:#171717}.btn-gold:hover{background:#cbb184}.btn:disabled{opacity:.5;cursor:wait;transform:none}.submit-row{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-top:20px}.micro{font-size:10px;color:var(--muted);line-height:1.5}
+.prompt{width:100%;min-height:140px;resize:vertical;border:1px solid rgba(16,18,20,.16);border-radius:2px;background:#f7f8f5;padding:14px;outline:none;font-size:13px;line-height:1.6;color:var(--text)}.examples{display:flex;flex-wrap:wrap;gap:7px;margin-top:11px}.example{border:1px solid #c9ccc6;background:transparent;color:#50585b;padding:7px 9px;font-size:10px;cursor:pointer}.example:hover{border-color:var(--gold-dark);color:#302a20}.ai-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:18px}.ai-note{font-size:10px;color:#68716d;line-height:1.5}
+.results{display:none;margin-top:28px}.results.visible{display:block}.results-head{display:flex;align-items:end;justify-content:space-between;gap:18px;margin-bottom:14px}.results-head h2{margin:6px 0 0;font-size:26px;font-weight:500;letter-spacing:-.035em}.results-meta{font-size:10px;color:var(--muted)}.result-card{background:var(--surface);padding:24px 26px}.vehicle-line{display:flex;justify-content:space-between;gap:16px;align-items:start;padding-bottom:18px;margin-bottom:18px;background:linear-gradient(90deg,#f2f3f2,#fff);padding:16px}.vehicle-line strong{font-size:17px;font-weight:600}.vehicle-line span{font-size:10px;color:var(--muted)}.specs{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.spec{background:#f1f2f1;padding:16px 14px;min-width:0}.spec label{display:block;color:var(--muted);font-size:9px;letter-spacing:.12em;text-transform:uppercase}.spec strong{display:block;margin-top:8px;font-size:22px;font-weight:500;letter-spacing:-.03em;overflow-wrap:anywhere}.spec small{display:block;margin-top:5px;color:var(--muted);font-size:9px;line-height:1.45}.fitment-details{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px}.fitment-detail{padding:16px;background:#f8f9f8}.fitment-detail label{display:block;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em}.fitment-detail strong{display:block;margin-top:8px;font-size:14px;font-weight:500;line-height:1.45}.advice{margin-top:16px;padding:18px 20px;background:#f1eee8}.advice h4{margin:0 0 8px;font-size:12px;font-weight:600}.advice p{margin:0;color:#4f5555;font-size:12px;line-height:1.7;white-space:pre-wrap}.warning{margin-top:14px;padding:12px 14px;background:#f7f3eb;color:#62553f;font-size:10px;line-height:1.6}.source-line{display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-top:16px;color:var(--muted);font-size:9px}.source-line a{text-decoration:underline;text-underline-offset:3px}.message{display:none;margin-top:15px;padding:13px 15px;background:#f7f3eb;color:#66573f;font-size:11px;line-height:1.6}.message.visible{display:block}.loader{display:inline-block;width:13px;height:13px;border:2px solid #ffffff55;border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;margin-right:8px;vertical-align:-2px}@keyframes spin{to{transform:rotate(360deg)}}
+.footnote{margin-top:24px;padding:16px 0;border-top:1px solid var(--line);font-size:10px;color:var(--muted);line-height:1.7}.footer{background:var(--ink);color:#aeb5b9}.footer-inner{max-width:var(--content);margin:auto;padding:27px 32px;display:flex;justify-content:space-between;gap:18px;font-size:9px;letter-spacing:.08em}.footer strong{color:white;letter-spacing:.14em}
+@media(max-width:900px){.header-inner{padding:0 24px}.nav{gap:16px}.nav a{font-size:10px}.hero-inner{padding:54px 24px 60px;gap:25px}main{padding-left:24px;padding-right:24px}.method{padding:22px}.specs{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:680px){.header-inner{min-height:68px;padding:0 18px}.brand strong{font-size:17px}.nav{display:none}.menu{display:block}.header-right .lang{display:none}.hero-inner{grid-template-columns:1fr;padding:48px 20px 52px}.hero-wheel{width:min(58vw,220px);margin-top:10px}.hero h1{font-size:clamp(42px,12vw,58px)}main{padding:0 16px 58px}.finder-wrap{padding-top:28px}.intro{display:block}.intro p{margin-top:10px}.methods{grid-template-columns:1fr;gap:12px}.method{padding:22px 18px}.form-grid{gap:12px}.submit-row,.ai-footer{align-items:stretch;flex-direction:column}.submit-row .btn,.ai-footer .btn{width:100%}.results-head{align-items:start;flex-direction:column}.result-card{padding:16px}.vehicle-line{flex-direction:column}.specs{grid-template-columns:repeat(2,1fr)}.fitment-details{grid-template-columns:1fr}.footer-inner{padding:24px 18px;flex-direction:column}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation-duration:.01ms!important;transition-duration:.01ms!important}}
+</style>
 </head>
 <body>
-  <div class="topline"></div>
-  <header class="site-header">
-    <div class="header-inner">
-      <a class="brand" href="/" aria-label="Uranus Wheels home">
-        <span class="brand-name">URANUS</span>
-        <span class="brand-sub">Forged Wheels</span>
-      </a>
-      <nav class="nav" id="primary-nav" aria-label="Primary navigation">
-        <a href="#foundation" aria-current="page">Foundation</a>
-        <a href="#tokens">Tokens</a>
-        <a href="#type">Typography</a>
-        <a href="#components">Components</a>
-        <a href="#layout">Grid</a>
-      </nav>
-      <div class="header-meta">
-        <span class="status">Design system preview</span>
-        <button class="menu-toggle" id="menu-toggle" type="button" aria-expanded="false" aria-controls="primary-nav">Menu</button>
-      </div>
-    </div>
-  </header>
-  <section class="hero" id="foundation">
-    <div class="hero-inner">
-      <div>
-        <div class="eyebrow">Uranus Wheels / Foundation 01</div>
-        <h1>A system built<br>around precision.</h1>
-        <p class="hero-copy">Carbon discipline meets premium automotive character. This foundation defines the visual language, layout rhythm and interaction principles that will guide every Uranus Wheels experience.</p>
-        <div class="hero-actions">
-          <a class="button button-primary" href="#tokens">Explore design tokens</a>
-          <a class="button button-quiet" href="#components">View components</a>
-        </div>
-      </div>
-      <div style="position:relative">
-        <div class="wheel-mark" role="img" aria-label="Abstract forged wheel geometry"></div>
-        <div class="wheel-caption">Machined precision / 001</div>
-      </div>
-    </div>
-  </section>
-  <main>
-    <section class="section" id="tokens">
-      <div class="section-head">
-        <div><div class="section-kicker">01 / Color system</div><h2>Quiet confidence. Metallic precision.</h2></div>
-        <p class="section-note">A restrained palette built from graphite, cool neutrals and a controlled champagne-metal accent. Background layers carry the structure; borders are used only when they clarify relationships.</p>
-      </div>
-      <div class="token-grid">
-        <div class="token"><div class="swatch" style="background:#101214"></div><div class="token-info"><span class="token-name">Carbon Black</span><span class="token-value">#101214 · Brand anchor</span></div></div>
-        <div class="token"><div class="swatch" style="background:#252a2e"></div><div class="token-info"><span class="token-name">Graphite</span><span class="token-value">#252A2E · Dark surface</span></div></div>
-        <div class="token"><div class="swatch" style="background:#8f989e"></div><div class="token-info"><span class="token-name">Titanium</span><span class="token-value">#8F989E · Metal tone</span></div></div>
-        <div class="token"><div class="swatch" style="background:#d9dddf"></div><div class="token-info"><span class="token-name">Cool Silver</span><span class="token-value">#D9DDDF · Neutral</span></div></div>
-        <div class="token"><div class="swatch" style="background:#f2f3f2"></div><div class="token-info"><span class="token-name">Cool White</span><span class="token-value">#F2F3F2 · Canvas</span></div></div>
-        <div class="token"><div class="swatch" style="background:#b99a68"></div><div class="token-info"><span class="token-name">Champagne</span><span class="token-value">#B99A68 · Accent</span></div></div>
-      </div>
-    </section>
-    <section class="section" id="type">
-      <div class="section-head">
-        <div><div class="section-kicker">02 / Typography & rhythm</div><h2>Clarity at every scale.</h2></div>
-        <p class="section-note">IBM Plex Sans provides a precise, contemporary foundation. Display typography is editorial and restrained; product specifications remain highly legible and consistent.</p>
-      </div>
-      <div class="demo-grid">
-        <div class="panel panel-dark">
-          <div class="panel-label">Display / IBM Plex Sans Medium</div>
-          <div class="type-display">FORGED<br>WITH INTENT.</div>
-          <p class="type-body">Every line, surface and proportion has a purpose. The design system gives the brand room to express performance without sacrificing clarity.</p>
-          <div class="type-meta"><span>Display 52 / 1.02</span><span>Tracking -5%</span></div>
-        </div>
-        <div class="panel">
-          <div class="panel-label">Spacing scale / 4px base unit</div>
-          <div class="scale-list">
-            <div class="scale-row"><span>Space 1</span><div class="scale-bar"><span style="width:5%"></span></div><span>4 px</span></div>
-            <div class="scale-row"><span>Space 2</span><div class="scale-bar"><span style="width:10%"></span></div><span>8 px</span></div>
-            <div class="scale-row"><span>Space 3</span><div class="scale-bar"><span style="width:15%"></span></div><span>12 px</span></div>
-            <div class="scale-row"><span>Space 4</span><div class="scale-bar"><span style="width:20%"></span></div><span>16 px</span></div>
-            <div class="scale-row"><span>Space 5</span><div class="scale-bar"><span style="width:30%"></span></div><span>24 px</span></div>
-            <div class="scale-row"><span>Space 6</span><div class="scale-bar"><span style="width:40%"></span></div><span>32 px</span></div>
-            <div class="scale-row"><span>Space 7</span><div class="scale-bar"><span style="width:60%"></span></div><span>48 px</span></div>
-            <div class="scale-row"><span>Space 8</span><div class="scale-bar"><span style="width:80%"></span></div><span>64 px</span></div>
-          </div>
-        </div>
-      </div>
-    </section>
-    <section class="section" id="components">
-      <div class="section-head">
-        <div><div class="section-kicker">03 / Core components</div><h2>Functional by design.</h2></div>
-        <p class="section-note">Controls inherit Carbon interaction discipline, then receive Uranus-specific visual treatment. Inputs use clear focus states and custom select styling rather than browser-default appearance.</p>
-      </div>
-      <div class="demo-grid">
-        <div class="panel">
-          <div class="control-stack">
-            <div class="control-title">Button hierarchy</div>
-            <div class="button-row"><button class="button button-dark" type="button">Primary action</button><button class="button button-outline" type="button">Secondary</button></div>
-            <div style="height:10px"></div>
-            <label class="field-label" for="sample-field">Text input</label>
-            <input class="field" id="sample-field" type="text" placeholder="Enter a vehicle or keyword">
-            <label class="field-label" for="sample-select">Custom select</label>
-            <div class="select-wrap"><select class="select" id="sample-select"><option>Select a wheel category</option><option>Monoblock Forged</option><option>2-Piece Forged</option><option>3-Piece Forged</option></select></div>
-          </div>
-        </div>
-        <div class="component-card">
-          <div class="panel-label">Information surface</div>
-          <h3 style="font-size:22px;font-weight:500;letter-spacing:-.03em;margin:17px 0 8px">Product specification</h3>
-          <p>Use surface contrast and spacing to group related information. Reserve dividers for data rows or boundaries that genuinely need separation.</p>
-          <div class="component-meta"><span>Forged construction</span><span>Specimen 01</span></div>
-        </div>
-      </div>
-    </section>
-    <section class="section" id="layout">
-      <div class="section-head">
-        <div><div class="section-kicker">04 / Layout foundation</div><h2>One grid. Every experience.</h2></div>
-        <p class="section-note">A responsive 12-column grid, consistent content width and predictable breakpoints provide the foundation for editorial storytelling, product discovery and data-dense fitment workflows.</p>
-      </div>
-      <div class="panel">
-        <div class="panel-label">12-column grid / illustrative</div>
-        <div class="layout-demo" aria-label="Twelve column layout grid"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
-        <div class="component-meta"><span>Max content width / 1280 px</span><span>Desktop · Tablet · Mobile</span></div>
-      </div>
-    </section>
-  </main>
-  <footer class="footer">
-    <div class="footer-inner"><strong>URANUS WHEELS</strong><span>Design system foundation preview · Not a production storefront</span><span>Carbon foundation × Premium automotive</span></div>
-  </footer>
-  <script>
-    const toggle = document.getElementById("menu-toggle");
-    const nav = document.getElementById("primary-nav");
-    toggle?.addEventListener("click", () => {
-      const open = nav.classList.toggle("is-open");
-      toggle.setAttribute("aria-expanded", String(open));
-      toggle.textContent = open ? "Close" : "Menu";
-    });
-    nav?.querySelectorAll("a").forEach((link) => link.addEventListener("click", () => {
-      nav.classList.remove("is-open");
-      toggle?.setAttribute("aria-expanded", "false");
-      if (toggle) toggle.textContent = "Menu";
-    }));
-  </script>
-</body>
-</html>`;
+<div class="topline"></div>
+<header class="header"><div class="header-inner">
+<a class="brand" href="/" aria-label="Uranus Wheels home"><strong>URANUS</strong><small>Forged Wheels</small></a>
+<nav class="nav" aria-label="Main navigation"><a class="active" href="/">Wheel Finder</a><a href="#vehicle-search">Find by Vehicle</a><a href="#ai-search">Ask AI</a></nav>
+<div class="header-right"><button class="lang" type="button" aria-label="Language">EN / 全球</button><button class="menu" id="menuBtn" type="button">Menu</button></div>
+</div></header>
+<section class="hero"><div class="hero-inner">
+<div><div class="eyebrow">Uranus Wheels / Fitment Intelligence</div><h1>Find the right fit.<br>Make it yours.</h1><p class="hero-copy">Start with your vehicle, or simply tell us what you drive and what you want. Discover wheel specifications and a considered direction for your next forged set.</p></div>
+<div class="hero-wheel" role="img" aria-label="Abstract forged wheel illustration"></div>
+</div></section>
+<main>
+<section class="finder-wrap">
+<div class="intro"><div><div class="kicker">Wheel Finder / 01</div><h2>How would you like to find your wheels?</h2></div><p>Two ways to get started. Use vehicle details for a direct specification lookup, or describe your goals and let our AI guide the search.</p></div>
+<div class="methods">
+<section class="method" id="vehicle-search">
+<div class="method-head"><div><div class="method-number">METHOD 01 / VEHICLE LOOKUP</div><h3>Choose your vehicle</h3><div class="method-sub">Select your make, model and year to retrieve available fitment data.</div></div><div class="method-icon" aria-hidden="true">⌖</div></div>
+<form id="vehicleForm">
+<div class="form-grid">
+<div class="field-group full"><label class="label" for="make">Vehicle make</label><div class="select-wrap"><select class="control select" id="make" required><option value="">Loading makes…</option></select></div></div>
+<div class="field-group"><label class="label" for="model">Model</label><div class="select-wrap"><select class="control select" id="model" required disabled><option value="">Choose make first</option></select></div></div>
+<div class="field-group"><label class="label" for="year">Model year</label><div class="select-wrap"><select class="control select" id="year" required disabled><option value="">Choose model first</option></select></div></div>
+</div>
+<div class="submit-row"><span class="micro">Factory and reference fitment data from ANKUSI.</span><button class="btn btn-primary" id="vehicleSubmit" type="submit">Find wheel specs <span aria-hidden="true">↗</span></button></div>
+</form>
+<div class="message" id="vehicleMessage" role="status"></div>
+</section>
+<section class="method ai" id="ai-search">
+<div class="method-head"><div><div class="method-number">METHOD 02 / AI ASSISTANT</div><h3>Ask in your own words</h3><div class="method-sub">Tell us your vehicle, style and driving preferences. No technical terms required.</div></div><div class="method-icon" aria-hidden="true">✳</div></div>
+<form id="aiForm">
+<div class="field-group"><label class="label" for="prompt">Describe your vehicle and what you have in mind</label><textarea class="prompt" id="prompt" required maxlength="1200" placeholder="Example: I drive a 2022 BMW M4 Competition. I want a 20-inch forged wheel setup with a deep concave look for daily driving. What specs should I consider?"></textarea></div>
+<div class="examples"><button class="example" type="button" data-prompt="I drive a 2021 Porsche 911 Carrera. I want a lightweight 20-inch forged wheel setup for street use.">Porsche 911 / street setup</button><button class="example" type="button" data-prompt="I have a 2024 BMW M3 G80 and prefer a flush, aggressive stance without rubbing.">BMW M3 / flush stance</button><button class="example" type="button" data-prompt="I drive a 2023 Mercedes-Benz G-Class. Recommend a forged wheel direction for daily use.">Mercedes G-Class / daily</button></div>
+<div class="ai-footer"><span class="ai-note">AI suggestions are based on ANKUSI fitment data where available. Final clearance must be confirmed for your exact vehicle.</span><button class="btn btn-gold" id="aiSubmit" type="submit">Get AI recommendation <span aria-hidden="true">↗</span></button></div>
+</form>
+<div class="message" id="aiMessage" role="status"></div>
+</section>
+</div>
+<section class="results" id="results" aria-live="polite">
+<div class="results-head"><div><div class="kicker">Fitment report / 02</div><h2 id="resultTitle">Your vehicle specifications</h2></div><div class="results-meta" id="resultMeta"></div></div>
+<div class="result-card" id="resultCard"></div>
+</section>
+<div class="footnote">Fitment data is provided by ANKUSI Wheels under the Creative Commons Attribution 4.0 International license. Factory specifications are reference data. Flush and maximum aftermarket sizes are guidance only, not guaranteed fitment. Brake clearance, suspension, tire size, vehicle trim and market specification must be verified before ordering or production.</div>
+</section>
+</main>
+<footer class="footer"><div class="footer-inner"><strong>URANUS WHEELS</strong><span>Precision forged for your individual fit.</span><span>Fitment data: ANKUSI Wheels · CC BY 4.0</span></div></footer>
+<script>
+(function(){
+const makeEl=document.getElementById("make"),modelEl=document.getElementById("model"),yearEl=document.getElementById("year");
+const vehicleForm=document.getElementById("vehicleForm"),aiForm=document.getElementById("aiForm");
+const vehicleMsg=document.getElementById("vehicleMessage"),aiMsg=document.getElementById("aiMessage");
+const results=document.getElementById("results"),resultCard=document.getElementById("resultCard");
+const vehicleSubmit=document.getElementById("vehicleSubmit"),aiSubmit=document.getElementById("aiSubmit");
+let models=[];
+function message(el,text){el.textContent=text;el.classList.add("visible")}
+function clearMessage(el){el.textContent="";el.classList.remove("visible")}
+function setLoading(btn,on,label){btn.disabled=on;btn.innerHTML=on?'<span class="loader"></span>Working…':label}
+function option(text,value){const o=document.createElement("option");o.value=value;o.textContent=text;return o}
+function escapeHtml(s){return String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+async function api(path){const r=await fetch(path);const j=await r.json();if(!r.ok||j.error)throw new Error(j.error||"Request failed");return j}
+async function loadMakes(){try{const d=await api("/api/makes");makeEl.innerHTML="";makeEl.append(option("Select vehicle make",""));(d.makes||[]).forEach(x=>makeEl.append(option(x.name||x.make,x.name||x.make)));}catch(e){makeEl.innerHTML="";makeEl.append(option("Could not load makes",""));message(vehicleMsg,"Vehicle list could not be loaded. Please try again shortly.")}}
+makeEl.addEventListener("change",async()=>{modelEl.disabled=true;yearEl.disabled=true;modelEl.innerHTML="";yearEl.innerHTML="";modelEl.append(option("Loading models…",""));yearEl.append(option("Choose model first",""));if(!makeEl.value)return;try{const d=await api("/api/models?make="+encodeURIComponent(makeEl.value));models=d.models||[];modelEl.innerHTML="";modelEl.append(option("Select model",""));models.forEach(m=>modelEl.append(option(m.name,m.name)));modelEl.disabled=false;}catch(e){modelEl.innerHTML="";modelEl.append(option("Could not load models",""));message(vehicleMsg,e.message)}});
+modelEl.addEventListener("change",()=>{yearEl.innerHTML="";yearEl.append(option("Select year",""));const m=models.find(x=>x.name===modelEl.value);(m&&m.years||[]).forEach(y=>yearEl.append(option(y,y)));yearEl.disabled=!modelEl.value});
+function showResult(payload,advice,mode){const f=payload.results&&payload.results[0]?payload.results[0]:payload.fitment||payload;const title=[f.make||"",f.model||"",f.year||""].filter(Boolean).join(" ");document.getElementById("resultTitle").textContent=title||"Fitment result";document.getElementById("resultMeta").textContent=mode==="ai"?"AI-assisted lookup · ANKUSI MCP":"Vehicle lookup · ANKUSI API";const pcd=f.bolt_pattern||"Not listed";const bore=f.center_bore_mm?f.center_bore_mm+" mm":"Not listed";const rear=f.center_bore_rear_mm?(" · Rear "+f.center_bore_rear_mm+" mm"):"";const oe=f.oe_wheel||"Not listed";const flush=f.flush_wheel||"Not published";const max=f.max_wheel||"Not published";let adviceHtml=advice?'<div class="advice"><h4>Uranus AI guidance</h4><p>'+escapeHtml(advice)+'</p></div>':"";resultCard.innerHTML='<div class="vehicle-line"><div><strong>'+escapeHtml(title||"Vehicle match")+'</strong><br><span>Fitment record returned by ANKUSI Wheels</span></div><span>DATA VERIFIED AT SOURCE</span></div><div class="specs"><div class="spec"><label>Bolt pattern / PCD</label><strong>'+escapeHtml(pcd)+'</strong><small>Number of lugs × pitch circle diameter</small></div><div class="spec"><label>Center bore</label><strong>'+escapeHtml(bore)+'</strong><small>Hub bore'+escapeHtml(rear)+'</small></div><div class="spec"><label>Lug count</label><strong>'+escapeHtml(f.lug_count||"—")+'</strong><small>Factory hub specification</small></div><div class="spec"><label>Vehicle year</label><strong>'+escapeHtml(f.year||"—")+'</strong><small>Model year in source record</small></div></div><div class="fitment-details"><div class="fitment-detail"><label>Original equipment wheel</label><strong>'+escapeHtml(oe)+'</strong></div><div class="fitment-detail"><label>Flush reference</label><strong>'+escapeHtml(flush)+'</strong></div><div class="fitment-detail"><label>Maximum reference</label><strong>'+escapeHtml(max)+'</strong></div></div>'+adviceHtml+'<div class="warning">Important: flush and maximum sizes are aftermarket reference points, not guaranteed fitment. Exact brake clearance, tire dimensions, suspension, trim and regional variant must be checked before ordering or manufacturing.</div><div class="source-line"><span>Dataset '+escapeHtml(payload.dataset_version||f.dataset_version||"ANKUSI current release")+' · CC BY 4.0</span><a href="'+escapeHtml(f.source_url||"https://ankusiwheels.com/wheel-fitment-api/")+'" target="_blank" rel="noopener">View ANKUSI source ↗</a></div>';results.classList.add("visible");results.scrollIntoView({behavior:"smooth",block:"start"})}
+vehicleForm.addEventListener("submit",async e=>{e.preventDefault();clearMessage(vehicleMsg);clearMessage(aiMsg);setLoading(vehicleSubmit,true,"Find wheel specs ↗");try{const q=new URLSearchParams({make:makeEl.value,model:modelEl.value,year:yearEl.value});const d=await api("/api/fitment?"+q.toString());if(!d.results||!d.results.length){message(vehicleMsg,"No exact record was found for this combination. Try another model year or use the AI assistant to clarify the vehicle variant.");return}showResult(d,null,"vehicle")}catch(err){message(vehicleMsg,err.message||"Could not retrieve fitment data.")}finally{setLoading(vehicleSubmit,false,"Find wheel specs ↗")}});
+aiForm.addEventListener("submit",async e=>{e.preventDefault();clearMessage(aiMsg);clearMessage(vehicleMsg);setLoading(aiSubmit,true,"Get AI recommendation ↗");try{const r=await fetch("/api/ai-advice",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({prompt:document.getElementById("prompt").value})});const d=await r.json();if(!r.ok)throw new Error(d.error||"AI service is temporarily unavailable.");if(d.type==="clarification"){message(aiMsg,d.message||"Please add your vehicle make, model and year.");return}if(!d.fitment)throw new Error("No verified fitment record was returned. Please provide a more specific vehicle description.");showResult({results:[d.fitment],dataset_version:d.dataset_version},d.advice,"ai")}catch(err){message(aiMsg,err.message||"AI could not complete the lookup.")}finally{setLoading(aiSubmit,false,"Get AI recommendation ↗")}});
+document.querySelectorAll("[data-prompt]").forEach(b=>b.addEventListener("click",()=>{document.getElementById("prompt").value=b.dataset.prompt;document.getElementById("prompt").focus()}));
+document.getElementById("menuBtn").addEventListener("click",()=>{const nav=document.querySelector(".nav");nav.style.display=nav.style.display==="flex"?"none":"flex";nav.style.position="absolute";nav.style.top="68px";nav.style.left="0";nav.style.right="0";nav.style.padding="18px";nav.style.background="#191d20";nav.style.flexDirection="column";nav.style.alignItems="stretch";nav.style.zIndex="9"});
+loadMakes();
+})();
+</script>
+</body></html>`;
 
-export default {
-  async fetch(request) {
-    const url = new URL(request.url);
-    if (url.pathname === "/health") {
-      return Response.json({ ok: true, app: "uranus-wheels-preview", phase: "design-system" });
-    }
-    return new Response(html, {
-      headers: {
-        "content-type": "text/html; charset=utf-8",
-        "cache-control": "no-store",
-        "x-content-type-options": "nosniff"
+function json(data, status) {
+  return new Response(JSON.stringify(data), { status: status || 200, headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store", "access-control-allow-origin": "*" } });
+}
+async function fetchJson(url) {
+  const response = await fetch(url, { headers: { "accept": "application/json" }, signal: AbortSignal.timeout(12000) });
+  if (!response.ok) throw new Error("ANKUSI returned HTTP " + response.status);
+  return response.json();
+}
+function datasetRows(data) {
+  if (Array.isArray(data)) return data;
+  if (Array.isArray(data.data)) return data.data;
+  if (Array.isArray(data.records)) return data.records;
+  return [];
+}
+async function getDataset() {
+  const cache = caches.default;
+  const key = new Request("https://uranus-internal.invalid/ankusi-dataset-v1");
+  const cached = await cache.match(key);
+  if (cached) return cached.json();
+  const data = await fetchJson(DATASET_URL);
+  const response = new Response(JSON.stringify(data), { headers: { "content-type": "application/json", "cache-control": "public, max-age=3600" } });
+  await cache.put(key, response);
+  return data;
+}
+async function mcpRequest(body, sessionId) {
+  const headers = { "content-type": "application/json", "accept": "application/json, text/event-stream" };
+  if (sessionId) headers["mcp-session-id"] = sessionId;
+  const response = await fetch(MCP_URL, { method: "POST", headers, body: JSON.stringify(body), signal: AbortSignal.timeout(15000) });
+  const sid = response.headers.get("mcp-session-id") || sessionId;
+  const raw = await response.text();
+  if (!response.ok && response.status !== 202) throw new Error("ANKUSI MCP HTTP " + response.status + ": " + raw.slice(0, 250));
+  if (!raw.trim()) return { sessionId: sid, result: null };
+  let payload;
+  try { payload = JSON.parse(raw); }
+  catch (_) {
+    const lines = raw.split(/\r?\n/).filter(line => line.startsWith("data:"));
+    if (!lines.length) throw new Error("ANKUSI MCP returned an unreadable response.");
+    payload = JSON.parse(lines[lines.length - 1].slice(5).trim());
+  }
+  return { sessionId: sid, result: payload };
+}
+async function callAnkusiTool(args) {
+  const init = await mcpRequest({
+    jsonrpc: "2.0", id: 1, method: "initialize",
+    params: { protocolVersion: "2025-03-26", capabilities: {}, clientInfo: { name: "uranus-wheels", version: "0.1.0" } }
+  });
+  if (init.sessionId) {
+    await mcpRequest({ jsonrpc: "2.0", method: "notifications/initialized", params: {} }, init.sessionId);
+  }
+  const called = await mcpRequest({
+    jsonrpc: "2.0", id: 2, method: "tools/call",
+    params: { name: "lookup_wheel_fitment", arguments: args }
+  }, init.sessionId);
+  const result = called.result && called.result.result ? called.result.result : called.result;
+  if (result && result.isError) throw new Error("ANKUSI MCP tool reported an error.");
+  let textContent = "";
+  if (result && Array.isArray(result.content)) textContent = result.content.filter(x => x.type === "text").map(x => x.text).join("\n");
+  if (!textContent && result) textContent = JSON.stringify(result.structuredContent || result);
+  let parsed;
+  try { parsed = JSON.parse(textContent); }
+  catch (_) {
+    const match = textContent.match(/\{[\s\S]*\}/);
+    if (match) { try { parsed = JSON.parse(match[0]); } catch (_) {} }
+  }
+  if (!parsed) throw new Error("ANKUSI MCP returned data in an unsupported format.");
+  return parsed;
+}
+function extractFitment(data) {
+  if (Array.isArray(data.results) && data.results.length) return data.results[0];
+  if (Array.isArray(data.content)) {
+    for (const item of data.content) {
+      if (item.text) {
+        try { const parsed = JSON.parse(item.text); if (parsed.results && parsed.results[0]) return parsed.results[0]; } catch (_) {}
       }
-    });
+    }
+  }
+  if (data.fitment) return data.fitment;
+  return null;
+}
+async function handleAi(request, env) {
+  if (!env.AI || typeof env.AI.run !== "function") return json({ error: "Workers AI binding is not enabled for this preview." }, 503);
+  const body = await request.json();
+  const prompt = String(body.prompt || "").trim();
+  if (!prompt || prompt.length > 1200) return json({ error: "Please enter a vehicle description (maximum 1,200 characters)." }, 400);
+  const system = "You are the Uranus Wheels vehicle fitment assistant. Understand the user's language. Never guess a vehicle make, model or year. Use the lookup_wheel_fitment tool whenever make, model and year are sufficiently clear. If one is missing or ambiguous, ask one concise clarification question in the user's language and do not call a tool. Do not invent trim or chassis data. You may recommend only using returned source data. Flush and maximum aftermarket sizes are reference estimates, never guarantees. Do not state a wheel is guaranteed to fit.";
+  const tools = [{
+    type: "function",
+    function: {
+      name: "lookup_wheel_fitment",
+      description: "Look up verified vehicle wheel fitment data from ANKUSI Wheels MCP. Use only when make, model and year are clear.",
+      parameters: {
+        type: "object",
+        properties: {
+          make: { type: "string", description: "Vehicle manufacturer, e.g. BMW" },
+          model: { type: "string", description: "Vehicle model as specific as known, e.g. M3" },
+          year: { type: "string", description: "Model year, four digits" },
+          limit: { type: "integer", description: "Maximum matching records", minimum: 1, maximum: 5 }
+        },
+        required: ["make", "model", "year"]
+      }
+    }
+  }];
+  const first = await env.AI.run(MODEL, { messages: [{ role: "system", content: system }, { role: "user", content: prompt }], tools, tool_choice: "auto", max_tokens: 700 });
+  const choice = first && first.choices && first.choices[0] && first.choices[0].message;
+  if (!choice) return json({ error: "Workers AI returned an unexpected response." }, 502);
+  const toolCall = choice.tool_calls && choice.tool_calls[0];
+  if (!toolCall) return json({ type: "clarification", message: choice.content || "Please tell me the vehicle make, model and year so I can look up the correct fitment data." });
+  let args;
+  try { args = JSON.parse(toolCall.function.arguments); } catch (_) { return json({ type: "clarification", message: "Please confirm the vehicle make, model and year." }); }
+  if (!args.make || !args.model || !args.year) return json({ type: "clarification", message: "Please confirm the vehicle make, model and year." });
+  const ankusi = await callAnkusiTool({ make: String(args.make), model: String(args.model), year: String(args.year), limit: 3 });
+  const fitment = extractFitment(ankusi);
+  if (!fitment) return json({ type: "clarification", message: "ANKUSI did not return a matching vehicle record. Please check the model name, year or market variant." });
+  const second = await env.AI.run(MODEL, {
+    messages: [
+      { role: "system", content: "You are Uranus Wheels' premium forged-wheel advisor. Respond in the same language as the customer. Explain the returned PCD, center bore and OE wheel size accurately. Give practical, cautious advice for a forged-wheel setup. Clearly separate verified factory data from flush/max reference estimates. If trim, brake package, tire or suspension details are unknown, say so and request confirmation. Never invent numeric specifications or guarantee fitment. Keep the answer concise and helpful." },
+      { role: "user", content: "Customer request: " + prompt + "\n\nANKUSI MCP result (source data, do not alter numeric values):\n" + JSON.stringify(fitment) + "\nDataset version: " + (ankusi.dataset_version || "ANKUSI current release") + "\nProvide advice based only on this data." }
+    ],
+    max_tokens: 850
+  });
+  const advice = second && second.choices && second.choices[0] && second.choices[0].message && second.choices[0].message.content;
+  return json({ type: "result", fitment, advice: advice || "The ANKUSI fitment record is available. Please confirm trim, brakes and suspension before choosing final wheel dimensions.", dataset_version: ankusi.dataset_version || "ANKUSI current release", source: "ANKUSI Wheels MCP" });
+}
+export default {
+  async fetch(request, env) {
+    const url = new URL(request.url);
+    if (request.method === "OPTIONS") return new Response(null, { headers: { "access-control-allow-origin": "*", "access-control-allow-methods": "GET,POST,OPTIONS", "access-control-allow-headers": "content-type" } });
+    try {
+      if (url.pathname === "/health") return json({ ok: true, app: "uranus-wheels-wheel-finder", phase: "wheel-finder", ai_model: MODEL, ankusi_api: ANKUSI + "/fitment", ankusi_mcp: MCP_URL });
+      if (url.pathname === "/api/makes" && request.method === "GET") {
+        const data = await fetchJson(ANKUSI + "/makes");
+        const makes = Array.isArray(data.makes) ? data.makes : Array.isArray(data) ? data : [];
+        return json({ makes, source: "ANKUSI Wheels API" });
+      }
+      if (url.pathname === "/api/models" && request.method === "GET") {
+        const make = String(url.searchParams.get("make") || "").trim();
+        if (!make) return json({ error: "A vehicle make is required." }, 400);
+        const data = await getDataset();
+        const rows = datasetRows(data).filter(row => String(row.make || "").toLowerCase() === make.toLowerCase());
+        const grouped = new Map();
+        for (const row of rows) {
+          const name = String(row.model || "").trim();
+          if (!name) continue;
+          if (!grouped.has(name)) grouped.set(name, new Set());
+          String(row.year || "").split(/[;,]/).forEach(y => { const value = y.trim(); if (value) grouped.get(name).add(value); });
+        }
+        const models = Array.from(grouped.entries()).map(([name, years]) => ({ name, years: Array.from(years).sort((a,b) => Number(b.slice(0,4)) - Number(a.slice(0,4))) })).sort((a,b) => a.name.localeCompare(b.name));
+        return json({ make, models, dataset_version: data.version || data.name || "ANKUSI current release", count: models.length, source: "ANKUSI Wheels Dataset" });
+      }
+      if (url.pathname === "/api/fitment" && request.method === "GET") {
+        const make = String(url.searchParams.get("make") || "").trim();
+        const model = String(url.searchParams.get("model") || "").trim();
+        const year = String(url.searchParams.get("year") || "").trim();
+        if (!make || !model || !year) return json({ error: "Make, model and year are required." }, 400);
+        const query = new URLSearchParams({ make, model, year, limit: "10" });
+        const data = await fetchJson(ANKUSI + "/fitment?" + query.toString());
+        return json({ ...data, source: "ANKUSI Wheels API" });
+      }
+      if (url.pathname === "/api/ai-advice" && request.method === "POST") return handleAi(request, env);
+      if (url.pathname === "/") return new Response(html, { headers: { "content-type": "text/html; charset=utf-8", "cache-control": "no-store", "x-content-type-options": "nosniff" } });
+      return new Response("Not found", { status: 404 });
+    } catch (error) {
+      return json({ error: error && error.message ? error.message : "Unexpected server error." }, 502);
+    }
   }
 };
