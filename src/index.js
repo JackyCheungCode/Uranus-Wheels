@@ -1,4 +1,4 @@
-const html = String.raw\`<!doctype html>
+const html = String.raw`<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
@@ -288,7 +288,7 @@ const html = String.raw\`<!doctype html>
     }));
   </script>
 </body>
-</html>\`;
+</html>`;
 
 export default {
   async fetch(request) {
