@@ -323,7 +323,7 @@ loadMakes();
 <footer class="uw-footer"><div class="uw-footer-inner"><div class="uw-footer-top"><div><a class="uw-brand" href="/"><strong>URANUS WHEELS</strong><small>PRECISION FORGED PERFORMANCE</small></a><p>Forged beyond limits. Precision, performance and individuality in every detail.</p></div><div><b>EXPLORE</b><a href="/wheels">Wheel Collections</a><a href="/fitment-finder">Fitment Finder</a><a href="/custom-wheel-builder">Custom Builder</a></div><div><b>COMPANY</b><a href="/#engineering">Engineering</a><a href="/#gallery">Gallery</a><a href="/#dealers">Become a Dealer</a></div><div><b>CONNECT</b><a href="/#dealers">Business Inquiry</a><a href="/#dealers">Global Partnerships</a></div></div><div class="uw-footer-bottom"><span>© 2026 URANUS WHEELS. ALL RIGHTS RESERVED.</span><span>PRECISION FORGED PERFORMANCE</span></div></div></footer><script>(function(){const nav=document.getElementById('uwNav'),menu=document.getElementById('uwMenu'),lang=document.getElementById('uwLanguage');if(menu&&nav)menu.addEventListener('click',()=>{const open=nav.classList.toggle('open');menu.setAttribute('aria-expanded',String(open));menu.textContent=open?'CLOSE':'MENU'});if(lang)lang.addEventListener('click',()=>{const zh=document.documentElement.lang!=='zh';document.documentElement.lang=zh?'zh':'en';document.querySelectorAll('[data-en][data-zh]').forEach(el=>{el.innerHTML=el.getAttribute(zh?'data-zh':'data-en')});lang.textContent=zh?'中文 / EN':'EN / 中文'});})();</script></body></html>`;
 
 
-const wheelsHtml = String.raw\`<!doctype html>
+const wheelsHtml = String.raw`<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -390,7 +390,7 @@ main{max-width:1320px;margin:auto;padding:0 36px 84px}.catalog-intro{display:fle
  render();
 })();
 </script>
-</body></html>\`;
+</body></html>`;
 
 const html = String.raw`<!doctype html>
 <html lang="en">
