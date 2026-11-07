@@ -13,6 +13,23 @@ const html = String.raw`<!doctype html>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;450;500;600;650;700&display=swap" rel="stylesheet">
 <style>
+
+/* Automotive aftermarket visual direction: asphalt, titanium and performance orange */
+:root{--ink:#171a1d;--graphite:#2b3035;--metal:#8b969d;--silver:#d7dde0;--paper:#eef0f1;--surface:#fbfcfc;--surface2:#e2e6e8;--text:#1b2024;--muted:#667178;--line:rgba(23,26,29,.12);--gold:#e56b35;--gold-dark:#a9431c}
+.topline{background:linear-gradient(90deg,#e56b35,#f19a5e 48%,#9d3f1c)}
+.method-icon{background:#252b30;color:#f07b43}
+.btn-gold,.btn-primary{background:#e56b35;border-color:#e56b35;color:#171a1d}
+.btn-gold:hover,.btn-primary:hover{background:#f1844f;border-color:#f1844f}
+.kicker,.method-number,.product-card .product-code{color:#bb5127}
+.select-option{display:flex;align-items:center;gap:12px}
+.make-logo{width:30px;height:30px;flex:0 0 30px;display:grid;place-items:center;border-radius:50%;background:#fff;border:1px solid #d9dfe2;overflow:hidden;color:#39434a;font-size:9px;font-weight:700;letter-spacing:-.04em}
+.make-logo img{width:23px;height:23px;object-fit:contain}
+.make-logo-fallback{font-size:9px;font-weight:700}
+.vehicle-photo{background:#30363b}
+.vehicle-confirm{border-left:3px solid #e56b35}
+.product-card{border-top:2px solid #d86a39}
+.demo-label{color:#a54a26}
+
 :root{--ink:#101214;--graphite:#252a2e;--metal:#8f989e;--silver:#d9dddf;--paper:#f2f3f2;--surface:#fff;--surface2:#e9ebea;--text:#171a1c;--muted:#697176;--line:rgba(16,18,20,.1);--gold:#b99a68;--gold-dark:#80643a;--content:1280px;--font:"IBM Plex Sans","Helvetica Neue",Arial,sans-serif;font-family:var(--font);font-synthesis:none;text-rendering:optimizeLegibility}
 *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--paper);color:var(--text)}button,input,select,textarea{font:inherit}a{color:inherit;text-decoration:none}.topline{height:3px;background:linear-gradient(90deg,var(--gold),#e1d2b5 48%,var(--gold-dark))}
 .header{background:var(--ink);color:#f7f8f8}.header-inner{max-width:var(--content);min-height:78px;margin:auto;padding:0 32px;display:flex;align-items:center;justify-content:space-between;gap:24px}.brand{display:flex;flex-direction:column;gap:2px}.brand strong{font-size:20px;font-weight:650;letter-spacing:.16em}.brand small{font-size:9px;color:#9ba2a6;letter-spacing:.29em;text-transform:uppercase}.nav{display:flex;align-items:center;gap:28px}.nav a{font-size:11px;color:#b9c0c4;letter-spacing:.1em;text-transform:uppercase}.nav a.active,.nav a:hover{color:#fff}.header-right{display:flex;align-items:center;gap:12px}.lang{border:1px solid #495055;background:transparent;color:#e1e4e5;padding:8px 10px;font-size:10px;letter-spacing:.1em}.menu{display:none;background:transparent;color:#fff;border:1px solid #495055;padding:8px 12px}
@@ -100,7 +117,9 @@ function createCustomSelect(rootId,placeholder){
     list.innerHTML="";
     if(!matches.length){const empty=document.createElement("div");empty.className="select-empty";empty.textContent="No matching options";list.append(empty);return}
     matches.forEach(item=>{
-      const button=document.createElement("button");button.type="button";button.className="select-option";button.setAttribute("role","option");button.setAttribute("aria-selected",String(item.value===value));button.textContent=item.label;
+      const button=document.createElement("button");button.type="button";button.className="select-option";button.setAttribute("role","option");button.setAttribute("aria-selected",String(item.value===value));
+      if(item.logo){const logo=document.createElement("span");logo.className="make-logo";const img=document.createElement("img");img.src="https://cdn.simpleicons.org/"+encodeURIComponent(item.logo);img.alt="";img.loading="lazy";img.onerror=()=>{logo.innerHTML='<span class="make-logo-fallback">'+escapeHtml(item.initials||item.label.slice(0,2).toUpperCase())+'</span>'};logo.append(img);button.append(logo)}
+      const label=document.createElement("span");label.textContent=item.label;button.append(label);
       button.addEventListener("click",()=>{value=item.value;valueNode.textContent=item.label;close();search.value="";render();trigger.focus();changeHandler(value)});
       button.addEventListener("keydown",event=>{
         const buttons=Array.from(list.querySelectorAll(".select-option"));const index=buttons.indexOf(button);
@@ -133,7 +152,7 @@ function createCustomSelect(rootId,placeholder){
 const makeEl=createCustomSelect("makeSelect","Select vehicle make");
 const modelEl=createCustomSelect("modelSelect","Choose make first");
 const yearEl=createCustomSelect("yearSelect","Choose model first");
-async function loadMakes(){try{const d=await api("/api/makes");makeEl.setOptions((d.makes||[]).map(x=>({label:x.name||x.make,value:x.name||x.make})));}catch(e){makeEl.setOptions([]);message(vehicleMsg,"Vehicle list could not be loaded. Please try again shortly.")}}
+async function loadMakes(){try{const d=await api("/api/makes");makeEl.setOptions((d.makes||[]).map(x=>{const name=x.name||x.make;const key=String(name).toLowerCase().replace(/[^a-z0-9]+/g,"");const aliases={"mercedesbenz":"mercedesbenz","landrover":"landrover","alfaromeo":"alfaromeo","astonmartin":"astonmartin","volkswagen":"volkswagen","bmw":"bmw","audi":"audi","porsche":"porsche","toyota":"toyota","honda":"honda","nissan":"nissan","mazda":"mazda","subaru":"subaru","mitsubishi":"mitsubishi","lexus":"lexus","acura":"acura","infiniti":"infiniti","hyundai":"hyundai","kia":"kia","genesis":"genesis","ford":"ford","chevrolet":"chevrolet","cadillac":"cadillac","gmc":"gmc","dodge":"dodge","jeep":"jeep","ram":"ram","tesla":"tesla","rivian":"rivian","lucid":"lucid","volvo":"volvo","polestar":"polestar","jaguar":"jaguar","bentley":"bentley","ferrari":"ferrari","lamborghini":"lamborghini","maserati":"maserati","bugatti":"bugatti","mclaren":"mclaren","mini":"mini","fiat":"fiat","renault":"renault","peugeot":"peugeot","citroen":"citroen","skoda":"skoda","seat":"seat","cupra":"cupra","opel":"opel","byd":"byd","mg":"mg","geely":"geely","zeekr":"zeekr","nio":"nio","xpeng":"xpeng","greatwall":"greatwall","haval":"haval","chery":"chery","changan":"changan","hongqi":"hongqi","smart":"smart","suzuki":"suzuki","isuzu":"isuzu","daihatsu":"daihatsu","buick":"buick","lincoln":"lincoln","chrysler":"chrysler","pontiac":"pontiac","saab":"saab","holden":"holden","proton":"proton","perodua":"perodua"};return {label:name,value:name,logo:aliases[key]||"",initials:name.split(/\\s+/).map(w=>w[0]).slice(0,2).join("").toUpperCase()}}));}catch(e){makeEl.setOptions([]);message(vehicleMsg,"Vehicle list could not be loaded. Please try again shortly.")}}
 makeEl.onChange(async value=>{
   modelEl.setDisabled(true);yearEl.setDisabled(true);modelEl.setOptions([]);yearEl.setOptions([]);models=[];
   if(!value)return;
@@ -274,20 +293,38 @@ function extractFitment(data) {
 }
 
 async function handleVehicleImage(url) {
-  const make = String(url.searchParams.get("make") || "").trim();
-  const model = String(url.searchParams.get("model") || "").trim();
-  const year = String(url.searchParams.get("year") || "").trim();
-  if (!make || !model) return json({ error: "Vehicle make and model are required." }, 400);
-  const search = [make, model, "car"].filter(Boolean).join(" ");
-  const params = new URLSearchParams({ action:"query", generator:"search", gsrsearch:search, gsrnamespace:"6", gsrlimit:"8", prop:"imageinfo", iiprop:"url|extmetadata", iiurlwidth:"1400", format:"json", origin:"*" });
-  const data = await fetchJson("https://commons.wikimedia.org/w/api.php?" + params.toString());
-  const pages = data.query && data.query.pages ? Object.values(data.query.pages) : [];
-  const coreModel = model.match(/[a-z0-9-]{2,}/i);
-  const tokens = [make, coreModel && coreModel[0]].filter(Boolean).map(x=>x.toLowerCase());
-  const matched = pages.map(page => ({ page, info:page.imageinfo && page.imageinfo[0] })).filter(x => x.info && x.info.thumburl && tokens.every(token => String(x.page.title||"").toLowerCase().includes(token)));
-  const pick = matched[0] || null;
-  if (!pick) return json({ image_url:null, title:null, matched:false, year });
-  return json({ image_url:pick.info.thumburl, title:pick.page.title, matched:true, license:pick.info.extmetadata && pick.info.extmetadata.LicenseShortName && pick.info.extmetadata.LicenseShortName.value || "Wikimedia Commons", source_url:pick.info.descriptionurl });
+  const make=String(url.searchParams.get("make")||"").trim();
+  const model=String(url.searchParams.get("model")||"").trim();
+  const year=String(url.searchParams.get("year")||"").trim();
+  if(!make||!model)return json({error:"Vehicle make and model are required."},400);
+  const coreTokens=model.toLowerCase().match(/[a-z0-9]+/g)||[];
+  const core=coreTokens.filter(t=>t.length>=2&&!["competition","coupe","convertible","sedan","hatchback","wagon","sport","edition","xdrive","quattro","series"].includes(t)).slice(0,2);
+  const searches=[year+" "+make+" "+core.join(" ")+" car",make+" "+core.join(" ")+" automobile"].filter(Boolean);
+  for(const search of searches){
+    const params=new URLSearchParams({action:"query",list:"search",srsearch:search,srnamespace:"6",srlimit:"15",format:"json"});
+    const data=await fetchJson("https://commons.wikimedia.org/w/api.php?"+params.toString(),{headers:{"User-Agent":"UranusWheels/1.0 (vehicle reference image lookup)"}});
+    const hits=data.query&&data.query.search?data.query.search:[];
+    const makeToken=make.toLowerCase().replace(/[^a-z0-9]/g,"");
+    const scored=hits.map(hit=>{
+      const title=String(hit.title||"").toLowerCase();
+      const normalized=title.replace(/[^a-z0-9]/g,"");
+      const brandMatch=normalized.includes(makeToken)||title.includes(make.toLowerCase());
+      const modelMatch=core.length===0||core.some(t=>normalized.includes(t));
+      const score=(brandMatch?4:0)+(modelMatch?3:0)+(year&&title.includes(year)?1:0);
+      return {...hit,score,brandMatch,modelMatch};
+    }).filter(hit=>hit.brandMatch&&hit.modelMatch).sort((a,b)=>b.score-a.score);
+    if(!scored.length)continue;
+    const ids=scored.slice(0,5).map(hit=>hit.title);
+    const infoParams=new URLSearchParams({action:"query",titles:ids.join("|"),prop:"imageinfo",iiprop:"url|extmetadata",iiurlwidth:"1400",format:"json"});
+    const detail=await fetchJson("https://commons.wikimedia.org/w/api.php?"+infoParams.toString(),{headers:{"User-Agent":"UranusWheels/1.0 (vehicle reference image lookup)"}});
+    const pages=detail.query&&detail.query.pages?Object.values(detail.query.pages):[];
+    const pick=pages.find(page=>page.imageinfo&&page.imageinfo[0]&&(page.imageinfo[0].thumburl||page.imageinfo[0].url));
+    if(pick){
+      const info=pick.imageinfo[0],meta=info.extmetadata||{};
+      return json({image_url:info.thumburl||info.url,title:pick.title,matched:true,license:meta.LicenseShortName&&meta.LicenseShortName.value||"Wikimedia Commons",artist:meta.Artist&&meta.Artist.value||"",source_url:info.descriptionurl||"https://commons.wikimedia.org"});
+    }
+  }
+  return json({image_url:null,title:null,matched:false,year,source:"Wikimedia Commons"});
 }
 
 async function handleAi(request, env) {
