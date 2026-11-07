@@ -1057,7 +1057,9 @@ export default {
         return json({ ...data, source: "ANKUSI Wheels API" });
       }
       if (url.pathname === "/api/locations/states" && request.method === "GET") return handleLocationLookup(url);
-      if (url.pathname === "/api/locations/cities" && request.method === "GET") return handleLocationLookup(url);\n      if (url.pathname === "/api/geocode" && request.method === "GET") return handleGeocode(url);\n      if (url.pathname === "/api/vehicle-image" && request.method === "GET") return handleVehicleImage(url);
+      if (url.pathname === "/api/locations/cities" && request.method === "GET") return handleLocationLookup(url);
+      if (url.pathname === "/api/geocode" && request.method === "GET") return handleGeocode(url);
+      if (url.pathname === "/api/vehicle-image" && request.method === "GET") return handleVehicleImage(url);
       if (url.pathname === "/api/ai-advice" && request.method === "POST") return handleAi(request, env);
       if (url.pathname === "/wheels" || url.pathname.startsWith("/wheels/")) return new Response(wheelsHtml, { headers: { "content-type": "text/html; charset=utf-8", "cache-control": "no-store", "x-content-type-options": "nosniff" } });
       if (url.pathname.startsWith("/configure/")) return new Response(configuratorHtml, { headers: { "content-type": "text/html; charset=utf-8", "cache-control": "no-store", "x-content-type-options": "nosniff" } });
