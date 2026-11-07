@@ -279,7 +279,7 @@ function renderVinCandidates(data){
   options.forEach((v,i)=>vinResult.querySelector('[data-vin-candidate="'+i+'"]').addEventListener("click",()=>showVinConfirmation({...data,selected_candidate:v})));
   vinResult.scrollIntoView({behavior:"smooth",block:"nearest"});
 }
-async function loadVinVehicleImage(vehicle,box){
+async async function loadVinVehicleImage(vehicle,box){
   const make=String(vehicle.make||"").trim(),model=String(vehicle.model||"").trim(),year=String(vehicle.year||"").trim();
   const placeholder=box.querySelector(".vin-vehicle-image-placeholder");
   if(!make||!model||!year){placeholder.textContent="Vehicle image cannot be matched because the decoded make, model or year is incomplete.";return}
