@@ -1,4 +1,4 @@
-const MODEL = "@cf/zai-org/glm-4.7-flash";
+const MODEL = "@cf/google/gemma-4-26b-a4b-it";
 const ANKUSI = "https://ankusiwheels.com/wp-json/ankusi/v1";
 const DATASET_URL = ANKUSI + "/dataset/json";
 const MCP_URL = ANKUSI + "/mcp";
@@ -185,17 +185,17 @@ async function handleAi(request, env) {
   const body = await request.json();
   const prompt = String(body.prompt || "").trim();
   if (!prompt || prompt.length > 1200) return json({ error: "Please enter a vehicle description (maximum 1,200 characters)." }, 400);
-  const system = "You are the Uranus Wheels vehicle fitment assistant. Understand the user's language. Never guess a vehicle make, model or year. Use the lookup_wheel_fitment tool whenever make, model and year are sufficiently clear. If one is missing or ambiguous, ask one concise clarification question in the user's language and do not call a tool. Do not invent trim or chassis data. You may recommend only using returned source data. Flush and maximum aftermarket sizes are reference estimates, never guarantees. Do not state a wheel is guaranteed to fit.";
+  const system = "You are the Uranus Wheels vehicle fitment extraction assistant. Understand the customer's language. Never guess make, model or year. If make, model and year are clear, you MUST call lookup_wheel_fitment. If a required field is missing or the vehicle variant is ambiguous, ask one concise clarification question in the same language and do not call a tool. Never greet or ask what the customer needs. Do not invent trim or chassis data.";
   const tools = [{
     type: "function",
     function: {
       name: "lookup_wheel_fitment",
-      description: "Look up verified vehicle wheel fitment data from ANKUSI Wheels MCP. Use only when make, model and year are clear.",
+      description: "Look up wheel fitment from ANKUSI Wheels MCP. Call only when make, model and year are sufficiently clear.",
       parameters: {
         type: "object",
         properties: {
           make: { type: "string", description: "Vehicle manufacturer, e.g. BMW" },
-          model: { type: "string", description: "Vehicle model as specific as known, e.g. M3" },
+          model: { type: "string", description: "Vehicle model and body/chassis variant when provided" },
           year: { type: "string", description: "Model year, four digits" },
           limit: { type: "integer", description: "Maximum matching records", minimum: 1, maximum: 5 }
         },
@@ -203,7 +203,13 @@ async function handleAi(request, env) {
       }
     }
   }];
-  const first = await env.AI.run(MODEL, { messages: [{ role: "system", content: system }, { role: "user", content: prompt }], tools, tool_choice: "auto", max_tokens: 700 });
+  const first = await env.AI.run(MODEL, {
+    messages: [{ role: "system", content: system }, { role: "user", content: prompt }],
+    tools,
+    tool_choice: "auto",
+    chat_template_kwargs: { enable_thinking: false },
+    max_completion_tokens: 500
+  });
   const choice = first && first.choices && first.choices[0] && first.choices[0].message;
   if (!choice) return json({ error: "Workers AI returned an unexpected response." }, 502);
   const toolCall = choice.tool_calls && choice.tool_calls[0];
@@ -211,18 +217,59 @@ async function handleAi(request, env) {
   let args;
   try { args = JSON.parse(toolCall.function.arguments); } catch (_) { return json({ type: "clarification", message: "Please confirm the vehicle make, model and year." }); }
   if (!args.make || !args.model || !args.year) return json({ type: "clarification", message: "Please confirm the vehicle make, model and year." });
-  const ankusi = await callAnkusiTool({ make: String(args.make), model: String(args.model), year: String(args.year), limit: 3 });
-  const fitment = extractFitment(ankusi);
-  if (!fitment) return json({ type: "clarification", message: "ANKUSI did not return a matching vehicle record. Please check the model name, year or market variant." });
+
+  const make = String(args.make).trim();
+  const model = String(args.model).trim();
+  const year = String(args.year).trim();
+  const mcpData = await callAnkusiTool({ make, model, year, limit: 5 });
+  const mcpFitment = extractFitment(mcpData);
+
+  // Cross-check the MCP match against ANKUSI REST API to prevent nearby trims/body styles being mixed.
+  const verifyQuery = new URLSearchParams({ make, model, year, limit: "10" });
+  const apiData = await fetchJson(ANKUSI + "/fitment?" + verifyQuery.toString());
+  const candidates = Array.isArray(apiData.results) ? apiData.results : [];
+  const normalizedQuery = model.toLowerCase();
+  const chassisMatch = normalizedQuery.match(/\b([a-z]\d{2,3})\b/i);
+  const bodyStyles = ["coupe", "convertible", "cabriolet", "cabrio", "sedan", "saloon", "touring", "wagon", "hatchback"];
+  const requestedBody = bodyStyles.find(style => normalizedQuery.includes(style));
+  let filtered = candidates;
+  if (chassisMatch) {
+    const chassis = chassisMatch[1].toLowerCase();
+    filtered = filtered.filter(row => String(row.chassis_code || "").toLowerCase() === chassis || String(row.model || "").toLowerCase().includes(chassis));
+  }
+  if (requestedBody) filtered = filtered.filter(row => String(row.model || "").toLowerCase().includes(requestedBody));
+
+  let fitment = null;
+  if (filtered.length === 1) {
+    fitment = filtered[0];
+  } else if (filtered.length > 1) {
+    const distinctModels = new Set(filtered.map(row => String(row.model || "").toLowerCase()));
+    if (distinctModels.size === 1) fitment = filtered[0];
+    else return json({ type: "clarification", message: "I found more than one vehicle variant. Could you confirm the body style or chassis code (for example, Coupe G82 or Convertible G83)?" });
+  } else if (!chassisMatch && !requestedBody && candidates.length === 1) {
+    fitment = candidates[0];
+  } else if (!candidates.length && mcpFitment) {
+    const mcpChassis = String(mcpFitment.chassis_code || "").toLowerCase();
+    if (!chassisMatch || !mcpChassis || mcpChassis === chassisMatch[1].toLowerCase()) fitment = mcpFitment;
+  }
+  if (!fitment) return json({ type: "clarification", message: "I could not confirm one exact vehicle variant in ANKUSI. Please provide the body style or chassis code so I can avoid giving you the wrong wheel specifications." });
+
   const second = await env.AI.run(MODEL, {
     messages: [
-      { role: "system", content: "You are Uranus Wheels' premium forged-wheel advisor. Respond in the same language as the customer. Explain the returned PCD, center bore and OE wheel size accurately. Give practical, cautious advice for a forged-wheel setup. Clearly separate verified factory data from flush/max reference estimates. If trim, brake package, tire or suspension details are unknown, say so and request confirmation. Never invent numeric specifications or guarantee fitment. Keep the answer concise and helpful." },
-      { role: "user", content: "Customer request: " + prompt + "\n\nANKUSI MCP result (source data, do not alter numeric values):\n" + JSON.stringify(fitment) + "\nDataset version: " + (ankusi.dataset_version || "ANKUSI current release") + "\nProvide advice based only on this data." }
+      { role: "system", content: "You are Uranus Wheels' premium forged-wheel advisor. Reply strictly in the same language as the customer's original message: English stays English, Simplified Chinese stays Simplified Chinese, Traditional Chinese stays Traditional Chinese, Japanese stays Japanese. Never switch to German or another language. Use only the supplied ANKUSI source data and preserve every numeric value exactly. Explain PCD, center bore and OE wheel size. Separate factory specifications from flush/max aftermarket references. If the requested wheel diameter is not fully covered by the reference data, say so and do not invent a size or offset. Ask for confirmation of trim, brakes, tires and suspension where needed. Never guarantee fitment. Keep the answer concise." },
+      { role: "user", content: "Customer request: " + prompt + "\n\nANKUSI MCP result cross-checked against ANKUSI REST API (source data; do not alter numeric values):\n" + JSON.stringify(fitment) + "\nDataset version: " + (apiData.dataset_version || mcpData.dataset_version || "ANKUSI current release") + "\nProvide a careful recommendation based only on this record." }
     ],
-    max_tokens: 850
+    chat_template_kwargs: { enable_thinking: false },
+    max_completion_tokens: 700
   });
   const advice = second && second.choices && second.choices[0] && second.choices[0].message && second.choices[0].message.content;
-  return json({ type: "result", fitment, advice: advice || "The ANKUSI fitment record is available. Please confirm trim, brakes and suspension before choosing final wheel dimensions.", dataset_version: ankusi.dataset_version || "ANKUSI current release", source: "ANKUSI Wheels MCP" });
+  return json({
+    type: "result",
+    fitment,
+    advice: advice || "The ANKUSI fitment record is available. Please confirm the exact trim, brakes, tires and suspension before choosing final wheel dimensions.",
+    dataset_version: apiData.dataset_version || mcpData.dataset_version || "ANKUSI current release",
+    source: "ANKUSI Wheels MCP + REST API cross-check"
+  });
 }
 export default {
   async fetch(request, env) {
