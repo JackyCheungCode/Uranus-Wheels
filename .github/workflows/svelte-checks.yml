@@ -24,7 +24,13 @@ jobs:
       - name: Install dependencies
         run: npm install --no-audit --no-fund
       - name: Svelte and TypeScript checks
-        run: npm run check
+        run: |
+          if npm run check > /tmp/svelte-check.log 2>&1; then
+            cat /tmp/svelte-check.log
+          else
+            tail -n 120 /tmp/svelte-check.log
+            exit 1
+          fi
       - name: Production build
         run: npm run build
       - name: Store preview build artifact
