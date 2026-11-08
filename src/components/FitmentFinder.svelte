@@ -91,7 +91,7 @@
       models = rows.map((item: any) => ({
         name: String(item?.name || item?.model || '').trim(),
         years: Array.isArray(item?.years) ? item.years.map((y: unknown) => String(y).trim()).filter(Boolean) : []
-      })).filter(item => item.name && item.years.length);
+      })).filter((item: Model) => item.name && item.years.length);
       if (!models.length) throw new Error('BMW 车型目录没有返回可用的车型和年份。');
       modelLoadError = '';
       error = '';
@@ -244,16 +244,16 @@
         <div class="lookup" role="tabpanel">
           <div class="locked-make"><span>MAKE</span><strong>BMW</strong><small>FIXED VEHICLE BRAND</small></div>
           <div class="fields">
-            <div class="field"><label class="field-label">MODEL</label><div class="custom-picker">
+            <div class="field"><span class="field-label">MODEL</span><div class="custom-picker">
               <button class="picker-trigger" type="button" aria-expanded={modelOpen} onclick={openModelPicker}>{model || (loading ? 'Loading BMW models…' : modelLoadError ? 'Retry loading BMW models' : 'Choose BMW model')}<i></i></button>
-              {#if modelOpen}<div class="picker-menu" onclick={(e) => e.stopPropagation()}><input class="picker-search" bind:value={modelSearch} placeholder="Search BMW model"/><div class="picker-options" role="listbox">
+              {#if modelOpen}<div class="picker-menu"><input class="picker-search" bind:value={modelSearch} placeholder="Search BMW model"/><div class="picker-options" role="listbox">
                 {#if loading}<p class="picker-empty">Loading BMW models…</p>
                 {:else if modelLoadError}<p class="picker-empty">{modelLoadError}</p><button type="button" class="picker-retry" onclick={() => loadModels()}>RETRY LOADING ↻</button>
                 {:else if filteredModels().length === 0}<p class="picker-empty">No matching BMW models.</p>
                 {:else}{#each filteredModels() as item}<button type="button" role="option" aria-selected={model===item.name} onclick={() => chooseModel(item.name)}>{item.name}</button>{/each}{/if}
               </div></div>{/if}
             </div></div>
-            <div class="field"><label class="field-label">MODEL YEAR</label><div class="custom-picker">
+            <div class="field"><span class="field-label">MODEL YEAR</span><div class="custom-picker">
               <button class="picker-trigger" type="button" disabled={!model} aria-expanded={yearOpen} onclick={() => {yearOpen=!yearOpen;modelOpen=false;}}>{year || 'Choose model year'}<i></i></button>
               {#if yearOpen}<div class="picker-menu"><div class="picker-options" role="listbox">{#each (selectedModel()?.years || []).slice().sort((a,b)=>Number(b.slice(0,4))-Number(a.slice(0,4))) as item}<button type="button" role="option" aria-selected={year===item} onclick={() => chooseYear(item)}>{item}</button>{/each}</div></div>{/if}
             </div></div>
