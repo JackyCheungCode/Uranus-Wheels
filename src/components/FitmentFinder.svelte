@@ -36,7 +36,7 @@
     const f = fitment || {};
     const value = (v: unknown, fallback = '未提供') => v == null || String(v).trim() === '' ? fallback : String(v);
     const pcd = value(f.bolt_pattern || f.pcd || f.PCD);
-    const pcdMatch = pcd.match(/(\\d{1,2})\\s*[x×]\\s*(\\d{2,3}(?:\\.\\d+)?)/i);
+    const pcdMatch = pcd.match(/(\d{1,2})\s*[x×]\s*(\d{2,3}(?:\.\d+)?)/i);
     const pcdValid = !!pcdMatch && Number(pcdMatch[1]) >= 3 && Number(pcdMatch[1]) <= 8 && Number(pcdMatch[2]) >= 50 && Number(pcdMatch[2]) <= 200;
     const lugCount = Number(f.lug_count) > 0 ? Number(f.lug_count) : null;
     const pcdMismatch = !!(pcdValid && lugCount && Number(pcdMatch?.[1]) !== lugCount);
@@ -45,13 +45,13 @@
     const oeWheel = value(f.oe_wheel);
     const flush = value(f.flush_wheel, '未发布');
     const max = value(f.max_wheel, '未发布');
-    const oeEt = (oeWheel.match(/ET\\s*[+-]?\\d+/i) || [])[0];
+    const oeEt = (oeWheel.match(/ET\s*[+-]?\d+/i) || [])[0];
     const aftermarketEt = [
-      (flush.match(/ET\\s*[+-]?\\d+/i) || [])[0] ? 'Flush ' + (flush.match(/ET\\s*[+-]?\\d+/i) || [])[0] : '',
-      (max.match(/ET\\s*[+-]?\\d+/i) || [])[0] ? 'Maximum ' + (max.match(/ET\\s*[+-]?\\d+/i) || [])[0] : ''
+      (flush.match(/ET\s*[+-]?\d+/i) || [])[0] ? 'Flush ' + (flush.match(/ET\s*[+-]?\d+/i) || [])[0] : '',
+      (max.match(/ET\s*[+-]?\d+/i) || [])[0] ? 'Maximum ' + (max.match(/ET\s*[+-]?\d+/i) || [])[0] : ''
     ].filter(Boolean).join(' · ');
     const sizeText = [oeWheel, flush, max].join(' | ');
-    const sizeFound = /\\b\\d{2}\\s*[x×]\\s*\\d{1,2}(?:\\.\\d+)?\\s*J?\\b/i.test(sizeText);
+    const sizeFound = /\b\d{2}\s*[x×]\s*\d{1,2}(?:\.\d+)?\s*J?\b/i.test(sizeText);
     const load = f.load_rating || f.wheel_load_rating || f.max_load_kg || f.load_capacity_kg;
     const brake = f.brake_clearance || f.brake_caliper_clearance || f.caliper_clearance;
     const thread = f.lug_thread || f.bolt_thread || f.thread_size;
