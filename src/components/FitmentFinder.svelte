@@ -183,8 +183,8 @@
     <section class="finder">
       <div class="finder-head"><div><p class="eyebrow">01 / VEHICLE IDENTIFICATION</p><h2>Start with your BMW.</h2></div><span class="lock">BMW ONLY</span></div>
       <div class="tabs" role="tablist" aria-label="Vehicle lookup method">
-        <button type="button" role="tab" aria-selected={method === 'vin'} class:active={method === 'vin'} onclick={() => { method='vin'; error=''; notice=''; }}>VIN LOOKUP <span>01</span></button>
-        <button type="button" role="tab" aria-selected={method === 'mmy'} class:active={method === 'mmy'} onclick={() => { method='mmy'; error=''; notice=''; }}>MANUAL MODEL <span>02</span></button>
+        <button type="button" role="tab" aria-selected={method === 'vin'} class:active={method === 'vin'} onclick={() => { method='vin'; error=''; notice=''; clearResult(); }}>VIN LOOKUP <span>01</span></button>
+        <button type="button" role="tab" aria-selected={method === 'mmy'} class:active={method === 'mmy'} onclick={() => { method='mmy'; error=''; notice=''; clearResult(); }}>MANUAL MODEL <span>02</span></button>
       </div>
       {#if method === 'vin'}
         <div class="lookup" role="tabpanel">
