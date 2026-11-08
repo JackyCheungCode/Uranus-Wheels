@@ -1,7 +1,6 @@
 <script lang="ts">
   type Chassis = 'G82' | 'G83' | 'F82' | 'F83';
   type UpgradeKey = 'wheels' | 'suspension' | 'brakes' | 'exterior' | 'performance' | 'interior';
-  type Spec = { label: string; front: string; rear: string; note: string };
   let chassis = $state<Chassis>('G82');
   let trim = $state('Competition');
   let year = $state('2024');
@@ -64,9 +63,9 @@
   ]);
   const vehiclePhotos: Record<Chassis, string> = {
     F82: 'https://upload.wikimedia.org/wikipedia/commons/2/21/The_frontview_of_BMW_M4_Coup%C3%A9_%28F82%29.JPG',
-    F83: 'https://upload.wikimedia.org/wikipedia/commons/2/21/The_frontview_of_BMW_M4_Coup%C3%A9_%28F82%29.JPG',
+    F83: 'https://commons.wikimedia.org/wiki/Special:FilePath/2014-2018_BMW_M4_%28F83%29_convertible_%282018-08-06%29_01.jpg?width=1920',
     G82: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/79/BMW_M4_%28G82%29_1X7A0155.jpg/1920px-BMW_M4_%28G82%29_1X7A0155.jpg',
-    G83: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/79/BMW_M4_%28G82%29_1X7A0155.jpg/1920px-BMW_M4_%28G82%29_1X7A0155.jpg'
+    G83: 'https://commons.wikimedia.org/wiki/Special:FilePath/BMW_M4_Competition_Cabriolet_%28G83%2C_2022%29_%2853338263511%29.jpg?width=1920'
   };
 
   const setups = [
@@ -86,14 +85,27 @@
   ];
 
   const currentVehicle = $derived(vehicleOptions[chassis]);
+  const validYears: Record<Chassis, Record<string, string[]>> = {
+    F82: { M4: ['2015','2016','2017','2018','2019','2020'], Competition: ['2016','2017','2018','2019','2020'], CS: ['2018'], GTS: ['2016'] },
+    F83: { M4: ['2015','2016','2017','2018','2019','2020'], Competition: ['2016','2017','2018','2019','2020'] },
+    G82: { M4: ['2021','2022','2023','2024','2025','2026'], Competition: ['2021','2022','2023','2024','2025','2026'], 'Competition xDrive': ['2022','2023','2024','2025','2026'], CS: ['2025','2026'], CSL: ['2023'] },
+    G83: { 'Competition xDrive': ['2022','2023','2024','2025','2026'] }
+  };
+  const availableYears = $derived(validYears[chassis][trim] ?? currentVehicle.years);
   const currentSetup = $derived(setups.find((item) => item.name === activeSetup) ?? setups[1]);
   const currentUpgrade = $derived(upgradeGroups.find((item) => item.key === activeUpgrade) ?? upgradeGroups[0]);
   const selectedYear = $derived(currentVehicle.years.includes(year) ? year : currentVehicle.years[currentVehicle.years.length - 1]);
 
+  function selectTrim(value: string) {
+    trim = value;
+    const years = validYears[chassis][value] ?? currentVehicle.years;
+    if (!years.includes(year)) year = years[years.length - 1];
+  }
+
   function selectChassis(value: Chassis) {
     chassis = value;
     trim = vehicleOptions[value].trims[0];
-    year = vehicleOptions[value].years[vehicleOptions[value].years.length - 1];
+    year = (validYears[value][trim] ?? vehicleOptions[value].years).at(-1) ?? vehicleOptions[value].years[0];
   }
 </script>
 
@@ -115,7 +127,7 @@
 
   <main>
     <section class="hero">
-      <div class="hero-image"><img src={vehiclePhotos[chassis]} alt={`BMW M4 ${chassis} reference vehicle`} /><span class="image-credit">{chassis.startsWith('F') ? 'Photo: Tokumeigakarinoaoshima · CC0' : 'Photo: Alexander Migl · CC BY-SA 4.0'}</span></div>
+      <div class="hero-image"><img src={vehiclePhotos[chassis]} alt={`BMW M4 ${chassis} reference vehicle`} /><span class="image-credit">{chassis === 'F82' ? 'Photo: Tokumeigakarinoaoshima · CC0' : chassis === 'F83' ? 'Photo: EuroVisionNim · CC BY-SA 4.0' : chassis === 'G82' ? 'Photo: Alexander Migl · CC BY-SA 4.0' : 'Photo: usf1fan2 · CC BY 2.0'}</span></div>
       <div class="hero-shade"></div>
       <div class="hero-content">
         <p class="eyebrow"><span></span> THE URANUS VEHICLE SERIES / 001</p>
@@ -145,13 +157,13 @@
           <div class="field-control"><span class="field-label">MODEL YEAR</span>
             <div class="custom-select">
               <button class="select-trigger" aria-expanded={yearPickerOpen} onclick={() => { yearPickerOpen = !yearPickerOpen; trimPickerOpen = false; }}>{year}<span>⌄</span></button>
-              {#if yearPickerOpen}<div class="select-menu" role="listbox" aria-label="Model year">{#each currentVehicle.years as item}<button role="option" aria-selected={year === item} class:current={year === item} onclick={() => { year = item; yearPickerOpen = false; }}>{item}</button>{/each}</div>{/if}
+              {#if yearPickerOpen}<div class="select-menu" role="listbox" aria-label="Model year">{#each availableYears as item}<button role="option" aria-selected={year === item} class:current={year === item} onclick={() => { year = item; yearPickerOpen = false; }}>{item}</button>{/each}</div>{/if}
             </div>
           </div>
           <div class="field-control"><span class="field-label">MODEL / EDITION</span>
             <div class="custom-select">
               <button class="select-trigger" aria-expanded={trimPickerOpen} onclick={() => { trimPickerOpen = !trimPickerOpen; yearPickerOpen = false; }}>{trim}<span>⌄</span></button>
-              {#if trimPickerOpen}<div class="select-menu" role="listbox" aria-label="Model edition">{#each currentVehicle.trims as item}<button role="option" aria-selected={trim === item} class:current={trim === item} onclick={() => { trim = item; trimPickerOpen = false; }}>{item}</button>{/each}</div>{/if}
+              {#if trimPickerOpen}<div class="select-menu" role="listbox" aria-label="Model edition">{#each currentVehicle.trims as item}<button role="option" aria-selected={trim === item} class:current={trim === item} onclick={() => { selectTrim(item); trimPickerOpen = false; }}>{item}</button>{/each}</div>{/if}
             </div>
           </div>
           <div class="vehicle-identity"><span>{chassis} · {trim}</span><strong>{selectedYear} MODEL YEAR</strong><small>{currentVehicle.generation} / {currentVehicle.body}</small></div>
