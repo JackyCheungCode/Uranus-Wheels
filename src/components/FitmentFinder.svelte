@@ -35,36 +35,36 @@
   const filteredModels = () => models.filter(x => x.name.toLowerCase().includes(modelSearch.trim().toLowerCase()));
   const resultSpecs = () => {
     const f = fitment || {};
-    const value = (v: unknown, fallback = '未提供') => v == null || String(v).trim() === '' ? fallback : String(v);
+    const value = (v: unknown) => v == null || String(v).trim() === '' ? '' : String(v);
     const pcd = value(f.bolt_pattern || f.pcd || f.PCD);
-    const pcdMatch = pcd.match(/(\d{1,2})\s*[x×]\s*(\d{2,3}(?:\.\d+)?)/i);
+    const pcdMatch = pcd.match(/(\\d{1,2})\\s*[x×]\\s*(\\d{2,3}(?:\\.\\d+)?)/i);
     const pcdValid = !!pcdMatch && Number(pcdMatch[1]) >= 3 && Number(pcdMatch[1]) <= 8 && Number(pcdMatch[2]) >= 50 && Number(pcdMatch[2]) <= 200;
     const lugCount = Number(f.lug_count) > 0 ? Number(f.lug_count) : null;
     const pcdMismatch = !!(pcdValid && lugCount && Number(pcdMatch?.[1]) !== lugCount);
-    const bore = f.center_bore_mm || f.center_bore || f.hub_bore_mm;
-    const rearBore = f.center_bore_rear_mm;
+    const bore = value(f.center_bore_mm || f.center_bore || f.hub_bore_mm);
+    const rearBore = value(f.center_bore_rear_mm);
     const oeWheel = value(f.oe_wheel);
-    const flush = value(f.flush_wheel, '未发布');
-    const max = value(f.max_wheel, '未发布');
-    const oeEt = (oeWheel.match(/ET\s*[+-]?\d+/i) || [])[0];
-    const oeSizeFound = /\b\d{2}\s*[x×]\s*\d{1,2}(?:\.\d+)?\s*J?\b/i.test(oeWheel);
-    const load = f.load_rating || f.wheel_load_rating || f.max_load_kg || f.load_capacity_kg;
-    const brake = f.brake_clearance || f.brake_caliper_clearance || f.caliper_clearance;
-    const thread = f.lug_thread || f.bolt_thread || f.thread_size;
-    const seat = f.lug_seat || f.bolt_seat || f.seat_type;
+    const oeEt = (oeWheel.match(/ET\\s*[+-]?\\d+/i) || [])[0] || '';
+    const oeSizeFound = /\\b\\d{2}\\s*[x×]\\s*\\d{1,2}(?:\\.\\d+)?\\s*J?\\b/i.test(oeWheel);
+    const load = value(f.load_rating || f.wheel_load_rating || f.max_load_kg || f.load_capacity_kg);
+    const brake = value(f.brake_clearance || f.brake_caliper_clearance || f.caliper_clearance);
+    const thread = value(f.lug_thread || f.bolt_thread || f.thread_size);
+    const seat = value(f.lug_seat || f.bolt_seat || f.seat_type);
+    const flush = value(f.flush_wheel);
+    const max = value(f.max_wheel);
     return [
-      { label:'PCD / 螺栓孔距', value:pcd, note:!pcdMatch ? '需要确认孔数与节圆直径格式' : pcdMismatch ? '与独立螺栓数量字段不一致' : '格式可识别，仍需实车核验', state:!pcdMatch ? (pcd === '未提供' ? 'missing' : 'review') : pcdMismatch ? 'review' : 'present' },
-      { label:'螺栓数量', value:value(lugCount), note:'应与 PCD 孔数一致', state:lugCount ? 'present' : 'missing' },
-      { label:'车型年份', value:value(f.year), note:'ANKUSI 车型目录年份', state:f.year ? 'present' : 'missing' },
-      { label:'中心孔', value:bore ? String(bore)+' mm'+(rearBore ? ' · 后轴 '+rearBore+' mm' : '') : '未提供', note:'确认前后轴及定位环要求', state:bore ? 'present' : 'missing' },
-      { label:'原厂轮毂尺寸', value:oeWheel, note:oeSizeFound ? '来源提供原厂直径 / 宽度参考' : '来源未提供可识别的原厂尺寸', state:oeSizeFound ? 'present' : 'missing' },
-      { label:'原厂偏距 / ET', value:oeEt || '来源未发布', note:oeEt ? '仅作为原厂参考，不代表改装轮毂适配' : '不可从改装参考值推断原厂 ET', state:oeEt ? 'present' : 'review' },
-      { label:'Flush 改装参考', value:flush, note:'来源发布的改装尺寸参考，需核对轮胎与车身间隙', state:flush !== '未发布' ? 'present' : 'review' },
-      { label:'Maximum 改装参考', value:max, note:'来源发布的最大尺寸参考，不代表安全安装保证', state:max !== '未发布' ? 'present' : 'review' },
-      { label:'轮毂承载能力', value:load ? String(load) : '未提供', note:'必须对照车辆轴荷及使用场景核验', state:load ? 'present' : 'missing' },
-      { label:'制动 / 卡钳间隙', value:value(brake), note:'需按实际制动套件确认', state:brake ? 'present' : 'missing' },
-      { label:'螺栓螺纹 / 座型', value:[thread,seat].filter(Boolean).join(' · ') || '未提供', note:'确认螺纹规格和紧固件座型', state:thread && seat ? 'present' : 'missing' }
-    ];
+      { label:'PCD', value:pcd, note:'Bolt count and pitch-circle diameter; verify on the vehicle', state:!pcdMatch ? (pcd ? 'review' : 'missing') : pcdMismatch ? 'review' : 'present' },
+      { label:'Lug count', value:lugCount ? String(lugCount) : '', note:'Must match the PCD bolt count', state:lugCount ? 'present' : 'missing' },
+      { label:'Model year', value:value(f.year), note:'Year listed in the fitment catalogue', state:f.year ? 'present' : 'missing' },
+      { label:'Center bore', value:bore ? bore+' mm'+(rearBore ? ' · Rear '+rearBore+' mm' : '') : '', note:'Verify front/rear axle and hub-ring requirements', state:bore ? 'present' : 'missing' },
+      { label:'OEM wheel size', value:oeSizeFound ? oeWheel : '', note:'OEM diameter and width reference', state:oeSizeFound ? 'present' : 'missing' },
+      { label:'OEM offset', value:oeEt, note:'OEM reference only; verify the exact vehicle specification', state:oeEt ? 'present' : 'missing' },
+      { label:'Flush fitment reference', value:flush, note:'Verify tire and body clearance', state:flush ? 'present' : 'missing' },
+      { label:'Maximum fitment reference', value:max, note:'Maximum-size reference; not a safety guarantee', state:max ? 'present' : 'missing' },
+      { label:'Wheel load rating', value:load, note:'Verify against vehicle axle load and intended use', state:load ? 'present' : 'missing' },
+      { label:'Brake clearance', value:brake, note:'Verify against the actual brake package', state:brake ? 'present' : 'missing' },
+      { label:'Lug thread / seat', value:[thread,seat].filter(Boolean).join(' · '), note:'Verify thread specification and fastener seat type', state:thread && seat ? 'present' : 'missing' }
+    ].filter(item => item.state !== 'missing');
   };
   const identityFields = () => {
     if (!vehicle) return [];
@@ -79,7 +79,7 @@
   async function api(path: string, init?: RequestInit) {
     const r = await fetch(path, { ...init, signal:AbortSignal.timeout(20000), headers:{ accept:'application/json', ...(init?.headers || {}) } });
     const d = await r.json();
-    if (!r.ok || d.error) throw new Error(d.error || '请求失败，请稍后重试。');
+    if (!r.ok || d.error) throw new Error(d.error || 'Request failed. Please try again.');
     return d;
   }
   async function loadModels() {
@@ -92,12 +92,12 @@
         name: String(item?.name || item?.model || '').trim(),
         years: Array.isArray(item?.years) ? item.years.map((y: unknown) => String(y).trim()).filter(Boolean) : []
       })).filter((item: Model) => item.name && item.years.length);
-      if (!models.length) throw new Error('BMW 车型目录没有返回可用的车型和年份。');
+      if (!models.length) throw new Error('The BMW model catalogue returned no usable models or years.');
       modelLoadError = '';
       error = '';
     } catch(e) {
       models = [];
-      modelLoadError = e instanceof Error ? e.message : 'BMW 车型数据暂时不可用。';
+      modelLoadError = e instanceof Error ? e.message : 'BMW model data is temporarily unavailable.';
     } finally { loading = false; }
   }
   function clearResult() { fitment = null; fitmentVehicle = null; }
@@ -113,16 +113,16 @@
     const q = new URLSearchParams({ make, model:modelName, year:modelYear });
     const d = await api('/api/fitment?' + q.toString());
     const rows = Array.isArray(d.results) ? d.results : Array.isArray(d.fitments) ? d.fitments : Array.isArray(d.records) ? d.records : Array.isArray(d.data) ? d.data : d.fitment ? [d.fitment] : [];
-    if (!rows.length) throw new Error('没有找到该车型年份对应的轮毂参数。请尝试相邻年份或手动选择车型。');
+    if (!rows.length) throw new Error('No wheel fitment data was found for this model year. Try an adjacent year or another catalogue model.');
     fitment = rows[0];
     fitmentVehicle = identity || { make, model:modelName, year:modelYear };
     source = sourceName;
-    notice = '已取得轮毂参考数据。参数仍需按具体车辆配置进行工程核验。';
+    notice = 'Reference fitment data retrieved. Verify all specifications against the exact vehicle configuration.';
   }
 
   async function manualSearch() {
     error = ''; notice = ''; clearResult();
-    if (!model || !year) { error = '请先选择 BMW 车型和年份。'; return; }
+    if (!model || !year) { error = 'Select a BMW model and model year first.'; return; }
     busy = true;
     try { await fetchFitment('BMW', model, year, { make:'BMW', model, year }, 'BMW 手动选型 · ANKUSI'); }
     catch(e) { error = e instanceof Error ? e.message : '轮毂参数查询失败。'; }
@@ -136,19 +136,19 @@
   }
   async function decodeVin() {
     error = ''; notice = ''; clearResult();
-    if (!/^[A-HJ-NPR-Z0-9]{17}$/.test(vin)) { error = '请输入有效的 17 位 VIN。字母 I、O、Q 不会出现在 VIN 中。'; return; }
+    if (!/^[A-HJ-NPR-Z0-9]{17}$/.test(vin)) { error = 'Enter a valid 17-character VIN. The letters I, O and Q are not used in VINs.'; return; }
     vinBusy = true;
     try {
       const d = await api('/api/vin-decode', { method:'POST', headers:{'content-type':'application/json'}, body:JSON.stringify({vin}) });
-      if (!d.vehicle) throw new Error('VIN 解码没有返回车辆信息。');
-      if (norm(d.vehicle.make) !== 'bmw') throw new Error('当前 Fitment Finder 仅支持 BMW。该 VIN 识别为 '+(d.vehicle.make || '未知品牌')+'。');
+      if (!d.vehicle) throw new Error('VIN decoding returned no vehicle information.');
+      if (norm(d.vehicle.make) !== 'bmw') throw new Error('Fitment Finder currently supports BMW only. This VIN was identified as '+(d.vehicle.make || 'an unknown make')+'。');
       vehicle = d.vehicle;
       if (d.status === 'ambiguous' && Array.isArray(d.candidates)) {
         candidates = d.candidates;
-        notice = 'VIN 已解码，但数据库返回多个可能版本。请选择最匹配的车型记录。';
+        notice = 'VIN decoded. Multiple vehicle variants were found; select the closest match.';
       } else {
         candidates = [];
-        notice = 'VIN 已解码。请核对车辆信息，再确认并查询轮毂参数。';
+        notice = 'VIN decoded. Review the vehicle details, then confirm to retrieve wheel specifications.';
       }
     } catch(e) { error = e instanceof Error ? e.message : 'VIN 解码失败，请重试。'; }
     finally { vinBusy = false; }
@@ -160,7 +160,7 @@
     try {
       const decodedModel = String(selectedCandidate?.model || vehicle.model || '').trim();
       const decodedYear = String(selectedCandidate?.year || vehicle.year || '').trim();
-      if (!decodedModel || !decodedYear) throw new Error('VIN 未能识别完整车型和年份，请切换到手动选型。');
+      if (!decodedModel || !decodedYear) throw new Error('VIN did not identify a complete model and year. Switch to manual model selection.');
       const d = await api('/api/models?make=BMW');
       const catalog = (d.models || []) as Model[];
       const key = norm(decodedModel);
@@ -169,14 +169,14 @@
       const matches = exact.length ? exact : available.filter(item => norm(item.name).includes(key) || key.includes(norm(item.name)));
       if (matches.length > 1) {
         catalogChoices = matches;
-        notice = 'VIN 名称与轮毂数据库的标准车型名称不同。请选择对应的 BMW 标准车型。';
+        notice = 'The VIN model name differs from the fitment catalogue. Select the matching BMW catalogue model.';
         return;
       }
-      if (!matches[0]) throw new Error('VIN 已识别为 '+decodedModel+'，但 BMW 轮毂目录没有找到可对应的标准车型。请切换到手动选型。');
+      if (!matches[0]) throw new Error('VIN identified the vehicle as '+decodedModel+', but no matching standard model was found in the BMW fitment catalogue. Switch to manual model selection.');
       const canonicalYear = matches[0].years.find(y => yearMatch(y, decodedYear));
-      if (!canonicalYear) throw new Error('已找到车型，但无法匹配对应年份。请使用手动选型。');
+      if (!canonicalYear) throw new Error('The model was found, but its year could not be matched. Use manual model selection.');
       await fetchFitment('BMW', matches[0].name, canonicalYear, { ...vehicle, ankusi_model:matches[0].name, ankusi_year:canonicalYear }, 'VIN 解码 · NHTSA vPIC + ANKUSI');
-    } catch(e) { error = e instanceof Error ? e.message : '确认车辆后查询轮毂参数失败。'; }
+    } catch(e) { error = e instanceof Error ? e.message : 'Could not retrieve fitment after vehicle confirmation.'; }
     finally { busy = false; }
   }
   async function chooseCatalogModel(item: Model) {
@@ -185,7 +185,7 @@
     try {
       const y = item.years.find(v => yearMatch(v, String(vehicle?.year || ''))) || String(vehicle.year || '');
       await fetchFitment('BMW', item.name, y, { ...vehicle, ankusi_model:item.name, ankusi_year:y }, 'VIN 解码 · NHTSA vPIC + ANKUSI');
-    } catch(e) { error = e instanceof Error ? e.message : '车型匹配失败。'; }
+    } catch(e) { error = e instanceof Error ? e.message : 'Model matching failed.'; }
     finally { busy = false; }
   }
   $effect(() => {
@@ -226,7 +226,7 @@
               {#if candidates.length}
                 <p class="field-label">SELECT A MATCHING DATABASE RECORD</p>
                 {#each candidates as item}
-                  <button class="candidate" type="button" onclick={() => { selectedCandidate=item; candidates=[]; notice='已选择 '+(item.model || '车型版本')+'，请确认车辆。'; }}><strong>{item.model || 'Vehicle variant'}</strong><span>{[item.year,item.chassis_code,item.body_style].filter(Boolean).join(' · ')}</span></button>
+                  <button class="candidate" type="button" onclick={() => { selectedCandidate=item; candidates=[]; notice='Selected '+(item.model || '车型版本')+'. Confirm the vehicle to continue.'; }}><strong>{item.model || 'Vehicle variant'}</strong><span>{[item.year,item.chassis_code,item.body_style].filter(Boolean).join(' · ')}</span></button>
                 {/each}
               {/if}
               {#if catalogChoices.length}
