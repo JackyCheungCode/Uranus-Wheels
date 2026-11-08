@@ -111,14 +111,20 @@
     };
     return { engine: 'S58B30 · 2,993 cc twin-turbo inline-six', ...(data[trim] ?? data.Competition), drive: trim.includes('xDrive') ? 'M xDrive all-wheel drive' : 'Rear-wheel drive', suspension: 'Adaptive M suspension · model-specific calibration', source: 'BMW Group official technical data' };
   });
-  const vehicleImageSources: Record<Chassis, string> = {\n    F82: 'https://commons.wikimedia.org/wiki/File:The_frontview_of_BMW_M4_Coup%C3%A9_(F82).JPG',\n    F83: 'https://commons.wikimedia.org/wiki/File:2014-2018_BMW_M4_(F83)_convertible_(2018-08-06)_01.jpg',\n    G82: 'https://commons.wikimedia.org/wiki/File:BMW_M4_(G82)_1X7A0155.jpg',\n    G83: 'https://commons.wikimedia.org/wiki/File:BMW_M4_Competition_Cabriolet_(G83,_2022)_(53338263511).jpg'\n  };\n  const galleryImages: Record<Chassis, { src: string; alt: string; caption: string; credit: string; source: string }[]> = {
+  const vehicleImageSources: Record<Chassis, string> = {
+    F82: 'https://commons.wikimedia.org/wiki/File:The_frontview_of_BMW_M4_Coup%C3%A9_(F82).JPG',
+    F83: 'https://commons.wikimedia.org/wiki/File:2014-2018_BMW_M4_(F83)_convertible_(2018-08-06)_01.jpg',
+    G82: 'https://commons.wikimedia.org/wiki/File:BMW_M4_(G82)_1X7A0155.jpg',
+    G83: 'https://commons.wikimedia.org/wiki/File:BMW_M4_Competition_Cabriolet_(G83,_2022)_(53338263511).jpg'
+  };
+  const galleryImages: Record<Chassis, { src: string; alt: string; caption: string; credit: string; source: string }[]> = {
     F82: [
       { src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/21/The_frontview_of_BMW_M4_Coup%C3%A9_%28F82%29.JPG/1280px-The_frontview_of_BMW_M4_Coup%C3%A9_%28F82%29.JPG', alt: 'BMW M4 F82 front three-quarter view', caption: 'F82 · Front profile', credit: 'Tokumeigakarinoaoshima · CC0', source: 'https://commons.wikimedia.org/wiki/File:The_frontview_of_BMW_M4_Coup%C3%A9_(F82).JPG' },
       { src: 'https://commons.wikimedia.org/wiki/Special:FilePath/The_front_tire_wheel_of_BMW_M4_Coup%C3%A9_%28F82%29.JPG?width=1280', alt: 'BMW M4 F82 front wheel and tyre close-up', caption: 'F82 · Front wheel detail', credit: 'Tokumeigakarinoaoshima · CC0', source: 'https://commons.wikimedia.org/wiki/File:The_front_tire_wheel_of_BMW_M4_Coup%C3%A9_(F82).JPG' }
     ],
     F83: [
       { src: 'https://commons.wikimedia.org/wiki/Special:FilePath/2014-2018_BMW_M4_%28F83%29_convertible_%282018-08-06%29_01.jpg?width=1600', alt: 'BMW M4 F83 convertible', caption: 'F83 · Convertible profile', credit: 'EuroVisionNim · CC BY-SA 4.0', source: 'https://commons.wikimedia.org/wiki/File:2014-2018_BMW_M4_(F83)_convertible_(2018-08-06)_01.jpg' },
-      { src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/The_front_tire_wheel_of_BMW_M4_Coup%C3%A9_%28F82%29.JPG/1280px-The_front_tire_wheel_of_BMW_M4_Coup%C3%A9_%28F82%29.JPG', alt: 'F8X M4 wheel and tyre detail', caption: 'F8X · Wheel detail reference', credit: 'Tokumeigakarinoaoshima · CC0', source: 'https://commons.wikimedia.org/wiki/File:The_front_tire_wheel_of_BMW_M4_Coup%C3%A9_(F82).JPG' }
+      { src: 'https://commons.wikimedia.org/wiki/Special:FilePath/The_front_tire_wheel_of_BMW_M4_Coup%C3%A9_%28F82%29.JPG?width=1280', alt: 'F8X M4 wheel and tyre detail', caption: 'F8X · Wheel detail reference', credit: 'Tokumeigakarinoaoshima · CC0', source: 'https://commons.wikimedia.org/wiki/File:The_front_tire_wheel_of_BMW_M4_Coup%C3%A9_(F82).JPG' }
     ],
     G82: [
       { src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/79/BMW_M4_%28G82%29_1X7A0155.jpg/1920px-BMW_M4_%28G82%29_1X7A0155.jpg', alt: 'BMW M4 G82 coupe', caption: 'G82 · Coupe profile', credit: 'Alexander Migl · CC BY-SA 4.0', source: 'https://commons.wikimedia.org/wiki/File:BMW_M4_(G82)_1X7A0155.jpg' },
