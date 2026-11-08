@@ -1,0 +1,239 @@
+<script lang="ts">
+  type Chassis = 'G82' | 'G83' | 'F82' | 'F83';
+  type UpgradeKey = 'wheels' | 'suspension' | 'brakes' | 'exterior' | 'performance' | 'interior';
+  type Spec = { label: string; front: string; rear: string; note: string };
+  let chassis = $state<Chassis>('G82');
+  let trim = $state('Competition');
+  let year = $state('2024');
+  let activeSetup = $state('Street Sport');
+  let activeUpgrade = $state<UpgradeKey>('wheels');
+
+  const vehicleOptions: Record<Chassis, { years: string[]; trims: string[]; body: string; generation: string }> = {
+    G82: { years: ['2021','2022','2023','2024','2025','2026'], trims: ['M4','Competition','Competition xDrive','CS'], body: 'Coupe', generation: 'Second generation' },
+    G83: { years: ['2021','2022','2023','2024','2025','2026'], trims: ['M4','Competition','Competition xDrive'], body: 'Convertible', generation: 'Second generation' },
+    F82: { years: ['2015','2016','2017','2018','2019','2020'], trims: ['M4','Competition','CS','GTS'], body: 'Coupe', generation: 'First generation' },
+    F83: { years: ['2015','2016','2017','2018','2019','2020'], trims: ['M4','Competition'], body: 'Convertible', generation: 'First generation' }
+  };
+
+  const specs: Spec[] = [
+    { label: 'PCD / Bolt pattern', front: 'Awaiting verified data', rear: 'Awaiting verified data', note: 'Confirm chassis-specific hub and fastener specification.' },
+    { label: 'Wheel diameter', front: 'Not yet published', rear: 'Not yet published', note: 'Publish approved diameter options for the selected brake package.' },
+    { label: 'Wheel width', front: 'Not yet published', rear: 'Not yet published', note: 'Maintain axle-specific width and barrel clearance.' },
+    { label: 'Offset (ET)', front: 'Not yet published', rear: 'Not yet published', note: 'Record approved offset range for each wheel width.' },
+    { label: 'Tire size', front: 'Not yet published', rear: 'Not yet published', note: 'Include tire model, measured section width and rolling diameter.' },
+    { label: 'Center bore', front: 'Awaiting verified data', rear: 'Awaiting verified data', note: 'Include hub fit and any approved centering solution.' }
+  ];
+
+  const setups = [
+    { name: 'OEM+', descriptor: 'Factory-inspired refinement', detail: 'A restrained upgrade that preserves the original character and everyday usability.', tags: ['Factory-led', 'Daily use'], status: 'Template' },
+    { name: 'Street Sport', descriptor: 'Balanced road presence', detail: 'A considered wheel and tire package with suspension compatibility reviewed as one system.', tags: ['Road focused', 'Staggered setup'], status: 'Template' },
+    { name: 'Track', descriptor: 'Heat, clearance and repeatability', detail: 'A track-oriented package requiring brake, tire, load and operating-clearance validation.', tags: ['Track use', 'Engineering review'], status: 'Template' },
+    { name: 'Show', descriptor: 'Individual visual direction', detail: 'A design-led build with explicit clearance, ride-height and bodywork checks.', tags: ['Custom finish', 'Body clearance'], status: 'Template' }
+  ];
+
+  const upgradeGroups: { key: UpgradeKey; title: string; intro: string; projects: string[] }[] = [
+    { key: 'wheels', title: 'Wheels & Tires', intro: 'The foundation of every M4 build. Review axle-specific fitment, tire pairing, load and brake clearance together.', projects: ['Forged monoblock wheels', '2-piece and 3-piece wheels', 'Staggered wheel & tire packages', 'TPMS and fitment hardware'] },
+    { key: 'suspension', title: 'Suspension', intro: 'Coordinate wheel fitment with ride height, suspension travel, alignment and intended use.', projects: ['Coilover systems', 'Lowering springs', 'Adjustable control arms', 'Alignment and corner balance'] },
+    { key: 'brakes', title: 'Brakes', intro: 'Brake package is a fitment variable, not an afterthought. Confirm caliper envelope and barrel clearance.', projects: ['Big brake kits', 'Brake rotors and pads', 'Brake lines and fluid', 'Caliper clearance validation'] },
+    { key: 'exterior', title: 'Exterior & Aero', intro: 'Build a cohesive exterior with documented chassis and body-style compatibility.', projects: ['Front splitters and lips', 'Side skirts', 'Rear diffusers', 'Spoilers and carbon components'] },
+    { key: 'performance', title: 'Performance', intro: 'Powertrain upgrades should be presented with supporting hardware, operating context and regional compliance notes.', projects: ['Intake systems', 'Exhaust systems', 'Cooling upgrades', 'ECU and calibration'] },
+    { key: 'interior', title: 'Interior', intro: 'Driver-focused upgrades that complement the intended road, touring or track setup.', projects: ['Steering wheels', 'Seats and restraints', 'Interior trim', 'Driver interface upgrades'] }
+  ];
+
+  const currentVehicle = $derived(vehicleOptions[chassis]);
+  const currentSetup = $derived(setups.find((item) => item.name === activeSetup) ?? setups[1]);
+  const currentUpgrade = $derived(upgradeGroups.find((item) => item.key === activeUpgrade) ?? upgradeGroups[0]);
+  const selectedYear = $derived(currentVehicle.years.includes(year) ? year : currentVehicle.years[currentVehicle.years.length - 1]);
+
+  function selectChassis(value: Chassis) {
+    chassis = value;
+    trim = vehicleOptions[value].trims[0];
+    year = vehicleOptions[value].years[vehicleOptions[value].years.length - 1];
+  }
+</script>
+
+<svelte:head>
+  <title>BMW M4 Modification Guide | Uranus Wheels</title>
+  <meta name="description" content="Explore BMW M4 wheel fitment references, curated build concepts and performance upgrade categories from Uranus Wheels." />
+  <meta name="theme-color" content="#f5f6f7" />
+</svelte:head>
+
+<div class="m4-page">
+  <div class="topline"><span>URANUS WHEELS</span><span>BMW PERFORMANCE & FITMENT GUIDE</span><a href="/fitment-finder">FITMENT FINDER ↗</a></div>
+  <header class="page-header">
+    <a class="wordmark" href="/" aria-label="Uranus Wheels home">URANUS <span>WHEELS</span></a>
+    <nav aria-label="M4 guide navigation">
+      <a href="#vehicle">VEHICLE</a><a href="#fitment">FITMENT</a><a href="#builds">BUILDS</a><a href="#upgrades">UPGRADES</a>
+    </nav>
+    <a class="header-action" href="#fitment">EXPLORE FITMENT <span>↗</span></a>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="hero-image" role="img" aria-label="Performance coupe on a dark studio road" />
+      <div class="hero-shade"></div>
+      <div class="hero-content">
+        <p class="eyebrow"><span></span> THE URANUS VEHICLE SERIES / 001</p>
+        <h1>BMW <em>M4</em></h1>
+        <p class="hero-subtitle">A considered guide to fitment, form<br />and performance upgrades.</p>
+        <div class="hero-meta"><span>F82 / F83</span><i></i><span>G82 / G83</span><i></i><span>COUPE & CONVERTIBLE</span></div>
+        <a class="hero-link" href="#vehicle">EXPLORE YOUR M4 <b>↓</b></a>
+      </div>
+      <div class="hero-index"><strong>01</strong><span> / 04</span><small>MODEL SPOTLIGHT</small></div>
+    </section>
+
+    <section class="vehicle-section section-wrap" id="vehicle">
+      <div class="section-heading">
+        <div><p class="eyebrow dark">01 / VEHICLE IDENTIFICATION</p><h2>Start with<br /><em>your M4.</em></h2></div>
+        <p class="section-intro">Fitment changes with chassis, model year, trim and brake configuration. Select your vehicle to keep every reference tied to the correct specification.</p>
+      </div>
+      <div class="vehicle-panel">
+        <div class="vehicle-panel-top"><span>SELECT YOUR PLATFORM</span><span class="manual-label">MANUALLY CURATED VEHICLE DATA</span></div>
+        <div class="chassis-grid" role="group" aria-label="Select M4 chassis">
+          {#each (['G82','G83','F82','F83'] as Chassis[]) as code}
+            <button class:chosen={chassis === code} class="chassis-option" onclick={() => selectChassis(code)} aria-pressed={chassis === code}>
+              <span class="chassis-code">{code}</span><span class="chassis-body">{vehicleOptions[code].body}</span><span class="chassis-years">{vehicleOptions[code].years[0]}—{vehicleOptions[code].years.at(-1)}</span><span class="select-mark">{chassis === code ? 'SELECTED' : 'SELECT'}</span>
+            </button>
+          {/each}
+        </div>
+        <div class="vehicle-fields">
+          <label>MODEL YEAR
+            <select bind:value={year}>
+              {#each currentVehicle.years as item}<option value={item}>{item}</option>{/each}
+            </select>
+          </label>
+          <label>MODEL / EDITION
+            <select bind:value={trim}>
+              {#each currentVehicle.trims as item}<option value={item}>{item}</option>{/each}
+            </select>
+          </label>
+          <div class="vehicle-identity"><span>{chassis} · {trim}</span><strong>{selectedYear} MODEL YEAR</strong><small>{currentVehicle.generation} / {currentVehicle.body}</small></div>
+        </div>
+        <p class="panel-footnote">Vehicle selection is a content filter only. Confirm the exact market specification, brake package and installed hardware before ordering parts.</p>
+      </div>
+    </section>
+
+    <section class="fitment-section" id="fitment">
+      <div class="section-wrap">
+        <div class="section-heading fitment-heading">
+          <div><p class="eyebrow">02 / ENGINEERING REFERENCE</p><h2>Wheel fitment.<br /><em>Without guesswork.</em></h2></div>
+          <p class="section-intro">A structured reference for {chassis} {trim}. Front and rear values are maintained independently. Unverified values remain unpublished rather than being estimated.</p>
+        </div>
+        <div class="fitment-toolbar"><div><span class="live-dot"></span> CURATED FITMENT DATABASE</div><span>VEHICLE: {chassis} / {selectedYear} / {trim}</span></div>
+        <div class="spec-table">
+          <div class="spec-header"><span>SPECIFICATION</span><span>FRONT AXLE</span><span>REAR AXLE</span><span>ENGINEERING NOTE</span></div>
+          {#each specs as spec, index}
+            <div class="spec-row">
+              <strong>{spec.label}</strong>
+              <span class="spec-value">{spec.front}</span>
+              <span class="spec-value">{spec.rear}</span>
+              <small>{spec.note}</small>
+            </div>
+          {/each}
+        </div>
+        <div class="engineering-note"><span class="note-icon">i</span><p><strong>Engineering status</strong> — This guide is being populated with vehicle-specific data. No universal fitment or safety claim is made until wheel, tire, brake and vehicle clearances have been reviewed and documented.</p></div>
+        <div class="fitment-actions"><a href="/fitment-finder" class="outline-action">OPEN FITMENT FINDER <span>↗</span></a><span>VIN DECODING IS AN IDENTIFICATION AID, NOT A FITMENT APPROVAL.</span></div>
+      </div>
+    </section>
+
+    <section class="build-section section-wrap" id="builds">
+      <div class="section-heading">
+        <div><p class="eyebrow dark">03 / CURATED CONFIGURATIONS</p><h2>Choose your<br /><em>build direction.</em></h2></div>
+        <p class="section-intro">A build is more than a wheel size. Explore distinct directions, each designed to connect fitment, tires, suspension and intended use.</p>
+      </div>
+      <div class="build-layout">
+        <div class="build-list" role="tablist" aria-label="M4 build concepts">
+          {#each setups as setup, i}
+            <button class:active={activeSetup === setup.name} class="build-choice" role="tab" aria-selected={activeSetup === setup.name} onclick={() => activeSetup = setup.name}>
+              <span class="build-number">0{i + 1}</span><span class="build-name">{setup.name}<small>{setup.descriptor}</small></span><span class="build-arrow">↗</span>
+            </button>
+          {/each}
+        </div>
+        <div class="build-detail" role="tabpanel">
+          <div class="build-visual"><span class="visual-kicker">BUILD CONCEPT / {currentSetup.name.toUpperCase()}</span><div class="wheel-graphic"><div class="wheel-outer"><div class="wheel-inner"><div class="wheel-hub"></div><span></span><i></i><b></b><em></em></div></div></div><span class="visual-caption">{chassis} / {trim} / {selectedYear}</span></div>
+          <div class="build-copy"><span class="status-pill">CONCEPT TEMPLATE</span><h3>{currentSetup.name}<br /><em>{currentSetup.descriptor}</em></h3><p>{currentSetup.detail}</p><div class="tag-row">{#each currentSetup.tags as tag}<span>{tag}</span>{/each}</div><div class="build-disclaimer">Specifications and product associations will be added after engineering review.</div></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="upgrade-section" id="upgrades">
+      <div class="section-wrap">
+        <div class="section-heading">
+          <div><p class="eyebrow">04 / MODIFICATION ECOSYSTEM</p><h2>Build beyond<br /><em>the wheels.</em></h2></div>
+          <p class="section-intro">Explore the wider M4 modification landscape. Each category can grow into a dedicated guide with compatible products, technical notes and real vehicle builds.</p>
+        </div>
+        <div class="upgrade-layout">
+          <div class="upgrade-nav" role="tablist" aria-label="Modification categories">
+            {#each upgradeGroups as group, i}
+              <button class:active={activeUpgrade === group.key} role="tab" aria-selected={activeUpgrade === group.key} onclick={() => activeUpgrade = group.key}><span>0{i + 1}</span>{group.title}<b>↗</b></button>
+            {/each}
+          </div>
+          <div class="upgrade-content" role="tabpanel">
+            <p class="eyebrow">{chassis} / MODIFICATION AREA</p><h3>{currentUpgrade.title}</h3><p class="upgrade-intro">{currentUpgrade.intro}</p>
+            <div class="project-list">
+              {#each currentUpgrade.projects as project, i}
+                <div class="project-item"><span>0{i + 1}</span><strong>{project}</strong><small>PLANNED CATEGORY</small></div>
+              {/each}
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="closing-section">
+      <div class="closing-image"></div><div class="closing-content"><p class="eyebrow">YOUR M4. YOUR SPECIFICATION.</p><h2>Precision starts<br />with the <em>details.</em></h2><p>Have a wheel setup in mind? Start with your vehicle, then review the fitment reference before selecting a design.</p><a href="/fitment-finder" class="closing-button">FIND WHEELS FOR YOUR BMW <span>↗</span></a></div>
+    </section>
+  </main>
+  <footer class="m4-footer"><a class="wordmark" href="/">URANUS <span>WHEELS</span></a><span>PRECISION FORGED. BMW-FOCUSED.</span><span>© {new Date().getFullYear()} URANUS WHEELS</span></footer>
+</div>
+
+<style>
+  :global(html){scroll-behavior:smooth}
+  :global(body){margin:0;background:#f5f6f7;color:#202428;font-family:Arial,Helvetica,sans-serif}
+  .m4-page{--blue:#1c69d4;--ink:#202428;--navy:#18212a;--muted:#697176;--paper:#f5f6f7;--line:#dfe2e5;color:var(--ink);overflow:hidden}
+  .topline{height:30px;padding:0 clamp(20px,5.5vw,88px);display:flex;align-items:center;justify-content:space-between;background:#17212b;color:#c4cbd2;font-size:8px;font-weight:700;letter-spacing:.16em}
+  .topline a{color:#fff;text-decoration:none}
+  .page-header{height:76px;padding:0 clamp(20px,5.5vw,88px);display:flex;align-items:center;justify-content:space-between;background:#fff}
+  .wordmark{font-size:15px;font-weight:800;letter-spacing:.16em;text-decoration:none;color:#202428}.wordmark span{font-weight:400;color:#7d858b}
+  .page-header nav{display:flex;gap:clamp(18px,3vw,46px)}.page-header nav a,.header-action{font-size:9px;font-weight:700;letter-spacing:.12em;text-decoration:none;color:#535d64}
+  .page-header nav a:hover{color:var(--blue)}.header-action{padding:13px 16px;border:1px solid #cfd4d8;color:#202428}.header-action span{color:var(--blue);margin-left:10px}
+  .hero{min-height:660px;position:relative;display:flex;align-items:center;background:#111a22;color:#fff;isolation:isolate}
+  .hero-image{position:absolute;inset:0;z-index:-2;background-image:url('https://images.unsplash.com/photo-1555215695-3004980ad54e?auto=format&fit=crop&w=2200&q=88');background-size:cover;background-position:center 56%;filter:saturate(.7)}
+  .hero-shade{position:absolute;inset:0;z-index:-1;background:linear-gradient(90deg,rgba(9,15,21,.94) 0%,rgba(9,15,21,.74) 40%,rgba(9,15,21,.16) 100%),linear-gradient(0deg,rgba(9,15,21,.35),transparent 50%)}
+  .hero-content{padding:90px clamp(24px,11vw,176px);max-width:1000px}.eyebrow{font-size:9px;font-weight:700;letter-spacing:.18em;color:#aeb8c1;margin:0 0 22px}.eyebrow span{display:inline-block;width:25px;height:2px;margin:0 10px 3px 0;background:#62a0ef}
+  h1{font-size:clamp(68px,11vw,148px);line-height:.84;letter-spacing:-.085em;font-weight:500;margin:0}h1 em,h2 em,h3 em{font-style:normal;color:#8ca9c9}
+  .hero-subtitle{font-size:clamp(18px,2vw,25px);line-height:1.5;color:#e1e6eb;margin:34px 0 30px}
+  .hero-meta{display:flex;align-items:center;gap:15px;color:#c3cbd2;font-size:9px;font-weight:700;letter-spacing:.14em}.hero-meta i{height:3px;width:3px;border-radius:50%;background:#75a9e8}
+  .hero-link{display:inline-flex;gap:26px;align-items:center;margin-top:48px;padding-bottom:12px;border-bottom:1px solid #8093a5;color:#fff;text-decoration:none;font-size:9px;font-weight:700;letter-spacing:.15em}.hero-link b{color:#83b5f4;font-size:15px}
+  .hero-index{position:absolute;right:clamp(24px,5.5vw,88px);bottom:38px;display:grid;grid-template-columns:auto auto;align-items:center;column-gap:5px;color:#bac4ce;font-size:10px}.hero-index strong{font-size:19px;color:#fff}.hero-index small{grid-column:1/3;margin-top:5px;font-size:8px;letter-spacing:.14em}
+  .section-wrap{width:min(1200px,calc(100% - 48px));margin:0 auto}.vehicle-section,.build-section{padding-block:100px 112px}
+  .section-heading{display:grid;grid-template-columns:1fr .72fr;gap:10%;align-items:end;margin-bottom:42px}.eyebrow.dark{color:#717c84}.section-heading h2{font-size:clamp(42px,6vw,74px);line-height:.98;letter-spacing:-.07em;font-weight:500;margin:0}.section-heading h2 em{color:#788fa7}.section-intro{max-width:430px;color:#68737b;font-size:14px;line-height:1.85;margin:0 0 5px}
+  .vehicle-panel{background:#fff;padding:30px 34px 25px;box-shadow:0 16px 44px rgba(22,34,45,.055)}
+  .vehicle-panel-top{display:flex;justify-content:space-between;gap:16px;color:#59636b;font-size:9px;font-weight:700;letter-spacing:.14em}.manual-label{color:#87929b}
+  .chassis-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;margin-top:22px;background:#e5e8eb}
+  .chassis-option{min-height:142px;padding:20px 18px;border:0;background:#f4f6f7;text-align:left;color:#202428;cursor:pointer;transition:background .18s ease}
+  .chassis-option:hover{background:#eaf0f6}.chassis-option.chosen{background:#e9f0f8;box-shadow:inset 0 -3px #1c69d4}
+  .chassis-code{display:block;font-size:29px;font-weight:600;letter-spacing:-.06em}.chassis-body{display:block;margin-top:2px;color:#65717a;font-size:11px}.chassis-years{display:block;margin-top:14px;color:#8b959d;font-size:9px;letter-spacing:.06em}.select-mark{display:block;margin-top:9px;color:#1c69d4;font-size:8px;font-weight:700;letter-spacing:.12em}.chassis-option:not(.chosen) .select-mark{color:#9aa3aa}
+  .vehicle-fields{display:grid;grid-template-columns:1fr 1fr 1.1fr;gap:20px;margin-top:25px;align-items:end}
+  label{display:grid;gap:9px;color:#69747d;font-size:9px;font-weight:700;letter-spacing:.13em}
+  select{height:48px;width:100%;padding:0 14px;border:0;border-bottom:1px solid #aab2b9;border-radius:0;background:#f4f6f7;color:#202428;font-size:13px;outline-offset:2px}
+  .vehicle-identity{min-height:48px;padding:5px 12px;border-left:2px solid #1c69d4;display:flex;flex-direction:column;justify-content:center;gap:2px}.vehicle-identity span{font-size:12px;font-weight:700}.vehicle-identity strong{font-size:9px;color:#1c69d4;letter-spacing:.08em}.vehicle-identity small{font-size:9px;color:#87919a}
+  .panel-footnote{margin:22px 0 0;padding-top:17px;border-top:1px solid #edf0f2;color:#828c94;font-size:10px;line-height:1.7}
+  .fitment-section{padding:100px 0 104px;background:#19232d;color:#fff}.fitment-heading .eyebrow{color:#a5b1bc}.fitment-heading h2 em{color:#86a9d1}.fitment-heading .section-intro{color:#b3bdc6}
+  .fitment-toolbar{display:flex;justify-content:space-between;gap:16px;padding:16px 18px;background:#222f3a;color:#c7d0d8;font-size:8px;font-weight:700;letter-spacing:.13em}.fitment-toolbar>div{display:flex;align-items:center;gap:9px}.live-dot{width:6px;height:6px;border-radius:50%;background:#75a9e8;box-shadow:0 0 0 4px rgba(117,169,232,.13)}
+  .spec-table{background:#202c36}.spec-header,.spec-row{display:grid;grid-template-columns:1.05fr 1fr 1fr 1.55fr;gap:16px;align-items:center}.spec-header{min-height:42px;padding:0 20px;color:#91a0ac;font-size:8px;font-weight:700;letter-spacing:.13em;background:#263440}.spec-row{min-height:76px;padding:14px 20px;border-top:1px solid rgba(255,255,255,.055)}.spec-row>strong{font-size:12px;font-weight:600}.spec-value{font-family:Consolas,monospace;font-size:11px;color:#dbe4ec;font-variant-numeric:tabular-nums}.spec-row small{color:#9caab5;font-size:9px;line-height:1.6}
+  .engineering-note{display:flex;gap:13px;align-items:flex-start;margin-top:20px;padding:17px 18px;background:#243440;color:#c1ccd5}.note-icon{display:grid;place-items:center;width:18px;height:18px;flex:0 0 18px;border:1px solid #8da4b9;border-radius:50%;font-size:11px}.engineering-note p{margin:0;font-size:10px;line-height:1.8}.engineering-note strong{color:#fff}
+  .fitment-actions{display:flex;justify-content:space-between;align-items:center;gap:18px;margin-top:26px}.outline-action{padding:14px 18px;border:1px solid #72818d;color:#fff;text-decoration:none;font-size:9px;font-weight:700;letter-spacing:.12em}.outline-action span{color:#83b5f4;margin-left:12px}.fitment-actions>span{max-width:420px;color:#92a0ab;font-size:8px;letter-spacing:.1em;line-height:1.6;text-align:right}
+  .build-layout{display:grid;grid-template-columns:.7fr 1.3fr;gap:30px}.build-list{display:flex;flex-direction:column}.build-choice{display:grid;grid-template-columns:42px 1fr 20px;align-items:center;gap:12px;min-height:91px;padding:15px 17px;border:0;border-bottom:1px solid #dfe3e6;background:transparent;text-align:left;cursor:pointer;color:#273039}.build-choice.active{background:#fff;border-left:3px solid #1c69d4;padding-left:14px}.build-number{font-family:Consolas,monospace;color:#8a959d;font-size:11px}.build-name{font-size:14px;font-weight:700}.build-name small{display:block;margin-top:6px;color:#828c94;font-size:10px;font-weight:400}.build-arrow{color:#7c8a96}.build-detail{display:grid;grid-template-columns:1fr 1fr;min-height:380px;background:#fff}
+  .build-visual{position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden;background:radial-gradient(ellipse at center,#344351 0%,#1b2731 65%,#141e27 100%);color:#d8e0e7}.visual-kicker{position:absolute;left:22px;top:20px;font-size:8px;letter-spacing:.13em;color:#aab9c6}.visual-caption{position:absolute;left:22px;bottom:20px;font-size:8px;letter-spacing:.12em;color:#aab9c6}
+  .wheel-graphic{width:220px;height:220px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(145deg,#66727c,#111a21 55%,#77838d);box-shadow:0 22px 44px rgba(0,0,0,.35),inset 0 0 0 5px #8b959d}.wheel-outer{width:190px;height:190px;border-radius:50%;display:grid;place-items:center;background:repeating-conic-gradient(from 4deg,#aab3ba 0deg 3deg,#313d47 3deg 8deg,#89949d 8deg 10deg);box-shadow:inset 0 0 0 12px #1a232c}
+  .wheel-inner{position:relative;width:118px;height:118px;border-radius:50%;background:radial-gradient(circle,#8e9aa3 0 7%,#27333d 8% 15%,#a8b2ba 16% 20%,#394550 21% 100%);box-shadow:inset 0 0 0 7px #697681}.wheel-hub{position:absolute;inset:43px;border-radius:50%;background:#9aa5ae;z-index:2}.wheel-inner span,.wheel-inner i,.wheel-inner b,.wheel-inner em{position:absolute;left:54px;top:5px;width:9px;height:53px;transform-origin:5px 54px;background:linear-gradient(90deg,#aab4bc,#4c5964);border-radius:5px}.wheel-inner i{transform:rotate(72deg)}.wheel-inner b{transform:rotate(144deg)}.wheel-inner em{transform:rotate(216deg)}
+  .build-copy{padding:38px 30px;display:flex;flex-direction:column;align-items:flex-start}.status-pill{padding:6px 9px;background:#edf2f6;color:#55718d;font-size:8px;font-weight:700;letter-spacing:.1em}.build-copy h3{margin:25px 0 13px;font-size:29px;line-height:1.08;letter-spacing:-.05em}.build-copy h3 em{color:#8297aa}.build-copy>p{margin:0;color:#69747d;font-size:12px;line-height:1.8}.tag-row{display:flex;flex-wrap:wrap;gap:7px;margin-top:20px}.tag-row span{padding:7px 9px;background:#f1f3f5;color:#66727b;font-size:8px;letter-spacing:.04em}.build-disclaimer{margin-top:auto;padding-top:22px;color:#8b959d;font-size:9px;line-height:1.7}
+  .upgrade-section{padding:100px 0 112px;background:#202b35;color:#fff}.upgrade-section .section-heading .eyebrow{color:#9eabb6}.upgrade-section .section-heading h2 em{color:#86a9d1}.upgrade-section .section-intro{color:#b5c0c9}
+  .upgrade-layout{display:grid;grid-template-columns:.75fr 1.25fr;gap:50px}.upgrade-nav{display:flex;flex-direction:column}.upgrade-nav button{display:grid;grid-template-columns:35px 1fr 20px;align-items:center;gap:10px;min-height:63px;padding:12px 13px;border:0;border-bottom:1px solid rgba(255,255,255,.12);background:transparent;color:#d4dce2;text-align:left;font-size:12px;cursor:pointer}.upgrade-nav button.active{background:#2c3a47;border-left:2px solid #6fa8ec;padding-left:11px;color:#fff}.upgrade-nav button span{color:#93a2ae;font-family:Consolas,monospace;font-size:10px}.upgrade-nav button b{color:#82b2ee;font-weight:400}.upgrade-content{padding:30px 34px;background:#293743}.upgrade-content .eyebrow{color:#9eabb6}.upgrade-content h3{margin:0;font-size:32px;font-weight:500;letter-spacing:-.04em}.upgrade-intro{max-width:530px;margin:12px 0 24px;color:#c1cbd3;font-size:12px;line-height:1.8}.project-list{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:#41505d}.project-item{min-height:90px;padding:14px;background:#22303b;display:flex;flex-direction:column;align-items:flex-start}.project-item span{color:#81b1e9;font-family:Consolas,monospace;font-size:9px}.project-item strong{margin-top:9px;color:#fff;font-size:11px}.project-item small{margin-top:6px;color:#91a0ac;font-size:7px;letter-spacing:.1em}
+  .closing-section{position:relative;min-height:470px;display:flex;align-items:center;background:#111a22;color:#fff;overflow:hidden}.closing-image{position:absolute;inset:0;background:url('https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1900&q=85') center 58%/cover;filter:grayscale(.5)}.closing-section:after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,rgba(12,19,26,.96),rgba(12,19,26,.76) 45%,rgba(12,19,26,.12))}.closing-content{position:relative;z-index:1;width:min(1200px,calc(100% - 48px));margin:0 auto;padding:75px 0}.closing-content h2{font-size:clamp(43px,6vw,76px);line-height:.98;letter-spacing:-.07em;font-weight:500;margin:0}.closing-content h2 em{color:#8baaca}.closing-content>p:not(.eyebrow){max-width:460px;color:#c0cad2;font-size:13px;line-height:1.8;margin:23px 0 28px}.closing-button{display:inline-flex;align-items:center;gap:18px;padding:16px 20px;background:#1c69d4;color:#fff;text-decoration:none;font-size:9px;font-weight:700;letter-spacing:.1em}.closing-button span{font-size:13px}
+  .m4-footer{min-height:92px;padding:22px clamp(20px,5.5vw,88px);display:flex;align-items:center;justify-content:space-between;gap:16px;background:#121a22;color:#9da8b1;font-size:8px;letter-spacing:.13em}.m4-footer .wordmark{color:#fff}
+  @media(max-width:800px){.topline{padding-inline:18px}.topline span:nth-child(2){display:none}.page-header{height:66px;padding-inline:18px}.page-header nav{gap:14px}.page-header nav a{font-size:8px}.header-action{display:none}.hero{min-height:600px}.hero-content{padding:80px 28px}.section-wrap{width:calc(100% - 36px)}.vehicle-section,.build-section,.fitment-section,.upgrade-section{padding-block:72px}.section-heading{grid-template-columns:1fr;gap:20px;margin-bottom:30px}.section-intro{max-width:600px}.chassis-grid{grid-template-columns:repeat(2,1fr)}.vehicle-fields{grid-template-columns:1fr 1fr}.vehicle-identity{grid-column:1/-1}.spec-header,.spec-row{grid-template-columns:1fr 1fr;gap:8px}.spec-header span:nth-child(4){display:none}.spec-row{padding:15px}.spec-row>strong{grid-column:1/-1}.spec-row small{grid-column:1/-1}.build-layout,.upgrade-layout{grid-template-columns:1fr;gap:20px}.build-choice{min-height:72px}.build-detail{min-height:340px}.upgrade-content{padding:25px}.fitment-actions{align-items:flex-start;flex-direction:column}.fitment-actions>span{text-align:left}.m4-footer{flex-wrap:wrap}}
+  @media(max-width:520px){.topline{height:27px;font-size:7px}.page-header nav{gap:10px}.page-header nav a{font-size:7px;letter-spacing:.07em}.wordmark{font-size:12px}.hero{min-height:560px}.hero-image{background-position:62% center}.hero-content{padding:76px 22px}.hero-meta{gap:9px;flex-wrap:wrap;font-size:8px}.hero-index{right:20px;bottom:24px}.section-wrap{width:calc(100% - 32px)}.vehicle-panel{padding:22px 16px}.vehicle-panel-top{font-size:8px}.manual-label{max-width:125px;text-align:right;line-height:1.5}.chassis-option{min-height:125px;padding:15px}.chassis-code{font-size:25px}.vehicle-fields{grid-template-columns:1fr}.vehicle-identity{grid-column:auto}.fitment-toolbar{flex-direction:column;font-size:7px}.spec-header{padding-inline:13px;font-size:7px}.spec-row{grid-template-columns:1fr 1fr;padding:13px}.spec-row>strong{font-size:11px}.spec-value{font-size:9px}.spec-row small{font-size:8px}.build-detail{grid-template-columns:1fr}.build-visual{min-height:250px}.wheel-graphic{width:185px;height:185px}.wheel-outer{width:160px;height:160px}.wheel-inner{width:100px;height:100px}.wheel-inner span,.wheel-inner i,.wheel-inner b,.wheel-inner em{left:45px;height:45px;transform-origin:5px 46px}.wheel-inner i{transform:rotate(72deg)}.wheel-inner b{transform:rotate(144deg)}.wheel-inner em{transform:rotate(216deg)}.build-copy{min-height:270px;padding:28px 23px}.project-list{grid-template-columns:1fr}.project-item{min-height:74px}.upgrade-content{padding:23px 18px}.closing-section{min-height:450px}.closing-content{width:calc(100% - 42px)}.m4-footer{align-items:flex-start;flex-direction:column;padding:26px 20px}}
+  @media(prefers-reduced-motion:reduce){:global(html){scroll-behavior:auto}.chassis-option{transition:none}}
+</style>
