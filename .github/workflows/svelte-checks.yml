@@ -1,0 +1,25 @@
+name: Svelte frontend checks
+
+on:
+  push:
+    branches:
+      - ui/bimmerz-svelte-rebuild
+  pull_request:
+    branches:
+      - ui/bimmerz-svelte-rebuild
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+      - name: Svelte and TypeScript checks
+        run: npm run check
+      - name: Production build
+        run: npm run build
