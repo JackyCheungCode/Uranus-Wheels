@@ -3,15 +3,16 @@ name: Svelte frontend checks
 permissions:
   contents: write
 
+concurrency:
+  group: svelte-preview-${{ github.ref }}
+  cancel-in-progress: true
+
 on:
   push:
     branches:
       - ui/bimmerz-svelte-rebuild
     paths-ignore:
       - dist/**
-  pull_request:
-    branches:
-      - brand/bmw-inspired-design-system
 
 jobs:
   verify:
