@@ -1,0 +1,176 @@
+/* Uranus Wheels — Brand Design System 2.0
+ * Premium BMW-focused forged wheel brand.
+ * These are Uranus Wheels tokens, not BMW corporate brand assets.
+ */
+:root {
+  color-scheme: light;
+  /* Brand palette */
+  --uw-color-white: #ffffff;
+  --uw-color-charcoal: #262626;
+  --uw-color-navy: #1a2129;
+  --uw-color-blue: #1c69d4;
+  --uw-color-blue-hover: #1558b0;
+
+  /* Neutral scale */
+  --uw-gray-025: #fbfbfb;
+  --uw-gray-050: #f7f7f7;
+  --uw-gray-100: #f1f1f1;
+  --uw-gray-200: #e6e7e8;
+  --uw-gray-300: #d8dadd;
+  --uw-gray-500: #8a9095;
+  --uw-gray-600: #697176;
+  --uw-gray-700: #4b5156;
+  --uw-gray-900: #202428;
+
+  /* Semantic */
+  --uw-text-primary: var(--uw-color-charcoal);
+  --uw-text-secondary: var(--uw-gray-600);
+  --uw-text-inverse: var(--uw-color-white);
+  --uw-surface: var(--uw-color-white);
+  --uw-surface-subtle: var(--uw-gray-050);
+  --uw-surface-muted: var(--uw-gray-100);
+  --uw-border-subtle: var(--uw-gray-200);
+  --uw-border-strong: var(--uw-gray-300);
+  --uw-action: var(--uw-color-blue);
+  --uw-action-hover: var(--uw-color-blue-hover);
+  --uw-focus: #0f62fe;
+  --uw-success: #198038;
+  --uw-warning: #b28600;
+  --uw-danger: #da1e28;
+
+  /* Typography */
+  --uw-font-sans: "Helvetica Neue", Helvetica, Arial, "Noto Sans", sans-serif;
+  --uw-font-mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  --uw-font-size-xs: 0.75rem;
+  --uw-font-size-sm: 0.875rem;
+  --uw-font-size-md: 1rem;
+  --uw-font-size-lg: 1.125rem;
+  --uw-font-size-xl: 1.5rem;
+  --uw-font-size-2xl: clamp(2rem, 4vw, 3.5rem);
+  --uw-line-tight: 1.1;
+  --uw-line-normal: 1.5;
+  --uw-line-loose: 1.7;
+
+  /* Spacing: 4px base */
+  --uw-space-1: 0.25rem;
+  --uw-space-2: 0.5rem;
+  --uw-space-3: 0.75rem;
+  --uw-space-4: 1rem;
+  --uw-space-5: 1.25rem;
+  --uw-space-6: 1.5rem;
+  --uw-space-8: 2rem;
+  --uw-space-10: 2.5rem;
+  --uw-space-12: 3rem;
+  --uw-space-16: 4rem;
+  --uw-space-20: 5rem;
+
+  /* Geometry and elevation */
+  --uw-radius-sm: 2px;
+  --uw-radius-md: 4px;
+  --uw-radius-lg: 8px;
+  --uw-radius-pill: 999px;
+  --uw-shadow-header: 0 1px 0 rgb(0 0 0 / 5%);
+  --uw-shadow-menu: 0 12px 32px rgb(0 0 0 / 12%);
+  --uw-content-max: 1440px;
+  --uw-reading-max: 760px;
+  --uw-header-height: 72px;
+
+  /* Motion */
+  --uw-motion-fast: 120ms;
+  --uw-motion-base: 200ms;
+  --uw-motion-slow: 320ms;
+  --uw-ease-standard: cubic-bezier(0.2, 0, 0.38, 0.9);
+
+  /* Layering */
+  --uw-z-header: 100;
+  --uw-z-menu: 200;
+  --uw-z-modal: 500;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  color: var(--uw-text-primary);
+  background: var(--uw-surface);
+  font-family: var(--uw-font-sans);
+  font-size: var(--uw-font-size-md);
+  line-height: var(--uw-line-normal);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+button, input, select, textarea { font: inherit; }
+button { cursor: pointer; }
+a { color: inherit; }
+:focus-visible {
+  outline: 2px solid var(--uw-focus);
+  outline-offset: 3px;
+}
+::selection { color: var(--uw-text-inverse); background: var(--uw-color-blue); }
+
+.uw-container {
+  width: min(100% - 2 * var(--uw-space-6), var(--uw-content-max));
+  margin-inline: auto;
+}
+.uw-section { padding-block: clamp(3rem, 7vw, 6.5rem); }
+.uw-section--subtle { background: var(--uw-surface-subtle); }
+.uw-section--dark { color: var(--uw-text-inverse); background: var(--uw-color-navy); }
+.uw-eyebrow {
+  margin: 0 0 var(--uw-space-3);
+  color: var(--uw-text-secondary);
+  font-size: var(--uw-font-size-xs);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.uw-heading {
+  margin: 0;
+  font-size: var(--uw-font-size-2xl);
+  font-weight: 500;
+  letter-spacing: -0.035em;
+  line-height: var(--uw-line-tight);
+}
+.uw-button {
+  display: inline-flex;
+  min-height: 48px;
+  align-items: center;
+  justify-content: center;
+  gap: var(--uw-space-2);
+  padding: 0 var(--uw-space-6);
+  border: 1px solid transparent;
+  border-radius: var(--uw-radius-sm);
+  font-weight: 600;
+  text-decoration: none;
+  transition: background var(--uw-motion-base) var(--uw-ease-standard),
+              color var(--uw-motion-base) var(--uw-ease-standard),
+              border-color var(--uw-motion-base) var(--uw-ease-standard);
+}
+.uw-button--primary { color: white; background: var(--uw-action); }
+.uw-button--primary:hover { background: var(--uw-action-hover); }
+.uw-button--secondary {
+  color: var(--uw-text-primary);
+  background: transparent;
+  border-color: var(--uw-border-strong);
+}
+.uw-button--secondary:hover { background: var(--uw-surface-muted); }
+.uw-surface-card {
+  background: var(--uw-surface);
+  border: 1px solid var(--uw-border-subtle);
+  border-radius: var(--uw-radius-md);
+}
+.uw-metric {
+  font-family: var(--uw-font-mono);
+  font-variant-numeric: tabular-nums;
+}
+@media (max-width: 640px) {
+  :root { --uw-header-height: 60px; }
+  .uw-container { width: min(100% - 2 * var(--uw-space-4), var(--uw-content-max)); }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
