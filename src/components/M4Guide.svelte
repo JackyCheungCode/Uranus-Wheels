@@ -10,6 +10,7 @@
   let yearPickerOpen = $state(false);
   let trimPickerOpen = $state(false);
   let selectedAxle = $state<'front' | 'rear'>('front');
+  let setupMode = $state<'Staggered' | 'Square' | 'Custom'>('Staggered');
   let frontWheelDiameter = $state('19');
   let frontWheelWidth = $state('9.5');
   let frontWheelEt = $state('20');
@@ -24,12 +25,26 @@
   const wheelWidthOptions = ['8.5', '9', '9.5', '10', '10.5', '11', '11.5', '12'];
   const wheelEtOptions = ['0', '5', '8', '10', '12', '15', '18', '20', '22', '25', '28', '30', '32', '35', '40'];
   const finishOptions = [
-    { name: 'Gloss Black', sheen: 'linear-gradient(135deg,#59636d,#111820 48%,#05080b)' },
-    { name: 'Satin Black', sheen: 'linear-gradient(135deg,#59616a,#252b31 50%,#101419)' },
-    { name: 'Brushed Titanium', sheen: 'linear-gradient(135deg,#e1e4e5,#7c858b 48%,#c3c9cc)' },
-    { name: 'Satin Bronze', sheen: 'linear-gradient(135deg,#c09a6b,#78563a 52%,#473324)' },
-    { name: 'Polished Aluminum', sheen: 'linear-gradient(135deg,#fff,#929da4 42%,#e8ecee 70%,#7a858d)' },
-    { name: 'Custom Color', sheen: 'linear-gradient(135deg,#83a8ce,#365a7c 52%,#1e3449)' }
+    { name: 'Gloss Black', group: 'Painted', sheen: 'linear-gradient(135deg,#59636d,#111820 48%,#05080b)' },
+    { name: 'Satin Black', group: 'Painted', sheen: 'linear-gradient(135deg,#59616a,#252b31 50%,#101419)' },
+    { name: 'Matte Black', group: 'Painted', sheen: 'linear-gradient(135deg,#55595d,#25282b 52%,#111315)' },
+    { name: 'Piano Black', group: 'Painted', sheen: 'linear-gradient(135deg,#899097,#080a0c 45%,#020304)' },
+    { name: 'Dark Gunmetal', group: 'Painted', sheen: 'linear-gradient(135deg,#7b8389,#3c4248 52%,#20252a)' },
+    { name: 'Titanium Grey', group: 'Painted', sheen: 'linear-gradient(135deg,#c3c8ca,#737c82 50%,#4b5359)' },
+    { name: 'Hyper Silver', group: 'Painted', sheen: 'linear-gradient(135deg,#fff,#aeb6bb 48%,#e3e7e9)' },
+    { name: 'Satin Silver', group: 'Painted', sheen: 'linear-gradient(135deg,#e0e4e6,#9ca5ab 50%,#737d84)' },
+    { name: 'Satin Bronze', group: 'Painted', sheen: 'linear-gradient(135deg,#c09a6b,#78563a 52%,#473324)' },
+    { name: 'Brushed Bronze', group: 'Brushed', sheen: 'linear-gradient(135deg,#d0b18a,#9a754d 48%,#634a31)' },
+    { name: 'Brushed Titanium', group: 'Brushed', sheen: 'linear-gradient(135deg,#e1e4e5,#7c858b 48%,#c3c9cc)' },
+    { name: 'Brushed Aluminium', group: 'Brushed', sheen: 'linear-gradient(135deg,#f5f6f6,#9aa4aa 48%,#d7dcdf)' },
+    { name: 'Polished Aluminium', group: 'Polished', sheen: 'linear-gradient(135deg,#fff,#929da4 42%,#e8ecee 70%,#7a858d)' },
+    { name: 'Mirror Polished', group: 'Polished', sheen: 'linear-gradient(135deg,#fff 0%,#66727b 24%,#f8f9f9 45%,#7b858c 65%,#fff)' },
+    { name: 'Champagne Gold', group: 'Special', sheen: 'linear-gradient(135deg,#e3ca91,#b69a68 52%,#79613d)' },
+    { name: 'PVD Gold', group: 'Special', sheen: 'linear-gradient(135deg,#f0d18a,#b38a42 52%,#70501f)' },
+    { name: 'Candy Red', group: 'Special', sheen: 'linear-gradient(135deg,#ed7478,#8c2028 52%,#450d12)' },
+    { name: 'Deep Blue', group: 'Special', sheen: 'linear-gradient(135deg,#6d91c1,#233f69 52%,#101e37)' },
+    { name: 'British Green', group: 'Special', sheen: 'linear-gradient(135deg,#6e9a82,#244b3d 52%,#10271f)' },
+    { name: 'Custom Colour', group: 'Special', sheen: 'conic-gradient(from 0deg,#e34d4d,#e6bd43,#6ba86b,#4b91c4,#8759a6,#e34d4d)' }
   ];
 
   const vehicleOptions: Record<Chassis, { years: string[]; trims: string[]; body: string; generation: string }> = {
@@ -200,15 +215,37 @@
   function setWheelEt(value: string) {
     if (selectedAxle === 'front') frontWheelEt = value; else rearWheelEt = value;
   }
-  function loadOemBaseline() {
-    if (selectedAxle === 'front') {
-      frontWheelDiameter = String(oemWheelBaseline.diameter);
-      frontWheelWidth = String(oemWheelBaseline.width);
-      if (oemWheelBaseline.et !== null) frontWheelEt = String(oemWheelBaseline.et);
+  function applyOemBaselineToAxle(axle: 'front' | 'rear') {
+    const spec = parseWheelSpec(axle === 'front' ? currentPackage.frontWheel : currentPackage.rearWheel);
+    if (axle === 'front') {
+      frontWheelDiameter = String(spec.diameter);
+      frontWheelWidth = String(spec.width);
+      if (spec.et !== null) frontWheelEt = String(spec.et);
     } else {
-      rearWheelDiameter = String(oemWheelBaseline.diameter);
-      rearWheelWidth = String(oemWheelBaseline.width);
-      if (oemWheelBaseline.et !== null) rearWheelEt = String(oemWheelBaseline.et);
+      rearWheelDiameter = String(spec.diameter);
+      rearWheelWidth = String(spec.width);
+      if (spec.et !== null) rearWheelEt = String(spec.et);
+    }
+  }
+
+  function loadOemBaseline() {
+    applyOemBaselineToAxle(selectedAxle);
+  }
+
+  function loadBothOemBaselines() {
+    applyOemBaselineToAxle('front');
+    applyOemBaselineToAxle('rear');
+    setupMode = 'Staggered';
+  }
+
+  function setSetupMode(mode: 'Staggered' | 'Square' | 'Custom') {
+    setupMode = mode;
+    if (mode === 'Staggered') {
+      loadBothOemBaselines();
+    } else if (mode === 'Square') {
+      rearWheelDiameter = frontWheelDiameter;
+      rearWheelWidth = frontWheelWidth;
+      rearWheelEt = frontWheelEt;
     }
   }
 
@@ -216,12 +253,14 @@
     trim = value;
     const years = validYears[chassis][value] ?? currentVehicle.years;
     if (!years.includes(year)) year = years[years.length - 1];
+    loadBothOemBaselines();
   }
 
   function selectChassis(value: Chassis) {
     chassis = value;
     trim = vehicleOptions[value].trims[0];
     year = (validYears[value][trim] ?? vehicleOptions[value].years)[(validYears[value][trim] ?? vehicleOptions[value].years).length - 1];
+    loadBothOemBaselines();
   }
 </script>
 
@@ -333,9 +372,20 @@
         <div class="fitment-configurator" id="fitment-builder">
           <div class="config-heading">
             <div><p class="eyebrow">URANUS WHEELS / FITMENT STUDIO</p><h3>Explore your<br /><em>fitment range.</em></h3><p>Change wheel diameter, width and offset. The technical illustration updates with your selection and compares the wheel position against the selected factory baseline.</p></div>
-            <div class="config-vehicle"><span>ACTIVE VEHICLE</span><strong>{chassis} · {trim}</strong><small>{selectedYear} MODEL YEAR / {selectedAxle.toUpperCase()} AXLE</small></div>
+            <div class="config-vehicle"><span>ACTIVE VEHICLE</span><strong>{chassis} · {trim}</strong><small>{selectedYear} MODEL YEAR / {setupMode.toUpperCase()} SETUP</small></div>
           </div>
-          <div class="axle-switch"><button class:active={selectedAxle === 'front'} onclick={() => selectedAxle = 'front'}>FRONT AXLE</button><button class:active={selectedAxle === 'rear'} onclick={() => selectedAxle = 'rear'}>REAR AXLE</button><button class="baseline-action" onclick={loadOemBaseline}>LOAD OEM BASELINE ↺</button></div>
+          <div class="setup-mode-row" aria-label="Wheel setup type">
+            <span>SETUP TYPE</span>
+            <button class:active={setupMode === 'Staggered'} onclick={() => setSetupMode('Staggered')}>OEM STAGGERED</button>
+            <button class:active={setupMode === 'Square'} onclick={() => setSetupMode('Square')}>SQUARE</button>
+            <button class:active={setupMode === 'Custom'} onclick={() => setSetupMode('Custom')}>CUSTOM STAGGERED</button>
+            <button class="baseline-action" onclick={loadBothOemBaselines}>RESET BOTH AXLES ↺</button>
+          </div>
+          <div class="axle-summary">
+            <button class:active={selectedAxle === 'front'} onclick={() => selectedAxle = 'front'}><small>FRONT WHEEL</small><strong>{frontWheelDiameter} × {frontWheelWidth}J</strong><span>ET{frontWheelEt}</span></button>
+            <button class:active={selectedAxle === 'rear'} onclick={() => selectedAxle = 'rear'}><small>REAR WHEEL</small><strong>{rearWheelDiameter} × {rearWheelWidth}J</strong><span>ET{rearWheelEt}</span></button>
+          </div>
+          <div class="axle-switch"><button class:active={selectedAxle === 'front'} onclick={() => selectedAxle = 'front'}>EDIT FRONT AXLE</button><button class:active={selectedAxle === 'rear'} onclick={() => selectedAxle = 'rear'}>EDIT REAR AXLE</button><button class="baseline-action" onclick={loadOemBaseline}>LOAD THIS AXLE OEM ↺</button></div>
           <div class="fitment-workspace">
             <div class="parameter-panel">
               <div class="parameter-group"><label>WHEEL DIAMETER</label><div class="parameter-options">{#each wheelDiameterOptions as value}<button class:chosen={wheelDiameter === value} onclick={() => setWheelDiameter(value)}>{value}<small>″</small></button>{/each}</div></div>
@@ -355,6 +405,10 @@
                 <rect x={535 - wheelFaceWidth / 2 + wheelDiagramShift} y="76" width={wheelFaceWidth} height="190" rx="12" fill="url(#rimMetal)" stroke="#d9e0e5" stroke-width="2"/><line x1="535" y1="67" x2="535" y2="280" stroke="#7da9d5" stroke-width="1.5" stroke-dasharray="4 4"/><line x1={535 + wheelDiagramShift} y1="67" x2={535 + wheelDiagramShift} y2="280" stroke="#fff" stroke-width="2"/><text x="535" y="304" text-anchor="middle" class="svg-sub">ET{wheelEt} · {wheelWidth}J</text><text x="435" y="293" class="svg-tiny">INBOARD</text><text x="600" y="293" class="svg-tiny">OUTBOARD</text>
               </svg>
               <div class="diagram-legend"><span><i class="legend-oem"></i> OEM reference position</span><span><i class="legend-selected"></i> Selected position</span></div>
+              <div class="product-reference">
+                <img src="https://vsforged.com/wp-content/uploads/2019/01/VS02-bg5.jpg" alt="Third-party forged wheel reference showing wheel face and deep barrel profile" loading="lazy" />
+                <div><strong>REAL-WORLD WHEEL REFERENCE</strong><span>Third-party product example · VS Forged VS02 · Visual reference only, not a Uranus Wheels product</span><a href="https://vsforged.com/vs02/" target="_blank" rel="noreferrer">VIEW SUPPLIER PRODUCT ↗</a></div>
+              </div>
               <div class="delta-grid"><div><span>OUTER POSITION CHANGE</span><strong>{fitmentDelta ? (fitmentDelta.outer > 0 ? '+' : '') + fitmentDelta.outer.toFixed(1) + ' mm' : 'OEM ET NOT PUBLISHED'}</strong><small>{fitmentDelta ? (fitmentDelta.outer > 0 ? 'Further outward' : fitmentDelta.outer < 0 ? 'Further inward' : 'Same outer position') : 'Offset comparison unavailable'}</small></div><div><span>INNER CLEARANCE CHANGE</span><strong>{fitmentDelta ? (fitmentDelta.inner > 0 ? '+' : '') + fitmentDelta.inner.toFixed(1) + ' mm' : 'OEM ET NOT PUBLISHED'}</strong><small>{fitmentDelta ? (fitmentDelta.inner > 0 ? 'Uses more inner space' : fitmentDelta.inner < 0 ? 'Gains inner clearance' : 'Same inner position') : 'Offset comparison unavailable'}</small></div></div>
             </div>
           </div>
@@ -390,7 +444,7 @@
         <div class="finish-layout">
           <div class="finish-preview"><div class="finish-preview-head"><span>FINISH PREVIEW</span><span>ILLUSTRATIVE SAMPLE</span></div><div class="finish-wheel" style:background={finishOptions.find((item) => item.name === selectedFinish)?.sheen ?? finishOptions[0].sheen}><div class="finish-wheel-ring"><div class="finish-wheel-face"><div class="finish-wheel-hub"></div>{#each Array.from({length: 10}, (_, i) => i) as spoke}<i style:transform={'rotate(' + (spoke * 36) + 'deg)'}></i>{/each}</div></div></div><strong>{selectedFinish}</strong><small>COLOUR / SHEEN SAMPLE — FINAL FINISH SUBJECT TO APPROVAL</small></div>
           <div class="finish-options"><p class="eyebrow">AVAILABLE FINISH DIRECTIONS</p><div class="finish-grid">{#each finishOptions as finish}<button class:active={selectedFinish === finish.name} class="finish-option" onclick={() => selectedFinish = finish.name}><span class="finish-swatch" style:background={finish.sheen}></span><strong>{finish.name}</strong><small>{finish.name === 'Custom Color' ? 'Colour matching on request' : 'Finish sample'}</small></button>{/each}</div>
-            <div class="process-list"><p class="eyebrow">MANUFACTURING & FINISHING PROCESSES</p><div><b>01</b><span><strong>Forging & CNC Machining</strong><small>Wheel blank forming, precision machining and design-specific detailing.</small></span></div><div><b>02</b><span><strong>Brushing & Polishing</strong><small>Directional grain, polished surfaces and machined-face treatments.</small></span></div><div><b>03</b><span><strong>Painting & Powder Coating</strong><small>Gloss, satin, matte and selected custom colour directions.</small></span></div><div><b>04</b><span><strong>Multi-Piece Assembly</strong><small>Custom component combinations and assembly options, subject to project specification.</small></span></div></div>
+            <div class="process-list"><p class="eyebrow">MANUFACTURING & FINISHING PROCESSES</p><div><b>01</b><span><strong>Forging & CNC Machining</strong><small>Wheel blank forming, precision machining and design-specific detailing.</small></span></div><div><b>02</b><span><strong>Brushing & Polishing</strong><small>Directional grain, polished surfaces and machined-face treatments.</small></span></div><div><b>03</b><span><strong>Painting & Powder Coating</strong><small>Gloss, satin, matte and selected custom colour directions.</small></span></div><div><b>04</b><span><strong>Diamond-Cut & Two-Tone</strong><small>Machined highlights, contrast pockets and layered finish effects where the design permits.</small></span></div><div><b>05</b><span><strong>PVD / Special Effects</strong><small>Selected metallic coating and transparent-tint effects, confirmed per wheel substrate and process partner.</small></span></div><div><b>06</b><span><strong>Multi-Piece Assembly</strong><small>Custom face, barrel, hardware and assembly options, subject to project specification.</small></span></div></div>
           </div>
         </div>
       </div>
@@ -461,12 +515,12 @@
   .m4-footer{min-height:92px;padding:22px clamp(20px,5.5vw,88px);display:flex;align-items:center;justify-content:space-between;gap:16px;background:#121a22;color:#9da8b1;font-size:8px;letter-spacing:.13em}.m4-footer .wordmark{color:#fff}
 
   .fitment-configurator{margin-top:34px;padding:30px;background:#202c36;color:#fff}.config-heading{display:flex;justify-content:space-between;gap:30px;align-items:flex-end;padding-bottom:24px;border-bottom:1px solid rgba(255,255,255,.1)}.config-heading .eyebrow{color:#8fa7bc;margin-bottom:12px}.config-heading h3{font-size:clamp(32px,4vw,48px);line-height:1;letter-spacing:-.06em;font-weight:500;margin:0}.config-heading h3 em{color:#8ca9c9}.config-heading p:not(.eyebrow){max-width:560px;color:#aebbc5;font-size:11px;line-height:1.8;margin:13px 0 0}.config-vehicle{min-width:190px;padding:15px 17px;background:#293946;display:flex;flex-direction:column;gap:7px}.config-vehicle span,.config-vehicle small{color:#91a2af;font-size:8px;letter-spacing:.13em}.config-vehicle strong{font-size:15px}.config-vehicle small{font-size:7px}
-  .axle-switch{display:flex;align-items:center;gap:2px;margin:22px 0}.axle-switch button{padding:12px 16px;border:0;background:#293743;color:#aab8c3;font-size:8px;font-weight:700;letter-spacing:.12em;cursor:pointer}.axle-switch button.active{background:#dce8f3;color:#20303d}.axle-switch .baseline-action{margin-left:auto;background:transparent;color:#9db9d4;border:1px solid #526574}.fitment-workspace{display:grid;grid-template-columns:.8fr 1.2fr;gap:1px;background:#3d4b57}.parameter-panel{padding:24px;background:#263541}.parameter-group{margin-bottom:23px}.parameter-group label{display:block;margin-bottom:11px;color:#9eacb7;font-size:8px;font-weight:700;letter-spacing:.14em}.parameter-options{display:flex;flex-wrap:wrap;gap:5px}.parameter-options button{min-width:47px;padding:9px 8px;border:1px solid #465764;background:#202d37;color:#c5d0d8;font-family:Consolas,monospace;font-size:11px;cursor:pointer}.parameter-options button small{font-family:Arial,sans-serif;color:#94a5b2;font-size:8px}.parameter-options button.chosen{border-color:#82b1e3;background:#e4eef8;color:#20303c}.parameter-options button.chosen small{color:#536d83}.width-options button{min-width:49px}.et-options button{min-width:49px;font-size:9px}.selected-spec{display:grid;grid-template-columns:1fr auto;align-items:center;gap:5px;padding:17px;background:#192630}.selected-spec span{grid-column:1/-1;color:#94a5b1;font-size:8px;letter-spacing:.13em}.selected-spec strong{font-size:22px;font-weight:500}.selected-spec b{color:#91b8e0;font-family:Consolas,monospace;font-size:16px}.parameter-footnote{margin:14px 0 0;color:#93a2ad;font-size:9px;line-height:1.7}
-  .diagram-panel{padding:20px 22px;background:#1b2731}.diagram-title{display:flex;justify-content:space-between;color:#9eacb7;font-size:8px;font-weight:700;letter-spacing:.12em}.diagram-title span:last-child{color:#6f7f8c}.fitment-diagram{display:block;width:100%;height:auto;max-height:330px;overflow:visible}.svg-label{fill:#aab9c5;font-size:12px;letter-spacing:2px}.svg-sub{fill:#9cabb7;font-size:10px;letter-spacing:1px}.svg-tiny{fill:#8293a0;font-size:8px;letter-spacing:1px}.diagram-legend{display:flex;justify-content:center;gap:22px;padding:7px 0 18px;color:#aab7c1;font-size:8px}.diagram-legend span{display:flex;align-items:center;gap:7px}.diagram-legend i{display:inline-block;width:17px;height:3px}.legend-oem{background:#7da9d5}.legend-selected{background:#fff}.delta-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:#3c4a56}.delta-grid>div{padding:14px;background:#263541}.delta-grid span,.delta-grid small{display:block;color:#95a5b1;font-size:7px;letter-spacing:.1em}.delta-grid strong{display:block;margin:8px 0;color:#fff;font-family:Consolas,monospace;font-size:17px}.delta-grid small{font-size:8px;letter-spacing:0}.fitment-warning{display:flex;gap:15px;padding:17px 19px;background:#2b3b47;color:#b7c4ce}.fitment-warning b{flex:0 0 auto;color:#a9c9e8;font-size:8px;letter-spacing:.1em}.fitment-warning span{font-size:9px;line-height:1.7}
+  .setup-mode-row{display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin:22px 0 12px}.setup-mode-row>span{margin-right:8px;color:#9eacb7;font-size:8px;font-weight:700;letter-spacing:.12em}.setup-mode-row button,.axle-switch button{padding:11px 13px;border:1px solid #465764;background:#293743;color:#aab8c3;font-size:8px;font-weight:700;letter-spacing:.1em;cursor:pointer}.setup-mode-row button.active,.axle-switch button.active{border-color:#9bbce0;background:#dce8f3;color:#20303d}.setup-mode-row .baseline-action,.axle-switch .baseline-action{margin-left:auto;background:transparent;color:#9db9d4;border:1px solid #526574}.axle-summary{display:grid;grid-template-columns:1fr 1fr;gap:1px;margin:12px 0;background:#42515d}.axle-summary button{display:grid;grid-template-columns:1fr auto;gap:5px 12px;padding:14px 16px;border:0;background:#24333f;color:#fff;text-align:left;cursor:pointer}.axle-summary button.active{background:#304657;box-shadow:inset 0 -2px #8db8e4}.axle-summary small{grid-column:1/-1;color:#9eacb7;font-size:8px;letter-spacing:.12em}.axle-summary strong{font-size:16px;font-weight:500}.axle-summary span{color:#a9c9e8;font-family:Consolas,monospace;font-size:13px}.fitment-workspace{display:grid;grid-template-columns:.8fr 1.2fr;gap:1px;background:#3d4b57}.parameter-panel{padding:24px;background:#263541}.parameter-group{margin-bottom:23px}.parameter-group label{display:block;margin-bottom:11px;color:#9eacb7;font-size:8px;font-weight:700;letter-spacing:.14em}.parameter-options{display:flex;flex-wrap:wrap;gap:5px}.parameter-options button{min-width:47px;padding:9px 8px;border:1px solid #465764;background:#202d37;color:#c5d0d8;font-family:Consolas,monospace;font-size:11px;cursor:pointer}.parameter-options button small{font-family:Arial,sans-serif;color:#94a5b2;font-size:8px}.parameter-options button.chosen{border-color:#82b1e3;background:#e4eef8;color:#20303c}.parameter-options button.chosen small{color:#536d83}.width-options button{min-width:49px}.et-options button{min-width:49px;font-size:9px}.selected-spec{display:grid;grid-template-columns:1fr auto;align-items:center;gap:5px;padding:17px;background:#192630}.selected-spec span{grid-column:1/-1;color:#94a5b1;font-size:8px;letter-spacing:.13em}.selected-spec strong{font-size:22px;font-weight:500}.selected-spec b{color:#91b8e0;font-family:Consolas,monospace;font-size:16px}.parameter-footnote{margin:14px 0 0;color:#93a2ad;font-size:9px;line-height:1.7}
+  .diagram-panel{padding:20px 22px;background:#1b2731}.diagram-title{display:flex;justify-content:space-between;color:#9eacb7;font-size:8px;font-weight:700;letter-spacing:.12em}.diagram-title span:last-child{color:#6f7f8c}.fitment-diagram{display:block;width:100%;height:auto;max-height:330px;overflow:visible}.svg-label{fill:#aab9c5;font-size:12px;letter-spacing:2px}.svg-sub{fill:#9cabb7;font-size:10px;letter-spacing:1px}.svg-tiny{fill:#8293a0;font-size:8px;letter-spacing:1px}.diagram-legend{display:flex;justify-content:center;gap:22px;padding:7px 0 18px;color:#aab7c1;font-size:8px}.diagram-legend span{display:flex;align-items:center;gap:7px}.diagram-legend i{display:inline-block;width:17px;height:3px}.legend-oem{background:#7da9d5}.legend-selected{background:#fff}.product-reference{display:grid;grid-template-columns:112px 1fr;gap:14px;align-items:center;margin-top:14px;padding:12px;background:#263541}.product-reference img{width:112px;height:104px;object-fit:contain;background:#fff}.product-reference div{display:flex;flex-direction:column;gap:7px}.product-reference strong{color:#e5edf3;font-size:8px;letter-spacing:.12em}.product-reference span{color:#aab8c3;font-size:8px;line-height:1.6}.product-reference a{color:#8fb9e7;font-size:8px;font-weight:700;text-decoration:none;letter-spacing:.08em}.delta-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:#3c4a56}.delta-grid>div{padding:14px;background:#263541}.delta-grid span,.delta-grid small{display:block;color:#95a5b1;font-size:7px;letter-spacing:.1em}.delta-grid strong{display:block;margin:8px 0;color:#fff;font-family:Consolas,monospace;font-size:17px}.delta-grid small{font-size:8px;letter-spacing:0}.fitment-warning{display:flex;gap:15px;padding:17px 19px;background:#2b3b47;color:#b7c4ce}.fitment-warning b{flex:0 0 auto;color:#a9c9e8;font-size:8px;letter-spacing:.1em}.fitment-warning span{font-size:9px;line-height:1.7}
   .finish-section{background:#19232d}.finish-layout{display:grid;grid-template-columns:.8fr 1.2fr;gap:1px;background:#46535f}.finish-preview{min-height:460px;padding:28px;background:radial-gradient(ellipse at 50% 48%,#3b4b58,#202c36 68%);display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff}.finish-preview-head{width:100%;display:flex;justify-content:space-between;margin-bottom:28px;color:#aab7c1;font-size:8px;letter-spacing:.12em}.finish-wheel{width:240px;height:240px;border-radius:50%;display:grid;place-items:center;box-shadow:0 22px 50px rgba(0,0,0,.3),inset 0 0 0 9px rgba(255,255,255,.16);transition:background .2s}.finish-wheel-ring{width:208px;height:208px;border-radius:50%;display:grid;place-items:center;background:repeating-conic-gradient(#b6c0c7 0 3deg,#4c5862 3deg 8deg,#d5dce0 8deg 10deg);box-shadow:inset 0 0 0 14px #1b2731}.finish-wheel-face{position:relative;width:126px;height:126px;border-radius:50%;background:radial-gradient(circle,#aeb9c0 0 8%,#25313b 9% 19%,#929da5 20% 26%,#35424d 27% 100%);box-shadow:inset 0 0 0 8px rgba(255,255,255,.2)}.finish-wheel-face i{position:absolute;left:59px;top:4px;width:9px;height:58px;transform-origin:4px 59px;border-radius:5px;background:linear-gradient(90deg,rgba(255,255,255,.8),rgba(20,30,39,.8))}.finish-wheel-hub{position:absolute;inset:47px;border-radius:50%;z-index:2;background:#9ba7ae;border:3px solid #d4dce1}.finish-preview>strong{margin-top:26px;font-size:18px;font-weight:500}.finish-preview>small{margin-top:8px;color:#9eacb7;font-size:7px;letter-spacing:.12em;text-align:center}.finish-options{padding:27px;background:#263541}.finish-options>.eyebrow{color:#a6b5c0}.finish-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}.finish-option{padding:10px;border:1px solid #465764;background:#202d37;color:#fff;text-align:left;cursor:pointer}.finish-option.active{border-color:#9bbce0;background:#2c4050}.finish-swatch{display:block;height:48px;margin-bottom:10px;border:1px solid rgba(255,255,255,.16)}.finish-option strong{display:block;font-size:9px}.finish-option small{display:block;margin-top:5px;color:#9cabb6;font-size:7px}.process-list{margin-top:26px;padding-top:22px;border-top:1px solid rgba(255,255,255,.1)}.process-list>.eyebrow{color:#9fb1bf}.process-list>div{display:flex;gap:13px;padding:12px 0;border-bottom:1px solid rgba(255,255,255,.07)}.process-list>div>b{color:#82b2e6;font-family:Consolas,monospace;font-size:10px}.process-list>div span{display:flex;flex-direction:column;gap:5px}.process-list strong{color:#edf2f5;font-size:10px}.process-list small{color:#9eacb7;font-size:8px;line-height:1.6}
   .services-section{padding:100px 0 108px;background:#f5f6f7}.service-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:#dce1e5}.service-grid article{min-height:190px;padding:25px;background:#fff}.service-grid article>span{color:#788894;font-size:8px;font-weight:700;letter-spacing:.13em}.service-grid h3{margin:23px 0 10px;color:#202a33;font-size:19px;font-weight:500;letter-spacing:-.03em}.service-grid p{margin:0;color:#6e7981;font-size:10px;line-height:1.8}.service-disclaimer{margin:17px 0 0;color:#849099;font-size:8px;line-height:1.7}
 
   @media(max-width:800px){.topline{padding-inline:18px}.topline span:nth-child(2){display:none}.page-header{height:66px;padding-inline:18px}.page-header nav{gap:14px}.page-header nav a{font-size:8px}.header-action{display:none}.hero{min-height:600px}.hero-content{padding:80px 28px}.section-wrap{width:calc(100% - 36px)}.vehicle-section,.build-section,.fitment-section,.upgrade-section{padding-block:72px}.section-heading{grid-template-columns:1fr;gap:20px;margin-bottom:30px}.section-intro{max-width:600px}.chassis-grid{grid-template-columns:repeat(2,1fr)}.vehicle-fields{grid-template-columns:1fr 1fr}.vehicle-identity{grid-column:1/-1}.spec-header,.spec-row{grid-template-columns:1fr 1fr;gap:8px}.spec-header span:nth-child(4){display:none}.spec-row{padding:15px}.spec-row>strong{grid-column:1/-1}.spec-row small{grid-column:1/-1}.build-layout,.upgrade-layout{grid-template-columns:1fr;gap:20px}.build-choice{min-height:72px}.build-detail{min-height:340px}.upgrade-content{padding:25px}.fitment-actions{align-items:flex-start;flex-direction:column}.fitment-actions>span{text-align:left}.config-heading{align-items:flex-start;flex-direction:column}.config-vehicle{width:100%}.fitment-workspace,.finish-layout{grid-template-columns:1fr}.service-grid{grid-template-columns:repeat(2,1fr)}.m4-footer{flex-wrap:wrap}}
-  @media(max-width:520px){.topline{height:27px;font-size:7px}.page-header nav{gap:10px}.page-header nav a{font-size:7px;letter-spacing:.07em}.wordmark{font-size:12px}.hero{min-height:560px}.hero-image{background-position:62% center}.hero-content{padding:76px 22px}.hero-meta{gap:9px;flex-wrap:wrap;font-size:8px}.hero-index{right:20px;bottom:24px}.section-wrap{width:calc(100% - 32px)}.vehicle-panel{padding:22px 16px}.vehicle-panel-top{font-size:8px}.manual-label{max-width:125px;text-align:right;line-height:1.5}.chassis-option{min-height:125px;padding:15px}.chassis-code{font-size:25px}.vehicle-fields{grid-template-columns:1fr}.vehicle-identity{grid-column:auto}.service-grid{grid-template-columns:1fr}.finish-grid{grid-template-columns:repeat(2,1fr)}.axle-switch{flex-wrap:wrap}.axle-switch .baseline-action{margin-left:0}.fitment-configurator{padding:18px}.parameter-panel{padding:18px}.diagram-panel{padding:15px 8px}.delta-grid strong{font-size:13px}.fitment-toolbar{flex-direction:column;font-size:7px}.spec-header{padding-inline:13px;font-size:7px}.spec-row{grid-template-columns:1fr 1fr;padding:13px}.spec-row>strong{font-size:11px}.spec-value{font-size:9px}.spec-row small{font-size:8px}.build-detail{grid-template-columns:1fr}.build-visual{min-height:250px}.wheel-graphic{width:185px;height:185px}.wheel-outer{width:160px;height:160px}.wheel-inner{width:100px;height:100px}.wheel-inner span,.wheel-inner i,.wheel-inner b,.wheel-inner em{left:45px;height:45px;transform-origin:5px 46px}.wheel-inner i{transform:rotate(72deg)}.wheel-inner b{transform:rotate(144deg)}.wheel-inner em{transform:rotate(216deg)}.build-copy{min-height:270px;padding:28px 23px}.project-list{grid-template-columns:1fr}.project-item{min-height:74px}.upgrade-content{padding:23px 18px}.closing-section{min-height:450px}.closing-content{width:calc(100% - 42px)}.m4-footer{align-items:flex-start;flex-direction:column;padding:26px 20px}}
+  @media(max-width:520px){.setup-mode-row .baseline-action,.axle-switch .baseline-action{margin-left:0}.axle-summary strong{font-size:13px}.product-reference{grid-template-columns:88px 1fr}.product-reference img{width:88px;height:88px}.topline{height:27px;font-size:7px}.page-header nav{gap:10px}.page-header nav a{font-size:7px;letter-spacing:.07em}.wordmark{font-size:12px}.hero{min-height:560px}.hero-image{background-position:62% center}.hero-content{padding:76px 22px}.hero-meta{gap:9px;flex-wrap:wrap;font-size:8px}.hero-index{right:20px;bottom:24px}.section-wrap{width:calc(100% - 32px)}.vehicle-panel{padding:22px 16px}.vehicle-panel-top{font-size:8px}.manual-label{max-width:125px;text-align:right;line-height:1.5}.chassis-option{min-height:125px;padding:15px}.chassis-code{font-size:25px}.vehicle-fields{grid-template-columns:1fr}.vehicle-identity{grid-column:auto}.service-grid{grid-template-columns:1fr}.finish-grid{grid-template-columns:repeat(2,1fr)}.axle-switch{flex-wrap:wrap}.axle-switch .baseline-action{margin-left:0}.fitment-configurator{padding:18px}.parameter-panel{padding:18px}.diagram-panel{padding:15px 8px}.delta-grid strong{font-size:13px}.fitment-toolbar{flex-direction:column;font-size:7px}.spec-header{padding-inline:13px;font-size:7px}.spec-row{grid-template-columns:1fr 1fr;padding:13px}.spec-row>strong{font-size:11px}.spec-value{font-size:9px}.spec-row small{font-size:8px}.build-detail{grid-template-columns:1fr}.build-visual{min-height:250px}.wheel-graphic{width:185px;height:185px}.wheel-outer{width:160px;height:160px}.wheel-inner{width:100px;height:100px}.wheel-inner span,.wheel-inner i,.wheel-inner b,.wheel-inner em{left:45px;height:45px;transform-origin:5px 46px}.wheel-inner i{transform:rotate(72deg)}.wheel-inner b{transform:rotate(144deg)}.wheel-inner em{transform:rotate(216deg)}.build-copy{min-height:270px;padding:28px 23px}.project-list{grid-template-columns:1fr}.project-item{min-height:74px}.upgrade-content{padding:23px 18px}.closing-section{min-height:450px}.closing-content{width:calc(100% - 42px)}.m4-footer{align-items:flex-start;flex-direction:column;padding:26px 20px}}
   @media(prefers-reduced-motion:reduce){:global(html){scroll-behavior:auto}.chassis-option{transition:none}}
 </style>
