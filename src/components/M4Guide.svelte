@@ -95,10 +95,10 @@
   const technicalOverview = $derived.by(() => {
     if (chassis.startsWith('F')) {
       const data: Record<string, { power: string; torque: string; transmission: string; brakes: string }> = {
-        M4: { power: '431 hp (market rating may vary)', torque: '550 Nm', transmission: '6-speed manual or 7-speed M DCT', brakes: 'M Compound brakes; optional M Carbon Ceramic Brakes on selected markets' },
+        M4: { power: '431 PS / 425 hp (market rating)', torque: '550 Nm', transmission: '6-speed manual or 7-speed M DCT', brakes: 'M Compound brakes; optional M Carbon Ceramic Brakes on selected markets' },
         Competition: { power: '444 hp (US rating) / 450 PS (regional rating)', torque: '550 Nm', transmission: '6-speed manual or 7-speed M DCT', brakes: 'M Compound brakes; optional M Carbon Ceramic Brakes' },
-        CS: { power: '460 hp', torque: '600 Nm', transmission: '7-speed M DCT', brakes: 'M Compound brakes; optional M Carbon Ceramic Brakes' },
-        GTS: { power: '493 hp', torque: '600 Nm', transmission: '7-speed M DCT', brakes: 'M Carbon Ceramic Brakes' }
+        CS: { power: '460 PS / 454 hp (US rating)', torque: '600 Nm', transmission: '7-speed M DCT', brakes: 'M Compound brakes; optional M Carbon Ceramic Brakes' },
+        GTS: { power: '500 PS / 493 hp (US rating)', torque: '600 Nm', transmission: '7-speed M DCT', brakes: 'M Carbon Ceramic Brakes' }
       };
       return { engine: 'S55B30 · 2,979 cc twin-turbo inline-six', ...(data[trim] ?? data.M4), drive: 'Rear-wheel drive', suspension: 'M-specific suspension; adaptive equipment varies by edition and market', source: 'BMW M / BMW technical data' };
     }
@@ -114,7 +114,7 @@
   const galleryImages: Record<Chassis, { src: string; alt: string; caption: string; credit: string }[]> = {
     F82: [
       { src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/21/The_frontview_of_BMW_M4_Coup%C3%A9_%28F82%29.JPG/1280px-The_frontview_of_BMW_M4_Coup%C3%A9_%28F82%29.JPG', alt: 'BMW M4 F82 front three-quarter view', caption: 'F82 · Front profile', credit: 'Tokumeigakarinoaoshima · CC0' },
-      { src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/The_front_tire_wheel_of_BMW_M4_Coup%C3%A9_%28F82%29.JPG/1280px-The_front_tire_wheel_of_BMW_M4_Coup%C3%A9_%28F82%29.JPG', alt: 'BMW M4 F82 front wheel and tyre close-up', caption: 'F82 · Front wheel detail', credit: 'Tokumeigakarinoaoshima · CC0' }
+      { src: 'https://commons.wikimedia.org/wiki/Special:FilePath/The_front_tire_wheel_of_BMW_M4_Coup%C3%A9_%28F82%29.JPG?width=1280', alt: 'BMW M4 F82 front wheel and tyre close-up', caption: 'F82 · Front wheel detail', credit: 'Tokumeigakarinoaoshima · CC0' }
     ],
     F83: [
       { src: 'https://commons.wikimedia.org/wiki/Special:FilePath/2014-2018_BMW_M4_%28F83%29_convertible_%282018-08-06%29_01.jpg?width=1600', alt: 'BMW M4 F83 convertible', caption: 'F83 · Convertible profile', credit: 'EuroVisionNim · CC BY-SA 4.0' },
@@ -270,10 +270,16 @@
           <div class="source-fields">
             <span>UW-M4-F-001 <b>F82/F83 hardware · FMB Wheels</b><a href="https://fmbwheels.com/bmw-f82-m4-2015-2020-wheel-fitment-guide/" target="_blank" rel="noreferrer">Open source ↗</a></span>
             <span>UW-M4-F-002 <b>F82/F83 OEM packages · FMB Wheels</b><a href="https://fmbwheels.com/bmw-f82-m4-2015-2020-wheel-fitment-guide/" target="_blank" rel="noreferrer">Open source ↗</a></span>
+            <span>UW-M4-F-003 <b>F82 engine / edition data · BMW</b><a href="https://www.bmw-m.com/en/topics/magazine-article-pool/bmw-m3-f80-and-bmw-m4-f82.html" target="_blank" rel="noreferrer">BMW M technical overview ↗</a></span>
+            <span>UW-M4-F-004 <b>F82 CS technical data · BMW</b><a href="https://www.press.bmwgroup.com/global/article/detail/T0269820EN/the-new-bmw-m4-cs?language=en" target="_blank" rel="noreferrer">BMW press kit ↗</a></span>
+            <span>UW-M4-F-005 <b>F82 factory wheel / tyre cross-check</b><a href="https://www.bmw.com" target="_blank" rel="noreferrer">BMW official site ↗</a></span>
             <span>UW-M4-G-001 <b>G82/G83 hardware · PG Wheels / FMB</b><a href="https://fmbwheels.com/bmw-g82-m4-wheel-fitment-guide/" target="_blank" rel="noreferrer">Open source ↗</a></span>
             <span>UW-M4-G-002 <b>G82 OEM tyre / wheel sizes · BMW</b><a href="https://www.press.bmwgroup.com/usa/article/detail/T0439244EN_US/the-new-2025-bmw-m4-coupe-and-m4-convertible?language=en_US" target="_blank" rel="noreferrer">BMW technical data ↗</a></span>
             <span>UW-M4-G-003 <b>2025 M4 CS · BMW</b><a href="https://www.press.bmwgroup.com/usa/article/detail/T0441789EN_US/the-new-2025-bmw-m4-cs" target="_blank" rel="noreferrer">BMW technical data ↗</a></span>
             <span>UW-M4-G-004 <b>2023 M4 CSL · BMW</b><a href="https://www.press.bmwgroup.com/usa/article/detail/T0392153EN_US/the-bmw-m4-csl" target="_blank" rel="noreferrer">BMW technical data ↗</a></span>
+            <span>UW-M4-G-005 <b>2021 M4 factory specification · BMW</b><a href="https://www.press.bmwgroup.com/usa/article/detail/T0317577EN_US/the-new-2021-bmw-m3-sedan-and-m4-coupe?language=en_US" target="_blank" rel="noreferrer">BMW technical data ↗</a></span>
+            <span>UW-M4-G-006 <b>Wheel size cross-check · Wheelssize</b><a href="https://wheelssize.com/wheels/bmw/m4/" target="_blank" rel="noreferrer">Open database ↗</a></span>
+            <span>UW-M4-G-007 <b>Wheel size cross-check · 4Wheels</b><a href="https://4wheels.com.tw/fitment/bmw/m4" target="_blank" rel="noreferrer">Open database ↗</a></span>
           </div>
         </div>
         <div class="source-standard">
