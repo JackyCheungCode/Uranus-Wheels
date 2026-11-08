@@ -37,15 +37,15 @@
     const f = fitment || {};
     const value = (v: unknown) => v == null || String(v).trim() === '' ? '' : String(v);
     const pcd = value(f.bolt_pattern || f.pcd || f.PCD);
-    const pcdMatch = pcd.match(/(\\d{1,2})\\s*[x×]\\s*(\\d{2,3}(?:\\.\\d+)?)/i);
+    const pcdMatch = pcd.match(/(\d{1,2})\s*[x×]\s*(\d{2,3}(?:\.\d+)?)/i);
     const pcdValid = !!pcdMatch && Number(pcdMatch[1]) >= 3 && Number(pcdMatch[1]) <= 8 && Number(pcdMatch[2]) >= 50 && Number(pcdMatch[2]) <= 200;
     const lugCount = Number(f.lug_count) > 0 ? Number(f.lug_count) : null;
     const pcdMismatch = !!(pcdValid && lugCount && Number(pcdMatch?.[1]) !== lugCount);
     const bore = value(f.center_bore_mm || f.center_bore || f.hub_bore_mm);
     const rearBore = value(f.center_bore_rear_mm);
     const oeWheel = value(f.oe_wheel);
-    const oeEt = (oeWheel.match(/ET\\s*[+-]?\\d+/i) || [])[0] || '';
-    const oeSizeFound = /\\b\\d{2}\\s*[x×]\\s*\\d{1,2}(?:\\.\\d+)?\\s*J?\\b/i.test(oeWheel);
+    const oeEt = (oeWheel.match(/ET\s*[+-]?\d+/i) || [])[0] || '';
+    const oeSizeFound = /\b\d{2}\s*[x×]\s*\d{1,2}(?:\.\d+)?\s*J?\b/i.test(oeWheel);
     const load = value(f.load_rating || f.wheel_load_rating || f.max_load_kg || f.load_capacity_kg);
     const brake = value(f.brake_clearance || f.brake_caliper_clearance || f.caliper_clearance);
     const thread = value(f.lug_thread || f.bolt_thread || f.thread_size);
