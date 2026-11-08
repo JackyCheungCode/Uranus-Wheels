@@ -3,7 +3,7 @@
   import FitmentFinder from './components/FitmentFinder.svelte';
   import M4Guide from './components/M4Guide.svelte';
   let mobileMenuOpen = $state(false);
-  const pathname = window.location.pathname;
+  const pathname = window.location.pathname.replace(/\\/+$/, '') || '/';
   const isFitmentFinder = pathname === '/fitment-finder';
   const isM4Guide = pathname === '/bmw-m4';
 </script>
