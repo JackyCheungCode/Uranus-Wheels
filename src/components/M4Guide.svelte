@@ -33,11 +33,11 @@
   };
   const oemPackages: Record<Chassis, { trim: string; years: string; frontWheel: string; rearWheel: string; frontTyre: string; rearTyre: string; source: string; note: string }[]> = {
     F82: [
-      { trim: 'M4', years: '2015–2020', frontWheel: '18 × 9J ET29', rearWheel: '18 × 10J ET40', frontTyre: '255/40 ZR18', rearTyre: '275/40 ZR18', source: 'UW-M4-F-002', note: 'Base-model Style 513M reference; steel brakes only.' },
-      { trim: 'M4', years: '2015–2020 optional', frontWheel: '19 × 9J ET29', rearWheel: '19 × 10J ET40', frontTyre: '255/35 ZR19', rearTyre: '275/35 ZR19', source: 'UW-M4-F-002', note: 'Style 437M optional wheel package.' },
-      { trim: 'Competition', years: '2016–2020', frontWheel: '20 × 9J ET29', rearWheel: '20 × 10J ET40', frontTyre: '265/30 ZR20', rearTyre: '285/30 ZR20', source: 'UW-M4-F-002', note: 'Competition Package / Style 666M.' },
-      { trim: 'CS', years: '2018–2019', frontWheel: '19 × 9J ET29', rearWheel: '20 × 10J ET40', frontTyre: '265/35 ZR19', rearTyre: '285/30 ZR20', source: 'UW-M4-F-002', note: 'Style 763M factory reference.' },
-      { trim: 'GTS', years: '2016', frontWheel: '19 × 9.5J ET29', rearWheel: '20 × 10.5J ET42', frontTyre: '265/35 ZR19', rearTyre: '285/30 ZR20', source: 'UW-M4-F-002', note: 'GTS-specific Style 666M; 681M carbon-barrel option shares these dimensions.' }
+      { trim: 'M4', years: '2015–2020', frontWheel: '18 × 9J ET29', rearWheel: '18 × 10J ET40', frontTyre: '255/40 ZR18', rearTyre: '275/40 ZR18', source: 'UW-M4-F-002 + UW-M4-F-005', note: 'Base-model Style 513M reference; steel brakes only.' },
+      { trim: 'M4', years: '2015–2020 optional', frontWheel: '19 × 9J ET29', rearWheel: '19 × 10J ET40', frontTyre: '255/35 ZR19', rearTyre: '275/35 ZR19', source: 'UW-M4-F-002 + UW-M4-F-005', note: 'Style 437M optional wheel package.' },
+      { trim: 'Competition', years: '2016–2020', frontWheel: '20 × 9J ET29', rearWheel: '20 × 10J ET40', frontTyre: '265/30 ZR20', rearTyre: '285/30 ZR20', source: 'UW-M4-F-002 + UW-M4-F-005', note: 'Competition Package / Style 666M.' },
+      { trim: 'CS', years: '2018–2019', frontWheel: '19 × 9J ET29', rearWheel: '20 × 10J ET40', frontTyre: '265/35 ZR19', rearTyre: '285/30 ZR20', source: 'UW-M4-F-002 + UW-M4-F-004', note: 'Style 763M factory reference.' },
+      { trim: 'GTS', years: '2016', frontWheel: '19 × 9.5J ET29', rearWheel: '20 × 10.5J ET42', frontTyre: '265/35 ZR19', rearTyre: '285/30 ZR20', source: 'UW-M4-F-002 + UW-M4-F-006', note: 'GTS-specific Style 666M; 681M carbon-barrel option shares these dimensions.' }
     ],
     F83: [
       { trim: 'M4', years: '2015–2020', frontWheel: '18 × 9J ET29', rearWheel: '18 × 10J ET40', frontTyre: '255/40 ZR18', rearTyre: '275/40 ZR18', source: 'UW-M4-F-002', note: 'F83 shares F82 wheel hardware; confirm exact market and brake package.' },
@@ -45,14 +45,14 @@
       { trim: 'Competition', years: '2016–2020', frontWheel: '20 × 9J ET29', rearWheel: '20 × 10J ET40', frontTyre: '265/30 ZR20', rearTyre: '285/30 ZR20', source: 'UW-M4-F-002', note: 'Competition Package / Style 666M.' }
     ],
     G82: [
-      { trim: 'M4', years: '2021–2026', frontWheel: '18 × 9.5J ET20', rearWheel: '19 × 10.5J ET20', frontTyre: '275/40 R18', rearTyre: '285/35 R19', source: 'UW-M4-G-002', note: 'Manual M4 Coupé standard stagger; confirm market and model-year placard.' },
-      { trim: 'Competition', years: '2021–2026', frontWheel: '19 × 9.5J ET20', rearWheel: '20 × 10.5J ET20', frontTyre: '275/35 R19', rearTyre: '285/30 R20', source: 'UW-M4-G-002', note: 'Competition factory stagger; also used by CSL / CS with model-specific tyre options.' },
-      { trim: 'Competition xDrive', years: '2022–2026', frontWheel: '19 × 9.5J ET20', rearWheel: '20 × 10.5J ET20', frontTyre: '275/35 R19', rearTyre: '285/30 R20', source: 'UW-M4-G-002', note: 'Keep front/rear rolling circumference within BMW xDrive requirements.' },
+      { trim: 'M4', years: '2021–2026', frontWheel: '18 × 9.5J ET20', rearWheel: '19 × 10.5J ET20', frontTyre: '275/40 R18', rearTyre: '285/35 R19', source: 'UW-M4-G-001 + UW-M4-G-002', note: 'Manual M4 Coupé standard stagger; confirm market and model-year placard.' },
+      { trim: 'Competition', years: '2021–2026', frontWheel: '19 × 9.5J ET20', rearWheel: '20 × 10.5J ET20', frontTyre: '275/35 R19', rearTyre: '285/30 R20', source: 'UW-M4-G-001 + UW-M4-G-002', note: 'Competition factory stagger; also used by CSL / CS with model-specific tyre options.' },
+      { trim: 'Competition xDrive', years: '2022–2026', frontWheel: '19 × 9.5J ET20', rearWheel: '20 × 10.5J ET20', frontTyre: '275/35 R19', rearTyre: '285/30 R20', source: 'UW-M4-G-001 + UW-M4-G-002', note: 'Keep front/rear rolling circumference within BMW xDrive requirements.' },
       { trim: 'CS', years: '2025–2026', frontWheel: '19 × 9.5J', rearWheel: '20 × 10.5J', frontTyre: '275/35 ZR19', rearTyre: '285/30 ZR20', source: 'UW-M4-G-003', note: 'BMW published factory wheel and tyre dimensions; offset not stated in this source.' },
       { trim: 'CSL', years: '2023', frontWheel: '19 × 9.5J', rearWheel: '20 × 10.5J', frontTyre: '275/35 ZR19', rearTyre: '285/30 ZR20', source: 'UW-M4-G-004', note: 'BMW published factory wheel and tyre dimensions; offset not stated in this source.' }
     ],
     G83: [
-      { trim: 'Competition xDrive', years: '2022–2026', frontWheel: '19 × 9.5J ET20', rearWheel: '20 × 10.5J ET20', frontTyre: '275/35 R19', rearTyre: '285/30 R20', source: 'UW-M4-G-002', note: 'Convertible xDrive factory stagger; verify year and market.' }
+      { trim: 'Competition xDrive', years: '2022–2026', frontWheel: '19 × 9.5J ET20', rearWheel: '20 × 10.5J ET20', frontTyre: '275/35 R19', rearTyre: '285/30 R20', source: 'UW-M4-G-001 + UW-M4-G-002', note: 'Convertible xDrive factory stagger; verify year and market.' }
     ]
   };
   const currentPackage = $derived(oemPackages[chassis].find((item) => item.trim === trim) ?? oemPackages[chassis][0]);
@@ -100,7 +100,7 @@
         CS: { power: '460 PS / 454 hp (US rating)', torque: '600 Nm', transmission: '7-speed M DCT', brakes: 'M Compound brakes; optional M Carbon Ceramic Brakes' },
         GTS: { power: '500 PS / 493 hp (US rating)', torque: '600 Nm', transmission: '7-speed M DCT', brakes: 'M Carbon Ceramic Brakes' }
       };
-      return { engine: 'S55B30 · 2,979 cc twin-turbo inline-six', ...(data[trim] ?? data.M4), drive: 'Rear-wheel drive', suspension: 'M-specific suspension; adaptive equipment varies by edition and market', source: 'BMW M / BMW technical data' };
+      return { engine: 'S55B30 · 2,979 cc twin-turbo inline-six', ...(data[trim] ?? data.M4), drive: 'Rear-wheel drive', suspension: 'M-specific suspension; adaptive equipment varies by edition and market', source: 'BMW M technical data · UW-M4-F-003 / UW-M4-F-004 / UW-M4-F-006' };
     }
     const data: Record<string, { power: string; torque: string; transmission: string; brakes: string }> = {
       M4: { power: '473 hp', torque: '406 lb-ft / 550 Nm', transmission: '6-speed manual', brakes: 'M Compound brakes · 6-piston front / single-piston rear' },
@@ -109,7 +109,7 @@
       CS: { power: '543 hp (US specification)', torque: '479 lb-ft / 650 Nm', transmission: '8-speed M Steptronic', brakes: 'M Compound brakes; optional M Carbon Ceramic Brakes' },
       CSL: { power: '543 hp (US specification)', torque: '479 lb-ft / 650 Nm', transmission: '8-speed M Steptronic', brakes: 'M Carbon Ceramic Brakes · standard equipment' }
     };
-    return { engine: 'S58B30 · 2,993 cc twin-turbo inline-six', ...(data[trim] ?? data.Competition), drive: trim.includes('xDrive') ? 'M xDrive all-wheel drive' : 'Rear-wheel drive', suspension: 'Adaptive M suspension · model-specific calibration', source: 'BMW Group official technical data' };
+    return { engine: 'S58B30 · 2,993 cc twin-turbo inline-six', ...(data[trim] ?? data.Competition), drive: trim.includes('xDrive') ? 'M xDrive all-wheel drive' : 'Rear-wheel drive', suspension: 'Adaptive M suspension · model-specific calibration', source: 'BMW Group technical data · UW-M4-G-002 / UW-M4-G-003 / UW-M4-G-004' };
   });
   const vehicleImageSources: Record<Chassis, string> = {
     F82: 'https://commons.wikimedia.org/wiki/File:The_frontview_of_BMW_M4_Coup%C3%A9_(F82).JPG',
@@ -278,7 +278,7 @@
             <span>UW-M4-F-002 <b>F82/F83 OEM packages · FMB Wheels</b><a href="https://fmbwheels.com/bmw-f82-m4-2015-2020-wheel-fitment-guide/" target="_blank" rel="noreferrer">Open source ↗</a></span>
             <span>UW-M4-F-003 <b>F82 engine / edition data · BMW</b><a href="https://www.bmw-m.com/en/topics/magazine-article-pool/bmw-m3-f80-and-bmw-m4-f82.html" target="_blank" rel="noreferrer">BMW M technical overview ↗</a></span>
             <span>UW-M4-F-004 <b>F82 CS technical data · BMW</b><a href="https://www.press.bmwgroup.com/global/article/detail/T0269820EN/the-new-bmw-m4-cs?language=en" target="_blank" rel="noreferrer">BMW press kit ↗</a></span>
-            <span>UW-M4-F-005 <b>F82 factory wheel / tyre cross-check</b><a href="https://www.press.bmwgroup.com/usa/article/attachment/T0160684EN_US/391903" target="_blank" rel="noreferrer">2015 BMW technical data ↗</a></span>
+            <span>UW-M4-F-005 <b>F82 factory wheel / tyre cross-check</b><a href="https://www.press.bmwgroup.com/usa/article/attachment/T0160684EN_US/391903" target="_blank" rel="noreferrer">2015 BMW technical data ↗</a></span>\n            <span>UW-M4-F-006 <b>F82 M4 GTS engine and performance · BMW</b><a href="https://www.press.bmwgroup.com/global/article/detail/T0236962EN/the-new-bmw-m4-gts" target="_blank" rel="noreferrer">BMW press release ↗</a></span>
             <span>UW-M4-G-001 <b>G82/G83 hardware · PG Wheels / FMB</b><a href="https://fmbwheels.com/bmw-g82-m4-wheel-fitment-guide/" target="_blank" rel="noreferrer">Open source ↗</a></span>\n            <span>UW-M4-G-008 <b>G82/G83 hub and fastener cross-check · PG Wheels</b><a href="https://pgwheels.com/fitment/bmw-m4-g82-g83-2021-2026-wheel-fitment-guide/" target="_blank" rel="noreferrer">Open source ↗</a></span>
             <span>UW-M4-G-002 <b>G82 OEM tyre / wheel sizes · BMW</b><a href="https://www.press.bmwgroup.com/usa/article/detail/T0439244EN_US/the-new-2025-bmw-m4-coupe-and-m4-convertible?language=en_US" target="_blank" rel="noreferrer">BMW technical data ↗</a></span>
             <span>UW-M4-G-003 <b>2025 M4 CS · BMW</b><a href="https://www.press.bmwgroup.com/usa/article/detail/T0441789EN_US/the-new-2025-bmw-m4-cs" target="_blank" rel="noreferrer">BMW technical data ↗</a></span>
