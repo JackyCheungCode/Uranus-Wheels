@@ -72,7 +72,7 @@
 
   <main>
     <section class="hero">
-      <div class="hero-image" role="img" aria-label="Performance coupe on a dark studio road" />
+      <div class="hero-image" role="img" aria-label="Abstract performance-inspired visual background"></div>
       <div class="hero-shade"></div>
       <div class="hero-content">
         <p class="eyebrow"><span></span> THE URANUS VEHICLE SERIES / 001</p>
@@ -94,7 +94,7 @@
         <div class="chassis-grid" role="group" aria-label="Select M4 chassis">
           {#each (['G82','G83','F82','F83'] as Chassis[]) as code}
             <button class:chosen={chassis === code} class="chassis-option" onclick={() => selectChassis(code)} aria-pressed={chassis === code}>
-              <span class="chassis-code">{code}</span><span class="chassis-body">{vehicleOptions[code].body}</span><span class="chassis-years">{vehicleOptions[code].years[0]}—{vehicleOptions[code].years.at(-1)}</span><span class="select-mark">{chassis === code ? 'SELECTED' : 'SELECT'}</span>
+              <span class="chassis-code">{code}</span><span class="chassis-body">{vehicleOptions[code].body}</span><span class="chassis-years">{vehicleOptions[code].years[0]}—{vehicleOptions[code].years[vehicleOptions[code].years.length - 1]}</span><span class="select-mark">{chassis === code ? 'SELECTED' : 'SELECT'}</span>
             </button>
           {/each}
         </div>
@@ -223,7 +223,6 @@
   .chassis-option:hover{background:#eaf0f6}.chassis-option.chosen{background:#e9f0f8;box-shadow:inset 0 -3px #1c69d4}
   .chassis-code{display:block;font-size:29px;font-weight:600;letter-spacing:-.06em}.chassis-body{display:block;margin-top:2px;color:#65717a;font-size:11px}.chassis-years{display:block;margin-top:14px;color:#8b959d;font-size:9px;letter-spacing:.06em}.select-mark{display:block;margin-top:9px;color:#1c69d4;font-size:8px;font-weight:700;letter-spacing:.12em}.chassis-option:not(.chosen) .select-mark{color:#9aa3aa}
   .vehicle-fields{display:grid;grid-template-columns:1fr 1fr 1.1fr;gap:20px;margin-top:25px;align-items:end}
-  label{display:grid;gap:9px;color:#69747d;font-size:9px;font-weight:700;letter-spacing:.13em}
   .field-control{position:relative;min-width:0}.field-label{display:block;margin-bottom:9px;color:#69747d;font-size:9px;font-weight:700;letter-spacing:.13em}.custom-select{position:relative}.select-trigger{height:48px;width:100%;display:flex;align-items:center;justify-content:space-between;padding:0 14px;border:0;border-bottom:1px solid #aab2b9;border-radius:0;background:#f4f6f7;color:#202428;font-size:13px;text-align:left;cursor:pointer}.select-trigger span{color:#1c69d4;font-size:16px}.select-menu{position:absolute;z-index:8;top:calc(100% + 2px);left:0;right:0;max-height:230px;overflow:auto;padding:5px;background:#fff;box-shadow:0 14px 32px rgba(20,31,42,.16)}.select-menu button{display:block;width:100%;padding:11px 10px;border:0;background:#fff;color:#273039;text-align:left;font-size:12px;cursor:pointer}.select-menu button:hover,.select-menu button.current{background:#eaf0f6;color:#1c69d4}
   .vehicle-identity{min-height:48px;padding:5px 12px;border-left:2px solid #1c69d4;display:flex;flex-direction:column;justify-content:center;gap:2px}.vehicle-identity span{font-size:12px;font-weight:700}.vehicle-identity strong{font-size:9px;color:#1c69d4;letter-spacing:.08em}.vehicle-identity small{font-size:9px;color:#87919a}
   .panel-footnote{margin:22px 0 0;padding-top:17px;border-top:1px solid #edf0f2;color:#828c94;font-size:10px;line-height:1.7}
