@@ -272,12 +272,12 @@
             <span>UW-M4-F-002 <b>F82/F83 OEM packages · FMB Wheels</b><a href="https://fmbwheels.com/bmw-f82-m4-2015-2020-wheel-fitment-guide/" target="_blank" rel="noreferrer">Open source ↗</a></span>
             <span>UW-M4-F-003 <b>F82 engine / edition data · BMW</b><a href="https://www.bmw-m.com/en/topics/magazine-article-pool/bmw-m3-f80-and-bmw-m4-f82.html" target="_blank" rel="noreferrer">BMW M technical overview ↗</a></span>
             <span>UW-M4-F-004 <b>F82 CS technical data · BMW</b><a href="https://www.press.bmwgroup.com/global/article/detail/T0269820EN/the-new-bmw-m4-cs?language=en" target="_blank" rel="noreferrer">BMW press kit ↗</a></span>
-            <span>UW-M4-F-005 <b>F82 factory wheel / tyre cross-check</b><a href="https://www.bmw.com" target="_blank" rel="noreferrer">BMW official site ↗</a></span>
+            <span>UW-M4-F-005 <b>F82 factory wheel / tyre cross-check</b><a href="https://www.press.bmwgroup.com/usa/article/attachment/T0160684EN_US/391903" target="_blank" rel="noreferrer">2015 BMW technical data ↗</a></span>
             <span>UW-M4-G-001 <b>G82/G83 hardware · PG Wheels / FMB</b><a href="https://fmbwheels.com/bmw-g82-m4-wheel-fitment-guide/" target="_blank" rel="noreferrer">Open source ↗</a></span>
             <span>UW-M4-G-002 <b>G82 OEM tyre / wheel sizes · BMW</b><a href="https://www.press.bmwgroup.com/usa/article/detail/T0439244EN_US/the-new-2025-bmw-m4-coupe-and-m4-convertible?language=en_US" target="_blank" rel="noreferrer">BMW technical data ↗</a></span>
             <span>UW-M4-G-003 <b>2025 M4 CS · BMW</b><a href="https://www.press.bmwgroup.com/usa/article/detail/T0441789EN_US/the-new-2025-bmw-m4-cs" target="_blank" rel="noreferrer">BMW technical data ↗</a></span>
             <span>UW-M4-G-004 <b>2023 M4 CSL · BMW</b><a href="https://www.press.bmwgroup.com/usa/article/detail/T0392153EN_US/the-bmw-m4-csl" target="_blank" rel="noreferrer">BMW technical data ↗</a></span>
-            <span>UW-M4-G-005 <b>2021 M4 factory specification · BMW</b><a href="https://www.press.bmwgroup.com/usa/article/detail/T0317577EN_US/the-new-2021-bmw-m3-sedan-and-m4-coupe?language=en_US" target="_blank" rel="noreferrer">BMW technical data ↗</a></span>
+            <span>UW-M4-G-005 <b>2021 M4 factory wheel package · BMW</b><a href="https://machineswithsouls.com/wp-content/uploads/2023/02/2022-f90-m5-ordering-guide.pdf" target="_blank" rel="noreferrer">BMW technical data ↗</a></span>
             <span>UW-M4-G-006 <b>Wheel size cross-check · Wheelssize</b><a href="https://wheelssize.com/wheels/bmw/m4/" target="_blank" rel="noreferrer">Open database ↗</a></span>
             <span>UW-M4-G-007 <b>Wheel size cross-check · 4Wheels</b><a href="https://4wheels.com.tw/fitment/bmw/m4" target="_blank" rel="noreferrer">Open database ↗</a></span>
           </div>
