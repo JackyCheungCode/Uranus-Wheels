@@ -46,12 +46,7 @@
     const flush = value(f.flush_wheel, '未发布');
     const max = value(f.max_wheel, '未发布');
     const oeEt = (oeWheel.match(/ET\s*[+-]?\d+/i) || [])[0];
-    const aftermarketEt = [
-      (flush.match(/ET\s*[+-]?\d+/i) || [])[0] ? 'Flush ' + (flush.match(/ET\s*[+-]?\d+/i) || [])[0] : '',
-      (max.match(/ET\s*[+-]?\d+/i) || [])[0] ? 'Maximum ' + (max.match(/ET\s*[+-]?\d+/i) || [])[0] : ''
-    ].filter(Boolean).join(' · ');
-    const sizeText = [oeWheel, flush, max].join(' | ');
-    const sizeFound = /\b\d{2}\s*[x×]\s*\d{1,2}(?:\.\d+)?\s*J?\b/i.test(sizeText);
+    const oeSizeFound = /\b\d{2}\s*[x×]\s*\d{1,2}(?:\.\d+)?\s*J?\b/i.test(oeWheel);
     const load = f.load_rating || f.wheel_load_rating || f.max_load_kg || f.load_capacity_kg;
     const brake = f.brake_clearance || f.brake_caliper_clearance || f.caliper_clearance;
     const thread = f.lug_thread || f.bolt_thread || f.thread_size;
@@ -61,9 +56,10 @@
       { label:'螺栓数量', value:value(lugCount), note:'应与 PCD 孔数一致', state:lugCount ? 'present' : 'missing' },
       { label:'车型年份', value:value(f.year), note:'ANKUSI 车型目录年份', state:f.year ? 'present' : 'missing' },
       { label:'中心孔', value:bore ? String(bore)+' mm'+(rearBore ? ' · 后轴 '+rearBore+' mm' : '') : '未提供', note:'确认前后轴及定位环要求', state:bore ? 'present' : 'missing' },
-      { label:'原厂轮毂尺寸', value:oeWheel, note:sizeFound ? '已取得轮毂直径 / 宽度参考' : '来源未提供可识别的尺寸', state:sizeFound ? 'present' : 'missing' },
-      { label:'原厂偏距 / ET', value:oeEt || '来源未发布', note:oeEt ? '仅作为原厂参考，不代表改装轮毂适配' : '不可从 Flush / Maximum 推断原厂 ET', state:oeEt ? 'present' : 'review' },
-      { label:'改装参考 ET', value:aftermarketEt || '来源未发布', note:'仅显示 Flush / Maximum 对应的来源数据', state:aftermarketEt ? 'present' : 'review' },
+      { label:'原厂轮毂尺寸', value:oeWheel, note:oeSizeFound ? '来源提供原厂直径 / 宽度参考' : '来源未提供可识别的原厂尺寸', state:oeSizeFound ? 'present' : 'missing' },
+      { label:'原厂偏距 / ET', value:oeEt || '来源未发布', note:oeEt ? '仅作为原厂参考，不代表改装轮毂适配' : '不可从改装参考值推断原厂 ET', state:oeEt ? 'present' : 'review' },
+      { label:'Flush 改装参考', value:flush, note:'来源发布的改装尺寸参考，需核对轮胎与车身间隙', state:flush !== '未发布' ? 'present' : 'review' },
+      { label:'Maximum 改装参考', value:max, note:'来源发布的最大尺寸参考，不代表安全安装保证', state:max !== '未发布' ? 'present' : 'review' },
       { label:'轮毂承载能力', value:load ? String(load) : '未提供', note:'必须对照车辆轴荷及使用场景核验', state:load ? 'present' : 'missing' },
       { label:'制动 / 卡钳间隙', value:value(brake), note:'需按实际制动套件确认', state:brake ? 'present' : 'missing' },
       { label:'螺栓螺纹 / 座型', value:[thread,seat].filter(Boolean).join(' · ') || '未提供', note:'确认螺纹规格和紧固件座型', state:thread && seat ? 'present' : 'missing' }
