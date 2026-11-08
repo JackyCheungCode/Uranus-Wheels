@@ -167,11 +167,6 @@
   loadModels();
 </script>
 
-<svelte:head>
-  <title>BMW Fitment Finder — Uranus Wheels</title>
-  <meta name="description" content="Decode your BMW VIN or select model and year to review wheel fitment reference data." />
-</svelte:head>
-
 <div class="fitment-page">
   <div class="topline"></div>
   <header class="header">
