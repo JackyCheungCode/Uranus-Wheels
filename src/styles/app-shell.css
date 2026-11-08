@@ -1,0 +1,53 @@
+/* Uranus Wheels AppShell primitives — import after design-tokens.css */
+.uw-app-shell { min-height: 100vh; display: flex; flex-direction: column; background: var(--uw-surface); }
+.uw-header {
+  position: sticky; top: 0; z-index: var(--uw-z-header);
+  min-height: var(--uw-header-height);
+  color: var(--uw-text-primary); background: rgb(255 255 255 / 96%);
+  box-shadow: var(--uw-shadow-header); backdrop-filter: blur(14px);
+}
+.uw-header__inner {
+  width: min(100% - 2 * var(--uw-space-6), var(--uw-content-max));
+  min-height: var(--uw-header-height); margin-inline: auto;
+  display: flex; align-items: center; justify-content: space-between; gap: var(--uw-space-8);
+}
+.uw-brand { display: inline-flex; align-items: center; gap: var(--uw-space-3); text-decoration: none; white-space: nowrap; }
+.uw-brand__name { font-size: 1rem; font-weight: 750; letter-spacing: .12em; }
+.uw-nav { display: flex; align-items: center; gap: clamp(1rem, 2.5vw, 2.5rem); }
+.uw-nav a {
+  min-height: 44px; display: inline-flex; align-items: center;
+  color: var(--uw-gray-700); font-size: var(--uw-font-size-sm);
+  font-weight: 600; text-decoration: none;
+  transition: color var(--uw-motion-fast) var(--uw-ease-standard);
+}
+.uw-nav a:hover, .uw-nav a[aria-current="page"] { color: var(--uw-action); }
+.uw-header__actions { display: flex; align-items: center; gap: var(--uw-space-3); }
+.uw-main { flex: 1; }
+.uw-footer { color: #d8dadd; background: var(--uw-color-navy); }
+.uw-footer__inner {
+  width: min(100% - 2 * var(--uw-space-6), var(--uw-content-max));
+  margin-inline: auto; padding-block: var(--uw-space-12);
+  display: grid; grid-template-columns: 2fr 1fr 1fr; gap: var(--uw-space-10);
+}
+.uw-footer a { color: inherit; text-decoration: none; }
+.uw-footer a:hover { color: white; }
+.uw-footer__legal {
+  padding-block: var(--uw-space-4); border-top: 1px solid rgb(255 255 255 / 14%);
+  color: #aeb5bb; font-size: var(--uw-font-size-xs);
+}
+.uw-mobile-menu { display: none; }
+@media (max-width: 800px) {
+  .uw-header__inner { width: min(100% - 2 * var(--uw-space-4), var(--uw-content-max)); gap: var(--uw-space-3); }
+  .uw-nav {
+    position: absolute; top: 100%; inset-inline: 0; z-index: var(--uw-z-menu);
+    display: none; padding: var(--uw-space-3) var(--uw-space-4) var(--uw-space-5);
+    background: white; box-shadow: var(--uw-shadow-menu);
+  }
+  .uw-nav[data-open="true"] { display: flex; flex-direction: column; align-items: stretch; gap: 0; }
+  .uw-nav a { border-bottom: 1px solid var(--uw-border-subtle); }
+  .uw-mobile-menu { display: inline-flex; }
+  .uw-footer__inner { grid-template-columns: 1fr 1fr; gap: var(--uw-space-6); }
+}
+@media (max-width: 480px) {
+  .uw-footer__inner { grid-template-columns: 1fr; }
+}
