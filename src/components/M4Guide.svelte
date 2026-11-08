@@ -11,20 +11,63 @@
   let trimPickerOpen = $state(false);
 
   const vehicleOptions: Record<Chassis, { years: string[]; trims: string[]; body: string; generation: string }> = {
-    G82: { years: ['2021','2022','2023','2024','2025','2026'], trims: ['M4','Competition','Competition xDrive','CS'], body: 'Coupe', generation: 'Second generation' },
+    G82: { years: ['2021','2022','2023','2024','2025','2026'], trims: ['M4','Competition','Competition xDrive','CS','CSL'], body: 'Coupe', generation: 'Second generation' },
     G83: { years: ['2021','2022','2023','2024','2025','2026'], trims: ['M4','Competition','Competition xDrive'], body: 'Convertible', generation: 'Second generation' },
     F82: { years: ['2015','2016','2017','2018','2019','2020'], trims: ['M4','Competition','CS','GTS'], body: 'Coupe', generation: 'First generation' },
     F83: { years: ['2015','2016','2017','2018','2019','2020'], trims: ['M4','Competition'], body: 'Convertible', generation: 'First generation' }
   };
 
-  const specs: Spec[] = [
-    { label: 'PCD / Bolt pattern', front: 'Awaiting verified data', rear: 'Awaiting verified data', note: 'Confirm chassis-specific hub and fastener specification.' },
-    { label: 'Wheel diameter', front: 'Not yet published', rear: 'Not yet published', note: 'Publish approved diameter options for the selected brake package.' },
-    { label: 'Wheel width', front: 'Not yet published', rear: 'Not yet published', note: 'Maintain axle-specific width and barrel clearance.' },
-    { label: 'Offset (ET)', front: 'Not yet published', rear: 'Not yet published', note: 'Record approved offset range for each wheel width.' },
-    { label: 'Tire size', front: 'Not yet published', rear: 'Not yet published', note: 'Include tire model, measured section width and rolling diameter.' },
-    { label: 'Center bore', front: 'Awaiting verified data', rear: 'Awaiting verified data', note: 'Include hub fit and any approved centering solution.' }
-  ];
+  type FitmentRecord = { label: string; front: string; rear: string; note: string; source: string; kind: 'OEM' | 'Hardware' };
+  const commonHardware: Record<'F' | 'G', FitmentRecord[]> = {
+    F: [
+      { label: 'PCD / Bolt pattern', front: '5 × 120 mm', rear: '5 × 120 mm', note: 'F82 / F83 wheel mounting pattern.', source: 'UW-M4-F-001', kind: 'Hardware' },
+      { label: 'Center bore', front: '72.56 mm', rear: '72.56 mm', note: 'Hub-centric fit; larger aftermarket bores require correctly specified rings.', source: 'UW-M4-F-001', kind: 'Hardware' },
+      { label: 'Fastener', front: 'M14 × 1.25 · 60° seat', rear: 'M14 × 1.25 · 60° seat', note: 'Factory lug-bolt interface. Verify seat type and bolt length for each wheel.', source: 'UW-M4-F-001', kind: 'Hardware' },
+      { label: 'Reference torque', front: '140 Nm / 103 lb-ft', rear: '140 Nm / 103 lb-ft', note: 'Secondary fitment reference; always follow the vehicle-specific BMW manual.', source: 'UW-M4-F-001', kind: 'Hardware' }
+    ],
+    G: [
+      { label: 'PCD / Bolt pattern', front: '5 × 112 mm', rear: '5 × 112 mm', note: 'G82 / G83 wheel mounting pattern.', source: 'UW-M4-G-001', kind: 'Hardware' },
+      { label: 'Center bore', front: '66.6 mm', rear: '66.6 mm', note: 'Hub-centric fit; larger aftermarket bores require correctly specified rings.', source: 'UW-M4-G-001', kind: 'Hardware' },
+      { label: 'Fastener', front: 'M14 × 1.25 · 60° seat', rear: 'M14 × 1.25 · 60° seat', note: 'Factory lug-bolt interface. Verify seat type and bolt length for each wheel.', source: 'UW-M4-G-001', kind: 'Hardware' },
+      { label: 'Reference torque', front: '140 Nm / 103 lb-ft', rear: '140 Nm / 103 lb-ft', note: 'Secondary fitment reference; always follow the vehicle-specific BMW manual.', source: 'UW-M4-G-001', kind: 'Hardware' }
+    ]
+  };
+  const oemPackages: Record<Chassis, { trim: string; years: string; frontWheel: string; rearWheel: string; frontTyre: string; rearTyre: string; source: string; note: string }[]> = {
+    F82: [
+      { trim: 'M4', years: '2015–2020', frontWheel: '18 × 9J ET29', rearWheel: '18 × 10J ET40', frontTyre: '255/40 ZR18', rearTyre: '275/40 ZR18', source: 'UW-M4-F-002', note: 'Base-model Style 513M reference; steel brakes only.' },
+      { trim: 'M4', years: '2015–2020 optional', frontWheel: '19 × 9J ET29', rearWheel: '19 × 10J ET40', frontTyre: '255/35 ZR19', rearTyre: '275/35 ZR19', source: 'UW-M4-F-002', note: 'Style 437M optional wheel package.' },
+      { trim: 'Competition', years: '2016–2020', frontWheel: '20 × 9J ET29', rearWheel: '20 × 10J ET40', frontTyre: '265/30 ZR20', rearTyre: '285/30 ZR20', source: 'UW-M4-F-002', note: 'Competition Package / Style 666M.' },
+      { trim: 'CS', years: '2018', frontWheel: '19 × 9J ET29', rearWheel: '20 × 10J ET40', frontTyre: '265/35 ZR19', rearTyre: '285/30 ZR20', source: 'UW-M4-F-002', note: 'Style 763M factory reference.' },
+      { trim: 'GTS', years: '2016', frontWheel: '19 × 9.5J ET29', rearWheel: '20 × 10.5J ET42', frontTyre: '265/35 ZR19', rearTyre: '285/30 ZR20', source: 'UW-M4-F-002', note: 'GTS-specific Style 666M; 681M carbon-barrel option shares these dimensions.' }
+    ],
+    F83: [
+      { trim: 'M4', years: '2015–2020', frontWheel: '18 × 9J ET29', rearWheel: '18 × 10J ET40', frontTyre: '255/40 ZR18', rearTyre: '275/40 ZR18', source: 'UW-M4-F-002', note: 'F83 shares F82 wheel hardware; confirm exact market and brake package.' },
+      { trim: 'M4', years: '2015–2020 optional', frontWheel: '19 × 9J ET29', rearWheel: '19 × 10J ET40', frontTyre: '255/35 ZR19', rearTyre: '275/35 ZR19', source: 'UW-M4-F-002', note: 'Style 437M optional wheel package.' },
+      { trim: 'Competition', years: '2016–2020', frontWheel: '20 × 9J ET29', rearWheel: '20 × 10J ET40', frontTyre: '265/30 ZR20', rearTyre: '285/30 ZR20', source: 'UW-M4-F-002', note: 'Competition Package / Style 666M.' }
+    ],
+    G82: [
+      { trim: 'M4', years: '2021–2026', frontWheel: '18 × 9.5J ET20', rearWheel: '19 × 10.5J ET20', frontTyre: '275/40 R18', rearTyre: '285/35 R19', source: 'UW-M4-G-002', note: 'Manual M4 Coupé standard stagger; confirm market and model-year placard.' },
+      { trim: 'Competition', years: '2021–2026', frontWheel: '19 × 9.5J ET20', rearWheel: '20 × 10.5J ET20', frontTyre: '275/35 R19', rearTyre: '285/30 R20', source: 'UW-M4-G-002', note: 'Competition factory stagger; also used by CSL / CS with model-specific tyre options.' },
+      { trim: 'Competition xDrive', years: '2022–2026', frontWheel: '19 × 9.5J ET20', rearWheel: '20 × 10.5J ET20', frontTyre: '275/35 R19', rearTyre: '285/30 R20', source: 'UW-M4-G-002', note: 'Keep front/rear rolling circumference within BMW xDrive requirements.' },
+      { trim: 'CS', years: '2025–2026', frontWheel: '19 × 9.5J', rearWheel: '20 × 10.5J', frontTyre: '275/35 ZR19', rearTyre: '285/30 ZR20', source: 'UW-M4-G-003', note: 'BMW published factory wheel and tyre dimensions; offset not stated in this source.' },
+      { trim: 'CSL', years: '2023', frontWheel: '19 × 9.5J', rearWheel: '20 × 10.5J', frontTyre: '275/35 ZR19', rearTyre: '285/30 ZR20', source: 'UW-M4-G-004', note: 'BMW published factory wheel and tyre dimensions; offset not stated in this source.' }
+    ],
+    G83: [
+      { trim: 'Competition xDrive', years: '2022–2026', frontWheel: '19 × 9.5J ET20', rearWheel: '20 × 10.5J ET20', frontTyre: '275/35 R19', rearTyre: '285/30 R20', source: 'UW-M4-G-002', note: 'Convertible xDrive factory stagger; verify year and market.' }
+    ]
+  };
+  const currentPackage = $derived(oemPackages[chassis].find((item) => item.trim === trim) ?? oemPackages[chassis][0]);
+  const specs = $derived([
+    ...commonHardware[chassis.startsWith('F') ? 'F' : 'G'],
+    { label: 'OEM wheel size', front: currentPackage.frontWheel, rear: currentPackage.rearWheel, note: currentPackage.note, source: currentPackage.source, kind: 'OEM' as const },
+    { label: 'OEM tyre size', front: currentPackage.frontTyre, rear: currentPackage.rearTyre, note: 'Factory reference only; check the tyre placard and exact vehicle market.', source: currentPackage.source, kind: 'OEM' as const }
+  ]);
+  const vehiclePhotos: Record<Chassis, string> = {
+    F82: 'https://upload.wikimedia.org/wikipedia/commons/2/21/The_frontview_of_BMW_M4_Coup%C3%A9_%28F82%29.JPG',
+    F83: 'https://upload.wikimedia.org/wikipedia/commons/2/21/The_frontview_of_BMW_M4_Coup%C3%A9_%28F82%29.JPG',
+    G82: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/79/BMW_M4_%28G82%29_1X7A0155.jpg/1920px-BMW_M4_%28G82%29_1X7A0155.jpg',
+    G83: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/79/BMW_M4_%28G82%29_1X7A0155.jpg/1920px-BMW_M4_%28G82%29_1X7A0155.jpg'
+  };
 
   const setups = [
     { name: 'OEM+', descriptor: 'Factory-inspired refinement', detail: 'A restrained upgrade that preserves the original character and everyday usability.', tags: ['Factory-led', 'Daily use'], status: 'Template' },
@@ -72,7 +115,7 @@
 
   <main>
     <section class="hero">
-      <div class="hero-image" role="img" aria-label="Abstract performance-inspired visual background"></div>
+      <div class="hero-image"><img src={vehiclePhotos[chassis]} alt={`BMW M4 ${chassis} reference vehicle`} /><span class="image-credit">{chassis.startsWith('F') ? 'Photo: Tokumeigakarinoaoshima · CC0' : 'Photo: Alexander Migl · CC BY-SA 4.0'}</span></div>
       <div class="hero-shade"></div>
       <div class="hero-content">
         <p class="eyebrow"><span></span> THE URANUS VEHICLE SERIES / 001</p>
@@ -125,17 +168,28 @@
         </div>
         <div class="fitment-toolbar"><div><span class="live-dot"></span> CURATED FITMENT DATABASE</div><span>VEHICLE: {chassis} / {selectedYear} / {trim}</span></div>
         <div class="spec-table">
-          <div class="spec-header"><span>SPECIFICATION</span><span>FRONT AXLE</span><span>REAR AXLE</span><span>ENGINEERING NOTE</span></div>
+          <div class="spec-header"><span>SPECIFICATION</span><span>FRONT AXLE</span><span>REAR AXLE</span><span>REFERENCE</span></div>
           {#each specs as spec, index}
             <div class="spec-row">
-              <strong>{spec.label}</strong>
+              <strong>{spec.label}<small class="spec-kind">{spec.kind}</small></strong>
               <span class="spec-value">{spec.front}</span>
               <span class="spec-value">{spec.rear}</span>
-              <small>{spec.note}</small>
+              <small>{spec.note}<a href="#sources">{spec.source}</a></small>
             </div>
           {/each}
         </div>
-        <div class="engineering-note"><span class="note-icon">i</span><p><strong>Engineering status</strong> — This guide is being populated with vehicle-specific data. No universal fitment or safety claim is made until wheel, tire, brake and vehicle clearances have been reviewed and documented.</p></div>
+        <div class="engineering-note"><span class="note-icon">i</span><p><strong>Fitment boundary</strong> — OEM dimensions below are reference data, not a blanket aftermarket approval. Brake package, wheel-spoke profile, suspension, tyre construction, alignment and market specification must be checked on the exact car.</p></div>
+        <div class="source-standard" id="sources">
+          <div><p class="eyebrow">SOURCE REGISTER</p><h3>Traceable vehicle data.</h3><p>Factory figures are prioritised from BMW technical publications. Secondary fitment databases are used to cross-check hardware and documented owner/vendor builds, not to certify every aftermarket combination.</p></div>
+          <div class="source-fields">
+            <span>UW-M4-F-001 <b>F82/F83 hardware · FMB Wheels</b><a href="https://fmbwheels.com/bmw-f82-m4-2015-2020-wheel-fitment-guide/" target="_blank" rel="noreferrer">Open source ↗</a></span>
+            <span>UW-M4-F-002 <b>F82/F83 OEM packages · FMB Wheels</b><a href="https://fmbwheels.com/bmw-f82-m4-2015-2020-wheel-fitment-guide/" target="_blank" rel="noreferrer">Open source ↗</a></span>
+            <span>UW-M4-G-001 <b>G82/G83 hardware · PG Wheels / FMB</b><a href="https://fmbwheels.com/bmw-g82-m4-wheel-fitment-guide/" target="_blank" rel="noreferrer">Open source ↗</a></span>
+            <span>UW-M4-G-002 <b>G82 OEM tyre / wheel sizes · BMW</b><a href="https://www.press.bmwgroup.com/usa/article/detail/T0439244EN_US/the-new-2025-bmw-m4-coupe-and-m4-convertible?language=en_US" target="_blank" rel="noreferrer">BMW technical data ↗</a></span>
+            <span>UW-M4-G-003 <b>2025 M4 CS · BMW</b><a href="https://www.press.bmwgroup.com/usa/article/detail/T0441789EN_US/the-new-2025-bmw-m4-cs" target="_blank" rel="noreferrer">BMW technical data ↗</a></span>
+            <span>UW-M4-G-004 <b>2023 M4 CSL · BMW</b><a href="https://www.press.bmwgroup.com/usa/article/detail/T0392153EN_US/the-bmw-m4-csl" target="_blank" rel="noreferrer">BMW technical data ↗</a></span>
+          </div>
+        </div>
         <div class="source-standard">
           <div><p class="eyebrow">DATA GOVERNANCE</p><h3>Every specification needs a source.</h3><p>Published values will carry a traceable reference and a review status. No anonymous forum figure or unverified owner report will be presented as an approved fitment.</p></div>
           <div class="source-fields"><span>SOURCE ID <b>e.g. UW-M4-G82-001</b></span><span>REFERENCE <b>Document / page / URL</b></span><span>VEHICLE SCOPE <b>Chassis · year · trim · brakes</b></span><span>REVIEW <b>Evidence type · reviewer · date</b></span></div>
@@ -159,7 +213,7 @@
         </div>
         <div class="build-detail" role="tabpanel">
           <div class="build-visual"><span class="visual-kicker">BUILD CONCEPT / {currentSetup.name.toUpperCase()}</span><div class="wheel-graphic"><div class="wheel-outer"><div class="wheel-inner"><div class="wheel-hub"></div><span></span><i></i><b></b><em></em></div></div></div><span class="visual-caption">{chassis} / {trim} / {selectedYear}</span></div>
-          <div class="build-copy"><span class="status-pill">CONCEPT TEMPLATE</span><h3>{currentSetup.name}<br /><em>{currentSetup.descriptor}</em></h3><p>{currentSetup.detail}</p><div class="tag-row">{#each currentSetup.tags as tag}<span>{tag}</span>{/each}</div><div class="build-disclaimer">Specifications and product associations will be added after engineering review.</div></div>
+          <div class="build-copy"><span class="status-pill">CONCEPT TEMPLATE</span><h3>{currentSetup.name}<br /><em>{currentSetup.descriptor}</em></h3><p>{currentSetup.detail}</p><div class="tag-row">{#each currentSetup.tags as tag}<span>{tag}</span>{/each}</div><div class="build-disclaimer">Aftermarket combinations are published separately as documented examples. They are not a fitment guarantee for every tyre, brake or suspension configuration.</div></div>
         </div>
       </div>
     </section>
@@ -206,7 +260,7 @@
   .page-header nav{display:flex;gap:clamp(18px,3vw,46px)}.page-header nav a,.header-action{font-size:9px;font-weight:700;letter-spacing:.12em;text-decoration:none;color:#535d64}
   .page-header nav a:hover{color:var(--blue)}.header-action{padding:13px 16px;border:1px solid #cfd4d8;color:#202428}.header-action span{color:var(--blue);margin-left:10px}
   .hero{min-height:660px;position:relative;display:flex;align-items:center;background:#111a22;color:#fff;isolation:isolate}
-  .hero-image{position:absolute;inset:0;z-index:-2;background:radial-gradient(ellipse at 72% 42%,rgba(90,122,151,.38),transparent 38%),linear-gradient(125deg,#101820 0%,#243544 48%,#101820 100%)}
+  .hero-image{position:absolute;inset:0;z-index:-2;background:#101820}.hero-image img{width:100%;height:100%;object-fit:cover;object-position:center 52%;filter:saturate(.68) brightness(.62)}.image-credit{position:absolute;right:24px;bottom:18px;color:#dce2e8;font-size:8px;letter-spacing:.08em;text-shadow:0 1px 4px #000}
   .hero-shade{position:absolute;inset:0;z-index:-1;background:linear-gradient(90deg,rgba(9,15,21,.94) 0%,rgba(9,15,21,.74) 40%,rgba(9,15,21,.16) 100%),linear-gradient(0deg,rgba(9,15,21,.35),transparent 50%)}
   .hero-content{padding:90px clamp(24px,11vw,176px);max-width:1000px}.eyebrow{font-size:9px;font-weight:700;letter-spacing:.18em;color:#aeb8c1;margin:0 0 22px}.eyebrow span{display:inline-block;width:25px;height:2px;margin:0 10px 3px 0;background:#62a0ef}
   h1{font-size:clamp(68px,11vw,148px);line-height:.84;letter-spacing:-.085em;font-weight:500;margin:0}h1 em,h2 em,h3 em{font-style:normal;color:#8ca9c9}
@@ -229,7 +283,7 @@
   .fitment-section{padding:100px 0 104px;background:#19232d;color:#fff}.fitment-heading .eyebrow{color:#a5b1bc}.fitment-heading h2 em{color:#86a9d1}.fitment-heading .section-intro{color:#b3bdc6}
   .fitment-toolbar{display:flex;justify-content:space-between;gap:16px;padding:16px 18px;background:#222f3a;color:#c7d0d8;font-size:8px;font-weight:700;letter-spacing:.13em}.fitment-toolbar>div{display:flex;align-items:center;gap:9px}.live-dot{width:6px;height:6px;border-radius:50%;background:#75a9e8;box-shadow:0 0 0 4px rgba(117,169,232,.13)}
   .spec-table{background:#202c36}.spec-header,.spec-row{display:grid;grid-template-columns:1.05fr 1fr 1fr 1.55fr;gap:16px;align-items:center}.spec-header{min-height:42px;padding:0 20px;color:#91a0ac;font-size:8px;font-weight:700;letter-spacing:.13em;background:#263440}.spec-row{min-height:76px;padding:14px 20px;border-top:1px solid rgba(255,255,255,.055)}.spec-row>strong{font-size:12px;font-weight:600}.spec-value{font-family:Consolas,monospace;font-size:11px;color:#dbe4ec;font-variant-numeric:tabular-nums}.spec-row small{color:#9caab5;font-size:9px;line-height:1.6}
-  .engineering-note{display:flex;gap:13px;align-items:flex-start;margin-top:20px;padding:17px 18px;background:#243440;color:#c1ccd5}.note-icon{display:grid;place-items:center;width:18px;height:18px;flex:0 0 18px;border:1px solid #8da4b9;border-radius:50%;font-size:11px}.engineering-note p{margin:0;font-size:10px;line-height:1.8}.engineering-note strong{color:#fff}.source-standard{display:grid;grid-template-columns:1fr 1fr;gap:30px;margin-top:24px;padding:24px;background:#202c36}.source-standard .eyebrow{margin-bottom:10px}.source-standard h3{margin:0 0 9px;font-size:19px;font-weight:500;letter-spacing:-.03em}.source-standard>div:first-child>p:last-child{max-width:500px;margin:0;color:#aebbc5;font-size:10px;line-height:1.8}.source-fields{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:#3b4a56}.source-fields span{padding:13px;background:#25333e;color:#8fa0ad;font-size:7px;font-weight:700;letter-spacing:.12em}.source-fields b{display:block;margin-top:7px;color:#e2e8ed;font-size:9px;font-weight:500;letter-spacing:0}
+  .engineering-note{display:flex;gap:13px;align-items:flex-start;margin-top:20px;padding:17px 18px;background:#243440;color:#c1ccd5}.note-icon{display:grid;place-items:center;width:18px;height:18px;flex:0 0 18px;border:1px solid #8da4b9;border-radius:50%;font-size:11px}.engineering-note p{margin:0;font-size:10px;line-height:1.8}.engineering-note strong{color:#fff}.spec-kind{display:block;margin-top:5px;color:#8b949c;font-size:8px;font-weight:600;letter-spacing:.1em;text-transform:uppercase}.spec-row small a{display:inline-block;margin-left:6px;color:#6f9bc8;text-decoration:none;font-size:8px;font-weight:700}.source-standard{display:grid;grid-template-columns:1fr 1fr;gap:30px;margin-top:24px;padding:24px;background:#202c36}.source-standard .eyebrow{margin-bottom:10px}.source-standard h3{margin:0 0 9px;font-size:19px;font-weight:500;letter-spacing:-.03em}.source-standard>div:first-child>p:last-child{max-width:500px;margin:0;color:#aebbc5;font-size:10px;line-height:1.8}.source-fields{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:#3b4a56}.source-fields span{padding:13px;background:#25333e;color:#8fa0ad;font-size:7px;font-weight:700;letter-spacing:.12em}.source-fields a{display:inline-block;margin-top:7px;color:#a8c9e8;font-size:8px;text-decoration:none}.source-fields b{display:block;margin-top:7px;color:#e2e8ed;font-size:9px;font-weight:500;letter-spacing:0}
   .fitment-actions{display:flex;justify-content:space-between;align-items:center;gap:18px;margin-top:26px}.outline-action{padding:14px 18px;border:1px solid #72818d;color:#fff;text-decoration:none;font-size:9px;font-weight:700;letter-spacing:.12em}.outline-action span{color:#83b5f4;margin-left:12px}.fitment-actions>span{max-width:420px;color:#92a0ab;font-size:8px;letter-spacing:.1em;line-height:1.6;text-align:right}
   .build-layout{display:grid;grid-template-columns:.7fr 1.3fr;gap:30px}.build-list{display:flex;flex-direction:column}.build-choice{display:grid;grid-template-columns:42px 1fr 20px;align-items:center;gap:12px;min-height:91px;padding:15px 17px;border:0;border-bottom:1px solid #dfe3e6;background:transparent;text-align:left;cursor:pointer;color:#273039}.build-choice.active{background:#fff;border-left:3px solid #1c69d4;padding-left:14px}.build-number{font-family:Consolas,monospace;color:#8a959d;font-size:11px}.build-name{font-size:14px;font-weight:700}.build-name small{display:block;margin-top:6px;color:#828c94;font-size:10px;font-weight:400}.build-arrow{color:#7c8a96}.build-detail{display:grid;grid-template-columns:1fr 1fr;min-height:380px;background:#fff}
   .build-visual{position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden;background:radial-gradient(ellipse at center,#344351 0%,#1b2731 65%,#141e27 100%);color:#d8e0e7}.visual-kicker{position:absolute;left:22px;top:20px;font-size:8px;letter-spacing:.13em;color:#aab9c6}.visual-caption{position:absolute;left:22px;bottom:20px;font-size:8px;letter-spacing:.12em;color:#aab9c6}
