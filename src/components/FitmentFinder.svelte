@@ -34,18 +34,39 @@
   const filteredModels = () => models.filter(x => x.name.toLowerCase().includes(modelSearch.trim().toLowerCase()));
   const resultSpecs = () => {
     const f = fitment || {};
-    const val = (v: unknown, unit = '') => v == null || String(v).trim() === '' ? '未提供' : String(v) + unit;
-    const oeEt = (String(f.oe_wheel || '').match(/ET\s*[+-]?\d+/i) || [])[0];
+    const value = (v: unknown, fallback = '未提供') => v == null || String(v).trim() === '' ? fallback : String(v);
+    const pcd = value(f.bolt_pattern || f.pcd || f.PCD);
+    const pcdMatch = pcd.match(/(\\d{1,2})\\s*[x×]\\s*(\\d{2,3}(?:\\.\\d+)?)/i);
+    const pcdValid = !!pcdMatch && Number(pcdMatch[1]) >= 3 && Number(pcdMatch[1]) <= 8 && Number(pcdMatch[2]) >= 50 && Number(pcdMatch[2]) <= 200;
+    const lugCount = Number(f.lug_count) > 0 ? Number(f.lug_count) : null;
+    const pcdMismatch = !!(pcdValid && lugCount && Number(pcdMatch?.[1]) !== lugCount);
+    const bore = f.center_bore_mm || f.center_bore || f.hub_bore_mm;
+    const rearBore = f.center_bore_rear_mm;
+    const oeWheel = value(f.oe_wheel);
+    const flush = value(f.flush_wheel, '未发布');
+    const max = value(f.max_wheel, '未发布');
+    const oeEt = (oeWheel.match(/ET\\s*[+-]?\\d+/i) || [])[0];
+    const aftermarketEt = [
+      (flush.match(/ET\\s*[+-]?\\d+/i) || [])[0] ? 'Flush ' + (flush.match(/ET\\s*[+-]?\\d+/i) || [])[0] : '',
+      (max.match(/ET\\s*[+-]?\\d+/i) || [])[0] ? 'Maximum ' + (max.match(/ET\\s*[+-]?\\d+/i) || [])[0] : ''
+    ].filter(Boolean).join(' · ');
+    const sizeText = [oeWheel, flush, max].join(' | ');
+    const sizeFound = /\\b\\d{2}\\s*[x×]\\s*\\d{1,2}(?:\\.\\d+)?\\s*J?\\b/i.test(sizeText);
+    const load = f.load_rating || f.wheel_load_rating || f.max_load_kg || f.load_capacity_kg;
+    const brake = f.brake_clearance || f.brake_caliper_clearance || f.caliper_clearance;
+    const thread = f.lug_thread || f.bolt_thread || f.thread_size;
+    const seat = f.lug_seat || f.bolt_seat || f.seat_type;
     return [
-      { label:'PCD / 螺栓孔距', value:val(f.bolt_pattern || f.pcd || f.PCD), note:'核对孔数与节圆直径' },
-      { label:'中心孔', value:val(f.center_bore_mm || f.center_bore || f.hub_bore_mm, ' mm'), note:f.center_bore_rear_mm ? '后轴中心孔：'+f.center_bore_rear_mm+' mm' : '确认前后轴及定位环要求' },
-      { label:'原厂轮毂尺寸', value:val(f.oe_wheel), note:'原厂尺寸参考' },
-      { label:'原厂 ET', value:val(oeEt), note:'仅显示来源明确提供的 ET' },
-      { label:'Flush 参考', value:val(f.flush_wheel), note:'改装参考值，非适配保证' },
-      { label:'Maximum 参考', value:val(f.max_wheel), note:'最大参考值，需再次核验' },
-      { label:'螺栓数量', value:val(f.lug_count), note:'应与 PCD 孔数一致' },
-      { label:'承载 / 制动间隙', value:val(f.load_rating || f.wheel_load_rating || f.max_load_kg)+' / '+val(f.brake_clearance || f.caliper_clearance), note:'缺失时必须单独工程确认' },
-      { label:'螺栓规格 / 座型', value:val(f.lug_thread || f.bolt_thread)+' / '+val(f.lug_seat || f.bolt_seat), note:'按具体车辆版本核实' }
+      { label:'PCD / 螺栓孔距', value:pcd, note:!pcdMatch ? '需要确认孔数与节圆直径格式' : pcdMismatch ? '与独立螺栓数量字段不一致' : '格式可识别，仍需实车核验', state:!pcdMatch ? (pcd === '未提供' ? 'missing' : 'review') : pcdMismatch ? 'review' : 'present' },
+      { label:'螺栓数量', value:value(lugCount), note:'应与 PCD 孔数一致', state:lugCount ? 'present' : 'missing' },
+      { label:'车型年份', value:value(f.year), note:'ANKUSI 车型目录年份', state:f.year ? 'present' : 'missing' },
+      { label:'中心孔', value:bore ? String(bore)+' mm'+(rearBore ? ' · 后轴 '+rearBore+' mm' : '') : '未提供', note:'确认前后轴及定位环要求', state:bore ? 'present' : 'missing' },
+      { label:'原厂轮毂尺寸', value:oeWheel, note:sizeFound ? '已取得轮毂直径 / 宽度参考' : '来源未提供可识别的尺寸', state:sizeFound ? 'present' : 'missing' },
+      { label:'原厂偏距 / ET', value:oeEt || '来源未发布', note:oeEt ? '仅作为原厂参考，不代表改装轮毂适配' : '不可从 Flush / Maximum 推断原厂 ET', state:oeEt ? 'present' : 'review' },
+      { label:'改装参考 ET', value:aftermarketEt || '来源未发布', note:'仅显示 Flush / Maximum 对应的来源数据', state:aftermarketEt ? 'present' : 'review' },
+      { label:'轮毂承载能力', value:load ? String(load) : '未提供', note:'必须对照车辆轴荷及使用场景核验', state:load ? 'present' : 'missing' },
+      { label:'制动 / 卡钳间隙', value:value(brake), note:'需按实际制动套件确认', state:brake ? 'present' : 'missing' },
+      { label:'螺栓螺纹 / 座型', value:[thread,seat].filter(Boolean).join(' · ') || '未提供', note:'确认螺纹规格和紧固件座型', state:thread && seat ? 'present' : 'missing' }
     ];
   };
   const identityFields = () => {
@@ -231,7 +252,7 @@
     {#if fitment}
       <section class="result">
         <div class="result-head"><div><p class="eyebrow">02 / FITMENT REFERENCE</p><h2>{fitmentVehicle?.make || 'BMW'} {fitmentVehicle?.ankusi_model || fitmentVehicle?.model || fitment.model} {fitmentVehicle?.ankusi_year || fitmentVehicle?.year || fitment.year}</h2></div><span class="source">{source}</span></div>
-        <div class="spec-grid">{#each resultSpecs() as item}<article><span>{item.label}</span><strong>{item.value}</strong><small>{item.note}</small></article>{/each}</div>
+        <div class="spec-grid">{#each resultSpecs() as item}<article><div class="spec-label"><span>{item.label}</span><b class:present={item.state === 'present'} class:review={item.state === 'review'}>{item.state === 'present' ? 'DATA FOUND' : item.state === 'review' ? 'REVIEW' : 'NOT PROVIDED'}</b></div><strong>{item.value}</strong><small>{item.note}</small></article>{/each}</div>
         <div class="source-line"><span>DATA SOURCE · ANKUSI WHEELS</span><a href="https://ankusiwheels.com/wheel-fitment-api/" target="_blank" rel="noopener">VIEW SOURCE ↗</a></div>
         <p class="disclaimer">Fitment data is a reference, not an engineering approval or guarantee of safe installation. Exact trim, brake package, wheel load rating, tire dimensions, offsets, fasteners and clearance must be verified before ordering or manufacturing.</p>
       </section>
@@ -253,7 +274,7 @@
   .vehicle-review{margin-top:22px;padding:22px;background:#f1f3f0}.review-label{font-size:9px;font-weight:650;letter-spacing:.16em;color:#80643a}.vehicle-review h3{font-size:21px;font-weight:550;margin:9px 0 16px}.identity{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;background:#dce0dc;margin:0}.identity div{background:white;padding:12px;min-width:0}.identity dt{font-size:8px;color:#70797c;letter-spacing:.1em;text-transform:uppercase}.identity dd{margin:6px 0 0;font-size:11px;font-weight:550;overflow-wrap:anywhere}.candidate{display:flex;justify-content:space-between;align-items:center;gap:12px;width:100%;margin:7px 0;padding:14px 15px;border:1px solid #d7dcd8;background:white;text-align:left;cursor:pointer}.candidate:hover{border-color:#80643a}.candidate strong{font-size:12px}.candidate span{font-size:10px;color:#687176}.candidate:disabled{opacity:.5}.actions{display:flex;align-items:center;flex-wrap:wrap;gap:10px;margin-top:18px}
   .locked-make{display:flex;align-items:center;gap:16px;padding:13px 15px;background:#f1f3f0;max-width:260px}.locked-make span,.locked-make small{font-size:8px;color:#717b7e;letter-spacing:.12em}.locked-make strong{font-size:16px;letter-spacing:.12em}.fields{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:20px}.field{min-width:0}.custom-picker{position:relative}.picker-trigger{height:48px;width:100%;display:flex;align-items:center;justify-content:space-between;padding:0 14px;border:0;border-bottom:1px solid #8d9692;background:#f3f4f2;color:#171a1c;text-align:left;font:inherit;font-size:13px;cursor:pointer}.picker-trigger:disabled{opacity:.5;cursor:not-allowed}.picker-trigger i{width:8px;height:8px;border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;transform:rotate(45deg) translateY(-2px)}.picker-menu{position:absolute;z-index:20;top:calc(100% + 1px);left:0;right:0;background:white;box-shadow:0 10px 28px #0002;border-top:2px solid #b99a68}.picker-search{width:calc(100% - 16px);margin:8px}.picker-options{max-height:260px;overflow:auto;padding:4px 0}.picker-options button{display:block;width:100%;min-height:40px;padding:9px 14px;border:0;background:white;color:#171a1c;text-align:left;font-size:12px;cursor:pointer}.picker-options button:hover,.picker-options button[aria-selected=true]{background:#e9ece8}
   .notice,.error{padding:12px 14px;margin:16px 0 0;font-size:11px;line-height:1.6}.notice{background:#eef2ed;color:#465c4b}.error{background:#f7eeee;color:#8a3434}
-  .result{margin-top:26px}.result-head{margin-bottom:20px}.result-head h2{font-size:24px}.spec-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;background:#dce0dc}.spec-grid article{padding:18px;background:#f5f6f4;min-width:0}.spec-grid article span{font-size:9px;color:#687176;letter-spacing:.09em}.spec-grid strong{display:block;margin-top:9px;font-size:16px;font-weight:550;overflow-wrap:anywhere}.spec-grid small{display:block;margin-top:7px;color:#7b8487;font-size:9px;line-height:1.5}.source-line{display:flex;justify-content:space-between;gap:12px;margin-top:18px;color:#7b8487;font-size:9px;letter-spacing:.1em}.source-line a{color:#3e484c;text-decoration:underline;text-underline-offset:3px}.disclaimer{margin:18px 0 0;padding:14px;background:#f3f0e9;color:#655a46;font-size:10px;line-height:1.7}
+  .result{margin-top:26px}.result-head{margin-bottom:20px}.result-head h2{font-size:24px}.spec-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;background:#dce0dc}.spec-grid article{padding:18px;background:#f5f6f4;min-width:0}.spec-label{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}.spec-label span{font-size:9px;color:#687176;letter-spacing:.09em}.spec-label b{flex:none;font-size:7px;letter-spacing:.08em;font-weight:650;color:#8a5b26}.spec-label b.present{color:#3f6849}.spec-label b.review{color:#8a5b26}.spec-grid strong{display:block;margin-top:9px;font-size:16px;font-weight:550;overflow-wrap:anywhere}.spec-grid small{display:block;margin-top:7px;color:#7b8487;font-size:9px;line-height:1.5}.source-line{display:flex;justify-content:space-between;gap:12px;margin-top:18px;color:#7b8487;font-size:9px;letter-spacing:.1em}.source-line a{color:#3e484c;text-decoration:underline;text-underline-offset:3px}.disclaimer{margin:18px 0 0;padding:14px;background:#f3f0e9;color:#655a46;font-size:10px;line-height:1.7}
   .footer{display:flex;justify-content:space-between;gap:16px;padding:26px max(24px,calc((100vw - 1120px)/2));background:#101416;color:#9ba3a6;font-size:9px;letter-spacing:.1em}
   @media(max-width:700px){.header{height:66px;padding:0 18px}.brand strong{font-size:15px}.main{padding:40px 16px 60px}.finder,.result{padding:22px 18px}.finder-head h2,.result-head h2{font-size:23px}.vin-row,.fields{grid-template-columns:1fr}.vin-row .primary{width:100%}.identity{grid-template-columns:repeat(2,minmax(0,1fr))}.result-head{align-items:flex-start;flex-direction:column}.source{align-self:flex-start}.footer{padding:22px 18px;flex-direction:column}.actions{align-items:flex-start}}
   @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
