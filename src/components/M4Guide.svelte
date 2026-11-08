@@ -381,7 +381,7 @@
             <span>SETUP TYPE</span>
             <button class:active={setupMode === 'Staggered'} onclick={() => setSetupMode('Staggered')}>OEM STAGGERED</button>
             <button class:active={setupMode === 'Square'} onclick={() => setSetupMode('Square')}>SQUARE</button>
-            <button class:active={setupMode === 'Custom'} onclick={() => setSetupMode('Custom')}>CUSTOM STAGGERED</button>
+            <button class:active={setupMode === 'Custom'} onclick={() => setSetupMode('Custom')}>CUSTOM SETUP</button>
             <button class="baseline-action" onclick={loadBothOemBaselines}>RESET BOTH AXLES ↺</button>
           </div>
           <div class="axle-summary">
