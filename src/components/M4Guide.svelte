@@ -10,9 +10,15 @@
   let yearPickerOpen = $state(false);
   let trimPickerOpen = $state(false);
   let selectedAxle = $state<'front' | 'rear'>('front');
-  let wheelDiameter = $state('20');
-  let wheelWidth = $state('10');
-  let wheelEt = $state('20');
+  let frontWheelDiameter = $state('19');
+  let frontWheelWidth = $state('9.5');
+  let frontWheelEt = $state('20');
+  let rearWheelDiameter = $state('20');
+  let rearWheelWidth = $state('10.5');
+  let rearWheelEt = $state('20');
+  const wheelDiameter = $derived(selectedAxle === 'front' ? frontWheelDiameter : rearWheelDiameter);
+  const wheelWidth = $derived(selectedAxle === 'front' ? frontWheelWidth : rearWheelWidth);
+  const wheelEt = $derived(selectedAxle === 'front' ? frontWheelEt : rearWheelEt);
   let selectedFinish = $state('Satin Black');
   const wheelDiameterOptions = ['18', '19', '20', '21', '22'];
   const wheelWidthOptions = ['8.5', '9', '9.5', '10', '10.5', '11', '11.5', '12'];
@@ -86,7 +92,7 @@
   });
   const wheelFaceRadius = $derived(66 + (Number(wheelDiameter) - 18) * 5.2);
   const wheelFaceWidth = $derived(92 + (Number(wheelWidth) - 9) * 16);
-  const wheelDiagramShift = $derived(fitmentDelta ? fitmentDelta.outer * 1.15 : 0);
+  const wheelDiagramShift = $derived(fitmentDelta ? ((fitmentDelta.outer - fitmentDelta.inner) / 2) * 1.15 : 0);
   const specs = $derived([
     ...commonHardware[chassis.startsWith('F') ? 'F' : 'G'],
     { label: 'OEM wheel size', front: currentPackage.frontWheel, rear: currentPackage.rearWheel, note: currentPackage.note, source: currentPackage.source, kind: 'OEM' as const },
@@ -185,10 +191,25 @@
   const currentUpgrade = $derived(upgradeGroups.find((item) => item.key === activeUpgrade) ?? upgradeGroups[0]);
   const selectedYear = $derived(currentVehicle.years.includes(year) ? year : currentVehicle.years[currentVehicle.years.length - 1]);
 
+  function setWheelDiameter(value: string) {
+    if (selectedAxle === 'front') frontWheelDiameter = value; else rearWheelDiameter = value;
+  }
+  function setWheelWidth(value: string) {
+    if (selectedAxle === 'front') frontWheelWidth = value; else rearWheelWidth = value;
+  }
+  function setWheelEt(value: string) {
+    if (selectedAxle === 'front') frontWheelEt = value; else rearWheelEt = value;
+  }
   function loadOemBaseline() {
-    wheelDiameter = String(oemWheelBaseline.diameter);
-    wheelWidth = String(oemWheelBaseline.width);
-    if (oemWheelBaseline.et !== null) wheelEt = String(oemWheelBaseline.et);
+    if (selectedAxle === 'front') {
+      frontWheelDiameter = String(oemWheelBaseline.diameter);
+      frontWheelWidth = String(oemWheelBaseline.width);
+      if (oemWheelBaseline.et !== null) frontWheelEt = String(oemWheelBaseline.et);
+    } else {
+      rearWheelDiameter = String(oemWheelBaseline.diameter);
+      rearWheelWidth = String(oemWheelBaseline.width);
+      if (oemWheelBaseline.et !== null) rearWheelEt = String(oemWheelBaseline.et);
+    }
   }
 
   function selectTrim(value: string) {
@@ -317,9 +338,9 @@
           <div class="axle-switch"><button class:active={selectedAxle === 'front'} onclick={() => selectedAxle = 'front'}>FRONT AXLE</button><button class:active={selectedAxle === 'rear'} onclick={() => selectedAxle = 'rear'}>REAR AXLE</button><button class="baseline-action" onclick={loadOemBaseline}>LOAD OEM BASELINE ↺</button></div>
           <div class="fitment-workspace">
             <div class="parameter-panel">
-              <div class="parameter-group"><label>WHEEL DIAMETER</label><div class="parameter-options">{#each wheelDiameterOptions as value}<button class:chosen={wheelDiameter === value} onclick={() => wheelDiameter = value}>{value}<small>″</small></button>{/each}</div></div>
-              <div class="parameter-group"><label>WHEEL WIDTH</label><div class="parameter-options width-options">{#each wheelWidthOptions as value}<button class:chosen={wheelWidth === value} onclick={() => wheelWidth = value}>{value}<small>J</small></button>{/each}</div></div>
-              <div class="parameter-group"><label>OFFSET / ET</label><div class="parameter-options et-options">{#each wheelEtOptions as value}<button class:chosen={wheelEt === value} onclick={() => wheelEt = value}>ET{value}</button>{/each}</div></div>
+              <div class="parameter-group"><label>WHEEL DIAMETER</label><div class="parameter-options">{#each wheelDiameterOptions as value}<button class:chosen={wheelDiameter === value} onclick={() => setWheelDiameter(value)}>{value}<small>″</small></button>{/each}</div></div>
+              <div class="parameter-group"><label>WHEEL WIDTH</label><div class="parameter-options width-options">{#each wheelWidthOptions as value}<button class:chosen={wheelWidth === value} onclick={() => setWheelWidth(value)}>{value}<small>J</small></button>{/each}</div></div>
+              <div class="parameter-group"><label>OFFSET / ET</label><div class="parameter-options et-options">{#each wheelEtOptions as value}<button class:chosen={wheelEt === value} onclick={() => setWheelEt(value)}>ET{value}</button>{/each}</div></div>
               <div class="selected-spec"><span>YOUR SELECTED WHEEL</span><strong>{wheelDiameter} × {wheelWidth}J</strong><b>ET{wheelEt}</b></div>
               <p class="parameter-footnote">Illustrative configuration only. The available choices are exploration inputs, not a declaration that every combination is compatible with this vehicle.</p>
             </div>
