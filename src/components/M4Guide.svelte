@@ -208,12 +208,15 @@
 
   function setWheelDiameter(value: string) {
     if (selectedAxle === 'front') frontWheelDiameter = value; else rearWheelDiameter = value;
+    setupMode = 'Custom';
   }
   function setWheelWidth(value: string) {
     if (selectedAxle === 'front') frontWheelWidth = value; else rearWheelWidth = value;
+    setupMode = 'Custom';
   }
   function setWheelEt(value: string) {
     if (selectedAxle === 'front') frontWheelEt = value; else rearWheelEt = value;
+    setupMode = 'Custom';
   }
   function applyOemBaselineToAxle(axle: 'front' | 'rear') {
     const spec = parseWheelSpec(axle === 'front' ? currentPackage.frontWheel : currentPackage.rearWheel);
