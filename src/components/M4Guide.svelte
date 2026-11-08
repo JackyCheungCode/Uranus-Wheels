@@ -92,6 +92,43 @@
     G83: { 'Competition xDrive': ['2022','2023','2024','2025','2026'] }
   };
   const availableYears = $derived(validYears[chassis][trim] ?? currentVehicle.years);
+  const technicalOverview = $derived.by(() => {
+    if (chassis.startsWith('F')) {
+      const data: Record<string, { power: string; torque: string; transmission: string; brakes: string }> = {
+        M4: { power: '431 hp (market rating may vary)', torque: '550 Nm', transmission: '6-speed manual or 7-speed M DCT', brakes: 'M Compound brakes; optional M Carbon Ceramic Brakes on selected markets' },
+        Competition: { power: '444 hp (US rating) / 450 PS (regional rating)', torque: '550 Nm', transmission: '6-speed manual or 7-speed M DCT', brakes: 'M Compound brakes; optional M Carbon Ceramic Brakes' },
+        CS: { power: '460 hp', torque: '600 Nm', transmission: '7-speed M DCT', brakes: 'M Compound brakes; optional M Carbon Ceramic Brakes' },
+        GTS: { power: '493 hp', torque: '600 Nm', transmission: '7-speed M DCT', brakes: 'M Carbon Ceramic Brakes' }
+      };
+      return { engine: 'S55B30 · 2,979 cc twin-turbo inline-six', ...(data[trim] ?? data.M4), drive: 'Rear-wheel drive', suspension: 'M-specific suspension; adaptive equipment varies by edition and market', source: 'BMW M / BMW technical data' };
+    }
+    const data: Record<string, { power: string; torque: string; transmission: string; brakes: string }> = {
+      M4: { power: '473 hp', torque: '406 lb-ft / 550 Nm', transmission: '6-speed manual', brakes: 'M Compound brakes · 6-piston front / single-piston rear' },
+      Competition: { power: '503 hp', torque: '479 lb-ft / 650 Nm', transmission: '8-speed M Steptronic', brakes: 'M Compound brakes · 6-piston front / single-piston rear' },
+      'Competition xDrive': { power: Number(selectedYear) >= 2025 ? '523 hp (US specification)' : '503 hp (US specification)', torque: '479 lb-ft / 650 Nm', transmission: '8-speed M Steptronic · M xDrive', brakes: 'M Compound brakes · 6-piston front / single-piston rear' },
+      CS: { power: '543 hp (US specification)', torque: '479 lb-ft / 650 Nm', transmission: '8-speed M Steptronic', brakes: 'M Compound brakes; optional M Carbon Ceramic Brakes' },
+      CSL: { power: '543 hp (US specification)', torque: '479 lb-ft / 650 Nm', transmission: '8-speed M Steptronic', brakes: 'M Carbon Ceramic Brakes · standard equipment' }
+    };
+    return { engine: 'S58B30 · 2,993 cc twin-turbo inline-six', ...(data[trim] ?? data.Competition), drive: trim.includes('xDrive') ? 'M xDrive all-wheel drive' : 'Rear-wheel drive', suspension: 'Adaptive M suspension · model-specific calibration', source: 'BMW Group official technical data' };
+  });
+  const galleryImages: Record<Chassis, { src: string; alt: string; caption: string; credit: string }[]> = {
+    F82: [
+      { src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/21/The_frontview_of_BMW_M4_Coup%C3%A9_%28F82%29.JPG/1280px-The_frontview_of_BMW_M4_Coup%C3%A9_%28F82%29.JPG', alt: 'BMW M4 F82 front three-quarter view', caption: 'F82 · Front profile', credit: 'Tokumeigakarinoaoshima · CC0' },
+      { src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/The_front_tire_wheel_of_BMW_M4_Coup%C3%A9_%28F82%29.JPG/1280px-The_front_tire_wheel_of_BMW_M4_Coup%C3%A9_%28F82%29.JPG', alt: 'BMW M4 F82 front wheel and tyre close-up', caption: 'F82 · Front wheel detail', credit: 'Tokumeigakarinoaoshima · CC0' }
+    ],
+    F83: [
+      { src: 'https://commons.wikimedia.org/wiki/Special:FilePath/2014-2018_BMW_M4_%28F83%29_convertible_%282018-08-06%29_01.jpg?width=1600', alt: 'BMW M4 F83 convertible', caption: 'F83 · Convertible profile', credit: 'EuroVisionNim · CC BY-SA 4.0' },
+      { src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/The_front_tire_wheel_of_BMW_M4_Coup%C3%A9_%28F82%29.JPG/1280px-The_front_tire_wheel_of_BMW_M4_Coup%C3%A9_%28F82%29.JPG', alt: 'F8X M4 wheel and tyre detail', caption: 'F8X · Wheel detail reference', credit: 'Tokumeigakarinoaoshima · CC0' }
+    ],
+    G82: [
+      { src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/79/BMW_M4_%28G82%29_1X7A0155.jpg/1920px-BMW_M4_%28G82%29_1X7A0155.jpg', alt: 'BMW M4 G82 coupe', caption: 'G82 · Coupe profile', credit: 'Alexander Migl · CC BY-SA 4.0' },
+      { src: 'https://commons.wikimedia.org/wiki/Special:FilePath/BMW_M4_G82.jpg?width=1600', alt: 'BMW M4 G82 at Plaza Athénée', caption: 'G82 · Exterior reference', credit: 'Mathious Ier · CC0' }
+    ],
+    G83: [
+      { src: 'https://commons.wikimedia.org/wiki/Special:FilePath/BMW_M4_Competition_Cabriolet_%28G83%2C_2022%29_%2853338263511%29.jpg?width=1600', alt: 'BMW M4 G83 Competition convertible', caption: 'G83 · Convertible profile', credit: 'usf1fan2 · CC BY 2.0' },
+      { src: 'https://commons.wikimedia.org/wiki/Special:FilePath/BMW_M4_competition_convertible.jpg?width=1600', alt: 'BMW M4 competition convertible', caption: 'G83 · Exterior reference', credit: 'How3010 · CC0' }
+    ]
+  };
   const currentSetup = $derived(setups.find((item) => item.name === activeSetup) ?? setups[1]);
   const buildReferences: Record<'F' | 'G', Record<string, { front: string; rear: string; frontTyre: string; rearTyre: string; note: string; source: string }>> = {
     F: {
@@ -187,11 +224,33 @@
       </div>
     </section>
 
+    <section class="technical-section section-wrap" id="technical">
+      <div class="section-heading">
+        <div><p class="eyebrow dark">02 / VEHICLE SPECIFICATION</p><h2>Know the<br /><em>machine.</em></h2></div>
+        <p class="section-intro">Factory powertrain, drivetrain, braking and suspension references for the selected M4 edition. Output figures are market-specific where noted.</p>
+      </div>
+      <div class="technical-grid">
+        <div class="technical-card"><span>ENGINE</span><strong>{technicalOverview.engine}</strong></div>
+        <div class="technical-card"><span>OUTPUT</span><strong>{technicalOverview.power}</strong></div>
+        <div class="technical-card"><span>TORQUE</span><strong>{technicalOverview.torque}</strong></div>
+        <div class="technical-card"><span>TRANSMISSION</span><strong>{technicalOverview.transmission}</strong></div>
+        <div class="technical-card"><span>DRIVETRAIN</span><strong>{technicalOverview.drive}</strong></div>
+        <div class="technical-card"><span>BRAKES</span><strong>{technicalOverview.brakes}</strong></div>
+        <div class="technical-card wide"><span>SUSPENSION</span><strong>{technicalOverview.suspension}</strong></div>
+      </div>
+      <p class="technical-source">REFERENCE: {technicalOverview.source} · Verify the exact market specification and vehicle build sheet before parts selection.</p>
+      <div class="image-gallery">
+        {#each galleryImages[chassis] as photo}
+          <figure><img src={photo.src} alt={photo.alt} loading="lazy" /><figcaption><strong>{photo.caption}</strong><span>{photo.credit}</span></figcaption></figure>
+        {/each}
+      </div>
+    </section>
+
     <section class="fitment-section" id="fitment">
       <div class="section-wrap">
         <div class="section-heading fitment-heading">
-          <div><p class="eyebrow">02 / ENGINEERING REFERENCE</p><h2>Wheel fitment.<br /><em>Without guesswork.</em></h2></div>
-          <p class="section-intro">A structured reference for {chassis} {trim}. Front and rear values are maintained independently. Unverified values remain unpublished rather than being estimated.</p>
+          <div><p class="eyebrow">03 / ENGINEERING REFERENCE</p><h2>Wheel fitment.<br /><em>Without guesswork.</em></h2></div>
+          <p class="section-intro">A sourced factory baseline for {chassis} {trim}. Front and rear values are maintained independently, with aftermarket references clearly separated from OEM specifications.</p>
         </div>
         <div class="fitment-toolbar"><div><span class="live-dot"></span> CURATED FITMENT DATABASE</div><span>VEHICLE: {chassis} / {selectedYear} / {trim}</span></div>
         <div class="spec-table">
@@ -227,7 +286,7 @@
 
     <section class="build-section section-wrap" id="builds">
       <div class="section-heading">
-        <div><p class="eyebrow dark">03 / CURATED CONFIGURATIONS</p><h2>Choose your<br /><em>build direction.</em></h2></div>
+        <div><p class="eyebrow dark">04 / CURATED CONFIGURATIONS</p><h2>Choose your<br /><em>build direction.</em></h2></div>
         <p class="section-intro">A build is more than a wheel size. Explore distinct directions, each designed to connect fitment, tires, suspension and intended use.</p>
       </div>
       <div class="build-layout">
@@ -248,7 +307,7 @@
     <section class="upgrade-section" id="upgrades">
       <div class="section-wrap">
         <div class="section-heading">
-          <div><p class="eyebrow">04 / MODIFICATION ECOSYSTEM</p><h2>Build beyond<br /><em>the wheels.</em></h2></div>
+          <div><p class="eyebrow">05 / MODIFICATION ECOSYSTEM</p><h2>Build beyond<br /><em>the wheels.</em></h2></div>
           <p class="section-intro">Explore the wider M4 modification landscape. Each category can grow into a dedicated guide with compatible products, technical notes and real vehicle builds.</p>
         </div>
         <div class="upgrade-layout">
@@ -307,7 +366,7 @@
   .field-control{position:relative;min-width:0}.field-label{display:block;margin-bottom:9px;color:#69747d;font-size:9px;font-weight:700;letter-spacing:.13em}.custom-select{position:relative}.select-trigger{height:48px;width:100%;display:flex;align-items:center;justify-content:space-between;padding:0 14px;border:0;border-bottom:1px solid #aab2b9;border-radius:0;background:#f4f6f7;color:#202428;font-size:13px;text-align:left;cursor:pointer}.select-trigger span{color:#1c69d4;font-size:16px}.select-menu{position:absolute;z-index:8;top:calc(100% + 2px);left:0;right:0;max-height:230px;overflow:auto;padding:5px;background:#fff;box-shadow:0 14px 32px rgba(20,31,42,.16)}.select-menu button{display:block;width:100%;padding:11px 10px;border:0;background:#fff;color:#273039;text-align:left;font-size:12px;cursor:pointer}.select-menu button:hover,.select-menu button.current{background:#eaf0f6;color:#1c69d4}
   .vehicle-identity{min-height:48px;padding:5px 12px;border-left:2px solid #1c69d4;display:flex;flex-direction:column;justify-content:center;gap:2px}.vehicle-identity span{font-size:12px;font-weight:700}.vehicle-identity strong{font-size:9px;color:#1c69d4;letter-spacing:.08em}.vehicle-identity small{font-size:9px;color:#87919a}
   .panel-footnote{margin:22px 0 0;padding-top:17px;border-top:1px solid #edf0f2;color:#828c94;font-size:10px;line-height:1.7}
-  .fitment-section{padding:100px 0 104px;background:#19232d;color:#fff}.fitment-heading .eyebrow{color:#a5b1bc}.fitment-heading h2 em{color:#86a9d1}.fitment-heading .section-intro{color:#b3bdc6}
+  .technical-section{padding-top:76px;padding-bottom:76px}.technical-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;background:#dce1e5}.technical-card{min-height:108px;padding:20px;background:#fff}.technical-card span{display:block;margin-bottom:12px;color:#77828b;font-size:8px;font-weight:700;letter-spacing:.14em}.technical-card strong{display:block;color:#26323c;font-size:13px;font-weight:500;line-height:1.6}.technical-card.wide{grid-column:1/-1;min-height:70px}.technical-source{margin:12px 0 28px;color:#77828b;font-size:9px;letter-spacing:.04em}.image-gallery{display:grid;grid-template-columns:1fr 1fr;gap:14px}.image-gallery figure{position:relative;margin:0;min-height:180px;background:#e9ecef;overflow:hidden}.image-gallery img{display:block;width:100%;height:100%;min-height:180px;max-height:290px;object-fit:cover}.image-gallery figcaption{display:flex;justify-content:space-between;gap:10px;padding:10px 12px;background:#202c36;color:#fff}.image-gallery figcaption strong{font-size:9px;font-weight:600}.image-gallery figcaption span{font-size:8px;color:#b7c2ca;text-align:right}.fitment-section{padding:100px 0 104px;background:#19232d;color:#fff}.fitment-heading .eyebrow{color:#a5b1bc}.fitment-heading h2 em{color:#86a9d1}.fitment-heading .section-intro{color:#b3bdc6}
   .fitment-toolbar{display:flex;justify-content:space-between;gap:16px;padding:16px 18px;background:#222f3a;color:#c7d0d8;font-size:8px;font-weight:700;letter-spacing:.13em}.fitment-toolbar>div{display:flex;align-items:center;gap:9px}.live-dot{width:6px;height:6px;border-radius:50%;background:#75a9e8;box-shadow:0 0 0 4px rgba(117,169,232,.13)}
   .spec-table{background:#202c36}.spec-header,.spec-row{display:grid;grid-template-columns:1.05fr 1fr 1fr 1.55fr;gap:16px;align-items:center}.spec-header{min-height:42px;padding:0 20px;color:#91a0ac;font-size:8px;font-weight:700;letter-spacing:.13em;background:#263440}.spec-row{min-height:76px;padding:14px 20px;border-top:1px solid rgba(255,255,255,.055)}.spec-row>strong{font-size:12px;font-weight:600}.spec-value{font-family:Consolas,monospace;font-size:11px;color:#dbe4ec;font-variant-numeric:tabular-nums}.spec-row small{color:#9caab5;font-size:9px;line-height:1.6}
   .engineering-note{display:flex;gap:13px;align-items:flex-start;margin-top:20px;padding:17px 18px;background:#243440;color:#c1ccd5}.note-icon{display:grid;place-items:center;width:18px;height:18px;flex:0 0 18px;border:1px solid #8da4b9;border-radius:50%;font-size:11px}.engineering-note p{margin:0;font-size:10px;line-height:1.8}.engineering-note strong{color:#fff}.spec-kind{display:block;margin-top:5px;color:#8b949c;font-size:8px;font-weight:600;letter-spacing:.1em;text-transform:uppercase}.spec-row small a{display:inline-block;margin-left:6px;color:#6f9bc8;text-decoration:none;font-size:8px;font-weight:700}.source-standard{display:grid;grid-template-columns:1fr 1fr;gap:30px;margin-top:24px;padding:24px;background:#202c36}.source-standard .eyebrow{margin-bottom:10px}.source-standard h3{margin:0 0 9px;font-size:19px;font-weight:500;letter-spacing:-.03em}.source-standard>div:first-child>p:last-child{max-width:500px;margin:0;color:#aebbc5;font-size:10px;line-height:1.8}.source-fields{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:#3b4a56}.source-fields span{padding:13px;background:#25333e;color:#8fa0ad;font-size:7px;font-weight:700;letter-spacing:.12em}.source-fields a{display:inline-block;margin-top:7px;color:#a8c9e8;font-size:8px;text-decoration:none}.source-fields b{display:block;margin-top:7px;color:#e2e8ed;font-size:9px;font-weight:500;letter-spacing:0}
