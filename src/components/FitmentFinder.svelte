@@ -7,6 +7,7 @@
   let vinBusy = $state(false);
   let busy = $state(false);
   let loading = $state(true);
+  let modelLoadError = $state('');
   let models = $state<Model[]>([]);
   let model = $state('');
   let year = $state('');
@@ -83,15 +84,28 @@
   }
   async function loadModels() {
     loading = true;
+    modelLoadError = '';
     try {
       const d = await api('/api/models?make=BMW');
-      models = Array.isArray(d.models) ? d.models : [];
-      if (!models.length) throw new Error('BMW 车型数据库暂时没有返回车型。');
+      const rows = Array.isArray(d.models) ? d.models : [];
+      models = rows.map((item: any) => ({
+        name: String(item?.name || item?.model || '').trim(),
+        years: Array.isArray(item?.years) ? item.years.map((y: unknown) => String(y).trim()).filter(Boolean) : []
+      })).filter(item => item.name && item.years.length);
+      if (!models.length) throw new Error('BMW 车型目录没有返回可用的车型和年份。');
+      modelLoadError = '';
       error = '';
-    } catch(e) { error = e instanceof Error ? e.message : 'BMW 车型数据暂时不可用。'; }
-    finally { loading = false; }
+    } catch(e) {
+      models = [];
+      modelLoadError = e instanceof Error ? e.message : 'BMW 车型数据暂时不可用。';
+    } finally { loading = false; }
   }
   function clearResult() { fitment = null; fitmentVehicle = null; }
+  function openModelPicker() {
+    modelOpen = !modelOpen;
+    yearOpen = false;
+    if (modelOpen && !models.length && !loading) void loadModels();
+  }
   function chooseModel(v: string) { model = v; year = ''; modelOpen = false; modelSearch = ''; clearResult(); error = ''; }
   function chooseYear(v: string) { year = v; yearOpen = false; clearResult(); error = ''; }
 
@@ -231,8 +245,13 @@
           <div class="locked-make"><span>MAKE</span><strong>BMW</strong><small>FIXED VEHICLE BRAND</small></div>
           <div class="fields">
             <div class="field"><label class="field-label">MODEL</label><div class="custom-picker">
-              <button class="picker-trigger" type="button" aria-expanded={modelOpen} onclick={() => {modelOpen=!modelOpen;yearOpen=false;}}>{model || (loading ? 'Loading BMW models…' : 'Choose BMW model')}<i></i></button>
-              {#if modelOpen}<div class="picker-menu"><input class="picker-search" bind:value={modelSearch} placeholder="Search BMW model"/><div class="picker-options" role="listbox">{#each filteredModels() as item}<button type="button" role="option" aria-selected={model===item.name} onclick={() => chooseModel(item.name)}>{item.name}</button>{/each}</div></div>{/if}
+              <button class="picker-trigger" type="button" aria-expanded={modelOpen} onclick={openModelPicker}>{model || (loading ? 'Loading BMW models…' : modelLoadError ? 'Retry loading BMW models' : 'Choose BMW model')}<i></i></button>
+              {#if modelOpen}<div class="picker-menu" onclick={(e) => e.stopPropagation()}><input class="picker-search" bind:value={modelSearch} placeholder="Search BMW model"/><div class="picker-options" role="listbox">
+                {#if loading}<p class="picker-empty">Loading BMW models…</p>
+                {:else if modelLoadError}<p class="picker-empty">{modelLoadError}</p><button type="button" class="picker-retry" onclick={() => loadModels()}>RETRY LOADING ↻</button>
+                {:else if filteredModels().length === 0}<p class="picker-empty">No matching BMW models.</p>
+                {:else}{#each filteredModels() as item}<button type="button" role="option" aria-selected={model===item.name} onclick={() => chooseModel(item.name)}>{item.name}</button>{/each}{/if}
+              </div></div>{/if}
             </div></div>
             <div class="field"><label class="field-label">MODEL YEAR</label><div class="custom-picker">
               <button class="picker-trigger" type="button" disabled={!model} aria-expanded={yearOpen} onclick={() => {yearOpen=!yearOpen;modelOpen=false;}}>{year || 'Choose model year'}<i></i></button>
@@ -268,7 +287,7 @@
   .lookup{padding:26px 0 8px}.field-label{display:block;margin-bottom:9px;color:#525c60;font-size:9px;font-weight:650;letter-spacing:.12em}.vin-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px}.vin-row input,.picker-search{height:48px;min-width:0;padding:0 14px;border:0;border-bottom:1px solid #909895;border-radius:0;background:#f3f4f2;color:#171a1c;font:inherit;font-size:13px;outline:none}.vin-row input:focus,.picker-search:focus{outline:2px solid #0f62fe;outline-offset:-2px}
   .primary,.secondary{min-height:46px;padding:0 18px;border:1px solid #101416;background:#101416;color:white;font-size:10px;font-weight:650;letter-spacing:.07em;cursor:pointer}.primary:hover{background:#30383c}.primary:disabled{opacity:.48;cursor:wait}.secondary{background:transparent;color:#202629;border-color:#aab1ae}.secondary:hover{background:#eef0ee}.hint{margin:9px 0 0;color:#737d80;font-size:10px;line-height:1.65}
   .vehicle-review{margin-top:22px;padding:22px;background:#f1f3f0}.review-label{font-size:9px;font-weight:650;letter-spacing:.16em;color:#80643a}.vehicle-review h3{font-size:21px;font-weight:550;margin:9px 0 16px}.identity{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;background:#dce0dc;margin:0}.identity div{background:white;padding:12px;min-width:0}.identity dt{font-size:8px;color:#70797c;letter-spacing:.1em;text-transform:uppercase}.identity dd{margin:6px 0 0;font-size:11px;font-weight:550;overflow-wrap:anywhere}.candidate{display:flex;justify-content:space-between;align-items:center;gap:12px;width:100%;margin:7px 0;padding:14px 15px;border:1px solid #d7dcd8;background:white;text-align:left;cursor:pointer}.candidate:hover{border-color:#80643a}.candidate strong{font-size:12px}.candidate span{font-size:10px;color:#687176}.candidate:disabled{opacity:.5}.actions{display:flex;align-items:center;flex-wrap:wrap;gap:10px;margin-top:18px}
-  .locked-make{display:flex;align-items:center;gap:16px;padding:13px 15px;background:#f1f3f0;max-width:260px}.locked-make span,.locked-make small{font-size:8px;color:#717b7e;letter-spacing:.12em}.locked-make strong{font-size:16px;letter-spacing:.12em}.fields{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:20px}.field{min-width:0}.custom-picker{position:relative}.picker-trigger{height:48px;width:100%;display:flex;align-items:center;justify-content:space-between;padding:0 14px;border:0;border-bottom:1px solid #8d9692;background:#f3f4f2;color:#171a1c;text-align:left;font:inherit;font-size:13px;cursor:pointer}.picker-trigger:disabled{opacity:.5;cursor:not-allowed}.picker-trigger i{width:8px;height:8px;border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;transform:rotate(45deg) translateY(-2px)}.picker-menu{position:absolute;z-index:20;top:calc(100% + 1px);left:0;right:0;background:white;box-shadow:0 10px 28px #0002;border-top:2px solid #b99a68}.picker-search{width:calc(100% - 16px);margin:8px}.picker-options{max-height:260px;overflow:auto;padding:4px 0}.picker-options button{display:block;width:100%;min-height:40px;padding:9px 14px;border:0;background:white;color:#171a1c;text-align:left;font-size:12px;cursor:pointer}.picker-options button:hover,.picker-options button[aria-selected=true]{background:#e9ece8}
+  .locked-make{display:flex;align-items:center;gap:16px;padding:13px 15px;background:#f1f3f0;max-width:260px}.locked-make span,.locked-make small{font-size:8px;color:#717b7e;letter-spacing:.12em}.locked-make strong{font-size:16px;letter-spacing:.12em}.fields{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:20px}.field{min-width:0}.custom-picker{position:relative}.picker-trigger{height:48px;width:100%;display:flex;align-items:center;justify-content:space-between;padding:0 14px;border:0;border-bottom:1px solid #8d9692;background:#f3f4f2;color:#171a1c;text-align:left;font:inherit;font-size:13px;cursor:pointer}.picker-trigger:disabled{opacity:.5;cursor:not-allowed}.picker-trigger i{width:8px;height:8px;border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;transform:rotate(45deg) translateY(-2px)}.picker-menu{position:absolute;z-index:20;top:calc(100% + 1px);left:0;right:0;background:white;box-shadow:0 10px 28px #0002;border-top:2px solid #b99a68}.picker-search{width:calc(100% - 16px);margin:8px}.picker-options{max-height:260px;overflow:auto;padding:4px 0}.picker-options button{display:block;width:100%;min-height:40px;padding:9px 14px;border:0;background:white;color:#171a1c;text-align:left;font-size:12px;cursor:pointer}.picker-options button:hover,.picker-options button[aria-selected=true]{background:#e9ece8}.picker-empty{margin:0;padding:14px;color:#687176;font-size:11px;line-height:1.6}.picker-options .picker-retry{color:#80643a;font-size:10px;font-weight:650;letter-spacing:.08em}
   .notice,.error{padding:12px 14px;margin:16px 0 0;font-size:11px;line-height:1.6}.notice{background:#eef2ed;color:#465c4b}.error{background:#f7eeee;color:#8a3434}
   .result{margin-top:26px}.result-head{margin-bottom:20px}.result-head h2{font-size:24px}.spec-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;background:#dce0dc}.spec-grid article{padding:18px;background:#f5f6f4;min-width:0}.spec-label{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}.spec-label span{font-size:9px;color:#687176;letter-spacing:.09em}.spec-label b{flex:none;font-size:7px;letter-spacing:.08em;font-weight:650;color:#8a5b26}.spec-label b.present{color:#3f6849}.spec-label b.review{color:#8a5b26}.spec-grid strong{display:block;margin-top:9px;font-size:16px;font-weight:550;overflow-wrap:anywhere}.spec-grid small{display:block;margin-top:7px;color:#7b8487;font-size:9px;line-height:1.5}.source-line{display:flex;justify-content:space-between;gap:12px;margin-top:18px;color:#7b8487;font-size:9px;letter-spacing:.1em}.source-line a{color:#3e484c;text-decoration:underline;text-underline-offset:3px}.disclaimer{margin:18px 0 0;padding:14px;background:#f3f0e9;color:#655a46;font-size:10px;line-height:1.7}
   .footer{display:flex;justify-content:space-between;gap:16px;padding:26px max(24px,calc((100vw - 1120px)/2));background:#101416;color:#9ba3a6;font-size:9px;letter-spacing:.1em}
