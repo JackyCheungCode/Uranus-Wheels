@@ -124,8 +124,8 @@
     error = ''; notice = ''; clearResult();
     if (!model || !year) { error = 'Select a BMW model and model year first.'; return; }
     busy = true;
-    try { await fetchFitment('BMW', model, year, { make:'BMW', model, year }, 'BMW 手动选型 · ANKUSI'); }
-    catch(e) { error = e instanceof Error ? e.message : '轮毂参数查询失败。'; }
+    try { await fetchFitment('BMW', model, year, { make:'BMW', model, year }, 'BMW MANUAL LOOKUP · ANKUSI'); }
+    catch(e) { error = e instanceof Error ? e.message : 'Fitment lookup failed.'; }
     finally { busy = false; }
   }
 
@@ -150,7 +150,7 @@
         candidates = [];
         notice = 'VIN decoded. Review the vehicle details, then confirm to retrieve wheel specifications.';
       }
-    } catch(e) { error = e instanceof Error ? e.message : 'VIN 解码失败，请重试。'; }
+    } catch(e) { error = e instanceof Error ? e.message : 'VIN decoding failed. Please try again.'; }
     finally { vinBusy = false; }
   }
 
@@ -175,7 +175,7 @@
       if (!matches[0]) throw new Error('VIN identified the vehicle as '+decodedModel+', but no matching standard model was found in the BMW fitment catalogue. Switch to manual model selection.');
       const canonicalYear = matches[0].years.find(y => yearMatch(y, decodedYear));
       if (!canonicalYear) throw new Error('The model was found, but its year could not be matched. Use manual model selection.');
-      await fetchFitment('BMW', matches[0].name, canonicalYear, { ...vehicle, ankusi_model:matches[0].name, ankusi_year:canonicalYear }, 'VIN 解码 · NHTSA vPIC + ANKUSI');
+      await fetchFitment('BMW', matches[0].name, canonicalYear, { ...vehicle, ankusi_model:matches[0].name, ankusi_year:canonicalYear }, 'VIN LOOKUP · NHTSA vPIC + ANKUSI');
     } catch(e) { error = e instanceof Error ? e.message : 'Could not retrieve fitment after vehicle confirmation.'; }
     finally { busy = false; }
   }
@@ -184,7 +184,7 @@
     catalogChoices = []; busy = true; error = '';
     try {
       const y = item.years.find(v => yearMatch(v, String(vehicle?.year || ''))) || String(vehicle.year || '');
-      await fetchFitment('BMW', item.name, y, { ...vehicle, ankusi_model:item.name, ankusi_year:y }, 'VIN 解码 · NHTSA vPIC + ANKUSI');
+      await fetchFitment('BMW', item.name, y, { ...vehicle, ankusi_model:item.name, ankusi_year:y }, 'VIN LOOKUP · NHTSA vPIC + ANKUSI');
     } catch(e) { error = e instanceof Error ? e.message : 'Model matching failed.'; }
     finally { busy = false; }
   }
@@ -226,7 +226,7 @@
               {#if candidates.length}
                 <p class="field-label">SELECT A MATCHING DATABASE RECORD</p>
                 {#each candidates as item}
-                  <button class="candidate" type="button" onclick={() => { selectedCandidate=item; candidates=[]; notice='Selected '+(item.model || '车型版本')+'. Confirm the vehicle to continue.'; }}><strong>{item.model || 'Vehicle variant'}</strong><span>{[item.year,item.chassis_code,item.body_style].filter(Boolean).join(' · ')}</span></button>
+                  <button class="candidate" type="button" onclick={() => { selectedCandidate=item; candidates=[]; notice='Selected '+(item.model || 'Vehicle variant')+'. Confirm the vehicle to continue.'; }}><strong>{item.model || 'Vehicle variant'}</strong><span>{[item.year,item.chassis_code,item.body_style].filter(Boolean).join(' · ')}</span></button>
                 {/each}
               {/if}
               {#if catalogChoices.length}
