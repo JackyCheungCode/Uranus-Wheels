@@ -5,13 +5,14 @@
   const isFitmentFinder = window.location.pathname === '/fitment-finder';
 </script>
 
+<svelte:head>
+  <title>{isFitmentFinder ? 'BMW Fitment Finder — Uranus Wheels' : 'Uranus Wheels — Precision Forged'}</title>
+  <meta name="description" content={isFitmentFinder ? 'Decode your BMW VIN or select model and year to review wheel fitment reference data.' : 'Precision-forged wheels, engineered around your BMW.'} />
+</svelte:head>
+
 {#if isFitmentFinder}
   <FitmentFinder />
 {:else}
-  <svelte:head>
-    <title>Uranus Wheels — Precision Forged</title>
-    <meta name="description" content="Precision-forged wheels, engineered around your BMW." />
-  </svelte:head>
   <div class="site-shell">
     <MStripe class="uw-m-stripe" />
     <header class="site-header">
