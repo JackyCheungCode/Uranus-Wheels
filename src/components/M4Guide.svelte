@@ -185,7 +185,8 @@
 
   <main>
     <section class="hero">
-      <div class="hero-image"><img src={vehiclePhotos[chassis]} alt={`BMW M4 ${chassis} reference vehicle`} /><a class="image-credit" href={vehicleImageSources[chassis]} target="_blank" rel="noreferrer">{chassis === 'F82' ? 'Photo: Tokumeigakarinoaoshima · CC0' : chassis === 'F83' ? 'Photo: EuroVisionNim · CC BY-SA 4.0' : chassis === 'G82' ? 'Photo: Alexander Migl · CC BY-SA 4.0' : 'Photo: usf1fan2 · CC BY 2.0'}</a></div>
+      <div class="hero-image"><img src={vehiclePhotos[chassis]} alt={`BMW M4 ${chassis} reference vehicle`} /></div>
+      <a class="image-credit" href={vehicleImageSources[chassis]} target="_blank" rel="noreferrer">{chassis === 'F82' ? 'Photo: Tokumeigakarinoaoshima · CC0' : chassis === 'F83' ? 'Photo: EuroVisionNim · CC BY-SA 4.0' : chassis === 'G82' ? 'Photo: Alexander Migl · CC BY-SA 4.0' : 'Photo: usf1fan2 · CC BY 2.0'}</a>
       <div class="hero-shade"></div>
       <div class="hero-content">
         <p class="eyebrow"><span></span> THE URANUS VEHICLE SERIES / 001</p>
@@ -360,7 +361,7 @@
   .page-header nav{display:flex;gap:clamp(18px,3vw,46px)}.page-header nav a,.header-action{font-size:9px;font-weight:700;letter-spacing:.12em;text-decoration:none;color:#535d64}
   .page-header nav a:hover{color:var(--blue)}.header-action{padding:13px 16px;border:1px solid #cfd4d8;color:#202428}.header-action span{color:var(--blue);margin-left:10px}
   .hero{min-height:660px;position:relative;display:flex;align-items:center;background:#111a22;color:#fff;isolation:isolate}
-  .hero-image{position:absolute;inset:0;z-index:-2;background:#101820}.hero-image img{width:100%;height:100%;object-fit:cover;object-position:center 52%;filter:saturate(.68) brightness(.62)}.image-credit{position:absolute;right:24px;bottom:18px;color:#dce2e8;font-size:8px;letter-spacing:.08em;text-shadow:0 1px 4px #000;text-decoration:none}.image-credit:hover{text-decoration:underline}
+  .hero-image{position:absolute;inset:0;z-index:-2;background:#101820}.hero-image img{width:100%;height:100%;object-fit:cover;object-position:center 52%;filter:saturate(.68) brightness(.62)}.image-credit{position:absolute;z-index:1;right:24px;bottom:18px;color:#dce2e8;font-size:8px;letter-spacing:.08em;text-shadow:0 1px 4px #000;text-decoration:none}.image-credit:hover{text-decoration:underline}
   .hero-shade{position:absolute;inset:0;z-index:-1;background:linear-gradient(90deg,rgba(9,15,21,.94) 0%,rgba(9,15,21,.74) 40%,rgba(9,15,21,.16) 100%),linear-gradient(0deg,rgba(9,15,21,.35),transparent 50%)}
   .hero-content{padding:90px clamp(24px,11vw,176px);max-width:1000px}.eyebrow{font-size:9px;font-weight:700;letter-spacing:.18em;color:#aeb8c1;margin:0 0 22px}.eyebrow span{display:inline-block;width:25px;height:2px;margin:0 10px 3px 0;background:#62a0ef}
   h1{font-size:clamp(68px,11vw,148px);line-height:.84;letter-spacing:-.085em;font-weight:500;margin:0}h1 em,h2 em,h3 em{font-style:normal;color:#8ca9c9}
