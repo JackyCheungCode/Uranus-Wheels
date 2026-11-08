@@ -1,4 +1,5 @@
 <script lang="ts">
+  // Vehicle-specific values are sourced and scoped by chassis, trim and model year.
   type Chassis = 'G82' | 'G83' | 'F82' | 'F83';
   type UpgradeKey = 'wheels' | 'suspension' | 'brakes' | 'exterior' | 'performance' | 'interior';
   let chassis = $state<Chassis>('G82');
