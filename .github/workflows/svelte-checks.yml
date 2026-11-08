@@ -1,0 +1,59 @@
+name: Svelte frontend checks
+
+permissions:
+  contents: write
+
+concurrency:
+  group: svelte-preview-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  push:
+    branches:
+      - ui/bimmerz-svelte-rebuild
+    paths-ignore:
+      - dist/**
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref || github.ref_name }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+      - name: Svelte and TypeScript checks
+        run: |
+          if npm run check > /tmp/svelte-check.log 2>&1; then
+            cat /tmp/svelte-check.log
+          else
+            tail -n 120 /tmp/svelte-check.log
+            exit 1
+          fi
+      - name: Production build
+        run: npm run build
+      - name: Store preview build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: uranus-wheels-svelte-dist
+          path: dist/
+          if-no-files-found: error
+
+      - name: Publish preview build to branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TARGET_BRANCH: ${{ github.head_ref || github.ref_name }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -f dist/
+          if git diff --cached --quiet; then
+            echo "No preview build changes to publish"
+          else
+            git commit -m "Publish Svelte preview build [skip ci]"
+            git push origin "HEAD:refs/heads/$TARGET_BRANCH"
+          fi
