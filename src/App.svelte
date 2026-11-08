@@ -1,16 +1,21 @@
 <script lang="ts">
   import { Brand, MStripe } from '@emdzej/bimmerz-ui';
   import FitmentFinder from './components/FitmentFinder.svelte';
+  import M4Guide from './components/M4Guide.svelte';
   let mobileMenuOpen = $state(false);
-  const isFitmentFinder = window.location.pathname === '/fitment-finder';
+  const pathname = window.location.pathname;
+  const isFitmentFinder = pathname === '/fitment-finder';
+  const isM4Guide = pathname === '/bmw-m4';
 </script>
 
 <svelte:head>
-  <title>{isFitmentFinder ? 'BMW Fitment Finder — Uranus Wheels' : 'Uranus Wheels — Precision Forged'}</title>
-  <meta name="description" content={isFitmentFinder ? 'Decode your BMW VIN or select model and year to review wheel fitment reference data.' : 'Precision-forged wheels, engineered around your BMW.'} />
+  <title>{isM4Guide ? 'BMW M4 Modification Guide — Uranus Wheels' : isFitmentFinder ? 'BMW Fitment Finder — Uranus Wheels' : 'Uranus Wheels — Precision Forged'}</title>
+  <meta name="description" content={isM4Guide ? 'Explore BMW M4 wheel fitment references, curated build concepts and performance upgrade categories.' : isFitmentFinder ? 'Decode your BMW VIN or select model and year to review wheel fitment reference data.' : 'Precision-forged wheels, engineered around your BMW.'} />
 </svelte:head>
 
-{#if isFitmentFinder}
+{#if isM4Guide}
+  <M4Guide />
+{:else if isFitmentFinder}
   <FitmentFinder />
 {:else}
   <div class="site-shell">
@@ -21,6 +26,7 @@
       <nav class:open={mobileMenuOpen} aria-label="Main navigation">
         <a href="#wheels">FORGED WHEELS</a>
         <a href="/fitment-finder">BMW FITMENT</a>
+        <a href="/bmw-m4">BMW M4 GUIDE</a>
         <a href="#engineering">ENGINEERING</a>
         <a href="#contact">CONTACT</a>
       </nav>
@@ -46,7 +52,7 @@
       </section>
       <section class="feature-band" id="engineering">
         <div class="feature-image"></div>
-        <div class="feature-copy"><p class="eyebrow">ENGINEERED TO FIT</p><h2>Form follows<br />function.</h2><p>Every build begins with the vehicle. Find your BMW, review the fitment data, and explore a wheel setup tailored to your specification.</p><a class="text-link" href="/fitment-finder">START WITH YOUR BMW <span>↗</span></a></div>
+        <div class="feature-copy"><p class="eyebrow">ENGINEERED TO FIT</p><h2>Form follows<br />function.</h2><p>Every build begins with the vehicle. Find your BMW, review the fitment data, and explore a wheel setup tailored to your specification.</p><a class="text-link" href="/fitment-finder">START WITH YOUR BMW <span>↗</span></a><a class="text-link" href="/bmw-m4">EXPLORE THE M4 GUIDE <span>↗</span></a></div>
       </section>
     </main>
     <footer id="contact"><a class="brand" href="/"><Brand body="URANUS" suffix="WHEELS" /></a><span>PRECISION FORGED. BMW-FOCUSED.</span><span>© {new Date().getFullYear()} URANUS WHEELS</span></footer>
