@@ -236,7 +236,7 @@
   <header class="page-header">
     <a class="wordmark" href="/" aria-label="Uranus Wheels home">URANUS <span>WHEELS</span></a>
     <nav aria-label="M4 guide navigation">
-      <a href="#vehicle">VEHICLE</a><a href="#fitment">FITMENT</a><a href="#builds">BUILDS</a><a href="#finishes">FINISHES</a>
+      <a href="#vehicle">VEHICLE</a><a href="#fitment">FITMENT</a><a href="#builds">BUILDS</a><a href="#finishes">FINISHES</a><a href="#services">SOLUTIONS</a>
     </nav>
     <a class="header-action" href="#fitment-builder">BUILD YOUR SETUP <span>↗</span></a>
   </header>
